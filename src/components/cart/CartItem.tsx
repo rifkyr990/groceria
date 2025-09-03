@@ -1,5 +1,4 @@
-"use client";
-
+import Image from "next/image";
 import { CartItemComponentProps } from "../types";
 import QuantityIncrementer from "./QuantityIncrementer";
 import RemoveButton from "./RemoveButton";
@@ -15,16 +14,13 @@ export default function CartItem({
   onDecrement,
   onRemove,
 }: CartItemComponentProps) {
-  const formattedPrice = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(price);
-
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-6 py-4 border-b border-gray-200">
-      <img
+    <div className="flex flex-col sm:flex-row items-center gap-6 py-4 border-b border-gray-200 last:border-none">
+      <Image
         src={image}
         alt={name}
+        width={112}
+        height={112}
         className="w-28 h-28 object-cover rounded-xl flex-shrink-0"
       />
       <div className="flex-1 w-full">
@@ -34,19 +30,18 @@ export default function CartItem({
             <p className="text-sm text-text-muted">{details}</p>
           </div>
           <p className="font-mono font-bold text-lg text-text-dark whitespace-nowrap">
-            {formattedPrice}
+            ${price.toFixed(2)}
           </p>
         </div>
-
         <div className="flex items-center gap-4 mt-4">
           <QuantityIncrementer
+            id={id}
             quantity={quantity}
-            onIncrement={() => onIncrement(id)}
-            onDecrement={() => onDecrement(id)}
+            onIncrement={onIncrement}
+            onDecrement={onDecrement}
           />
-
-          <div className="flex items-center gap-2 ml-auto">
-            <RemoveButton onRemove={() => onRemove(id)} />
+          <div className="ml-auto">
+            <RemoveButton id={id} onRemove={onRemove} />
           </div>
         </div>
       </div>
