@@ -1,42 +1,45 @@
-"use client";
 import { IoRemoveOutline, IoAddOutline } from "react-icons/io5";
+import { Button } from "@/components/ui/button";
 
-interface Props {
+interface QuantityIncrementerProps {
+  id: string;
   quantity: number;
-  onIncrement: () => void;
-  onDecrement: () => void;
+  onIncrement: (id: string) => void;
+  onDecrement: (id: string) => void;
 }
 
 export default function QuantityIncrementer({
+  id,
   quantity,
   onIncrement,
   onDecrement,
-}: Props) {
+}: QuantityIncrementerProps) {
   return (
-    <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-      <button
-        onClick={onDecrement}
-        aria-label="Decrease quantity"
-        className="w-10 h-10 flex items-center justify-center 
-                   text-gray-500 hover:text-primary-green-600 active:text-primary-green-800
-                   hover:bg-primary-green-50 active:bg-primary-green-100
-                   transition-colors"
+    <div
+      className="flex items-center border border-gray-300 rounded-lg overflow-hidden
+                 transition-all hover:border-primary-green-500 hover:ring-1 hover:ring-primary-green-500"
+    >
+      <Button
+        variant="ghost"
+        size="icon"
+        className="rounded-none text-gray-600 transition-colors
+                   hover:bg-primary-green-100 hover:text-primary-green-700"
+        onClick={() => onDecrement(id)}
       >
         <IoRemoveOutline className="text-lg" />
-      </button>
+      </Button>
 
       <span className="px-4 font-semibold text-text-dark">{quantity}</span>
 
-      <button
-        onClick={onIncrement}
-        aria-label="Increase quantity"
-        className="w-10 h-10 flex items-center justify-center 
-                   text-gray-500 hover:text-primary-green-600 active:text-primary-green-800
-                   hover:bg-primary-green-50 active:bg-primary-green-100
-                   transition-colors"
+      <Button
+        variant="ghost"
+        size="icon"
+        className="rounded-none text-gray-600 transition-colors
+                   hover:bg-primary-green-100 hover:text-primary-green-700"
+        onClick={() => onIncrement(id)}
       >
         <IoAddOutline className="text-lg" />
-      </button>
+      </Button>
     </div>
   );
 }
