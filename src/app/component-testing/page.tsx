@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
-import CartItem from "@/components/cart/CartItem";
+
+import CartList from "@/components/cart/CartList";
 import { mockCartItems } from "@/components/cart/dummy-data/Data-CartItem";
 import { CartItemProps } from "@/components/types";
+import { useState } from "react";
 
 export default function ComponentTest() {
   const [items, setItems] = useState<CartItemProps[]>(mockCartItems);
@@ -31,15 +32,12 @@ export default function ComponentTest() {
 
   return (
     <section className="space-y-4">
-      {items.map((item) => (
-        <CartItem
-          key={item.id}
-          {...item}
-          onIncrement={handleIncrement}
-          onDecrement={handleDecrement}
-          onRemove={handleRemove}
-        />
-      ))}
+      <CartList
+        items={items}
+        onDecrement={handleDecrement}
+        onIncrement={handleIncrement}
+        onRemove={handleRemove}
+      />
     </section>
   );
 }
