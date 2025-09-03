@@ -12,3 +12,10 @@ export interface CartItemComponentProps extends CartItemProps {
   onDecrement: (id: string) => void;
   onRemove: (id: string) => void;
 }
+
+export interface CartListProps {
+  items: CartItemProps[];
+  onDecrement: (id: string) => void;
+  onIncrement: (id: string) => void;
+  onRemove: (id: string) => void;
+}
