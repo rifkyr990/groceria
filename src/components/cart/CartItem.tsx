@@ -2,6 +2,7 @@ import Image from "next/image";
 import { CartItemComponentProps } from "../types";
 import QuantityIncrementer from "./QuantityIncrementer";
 import RemoveButton from "./RemoveButton";
+import { formatIDRCurrency } from "@/utils/format";
 
 export default function CartItem({
   id,
@@ -29,8 +30,8 @@ export default function CartItem({
             <h3 className="font-semibold text-lg text-text-dark">{name}</h3>
             <p className="text-sm text-text-muted">{details}</p>
           </div>
-          <p className="font-mono font-bold text-lg text-text-dark whitespace-nowrap">
-            ${price.toFixed(2)}
+          <p className="font-bold text-lg text-text-dark whitespace-nowrap">
+            {formatIDRCurrency(price)}
           </p>
         </div>
         <div className="flex items-center gap-4 mt-4">
