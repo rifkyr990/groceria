@@ -55,7 +55,7 @@ export default function PromoInput({
         onClick={toggleOpen}
         className="cursor-pointer flex flex-row items-center justify-between py-0 -mb-2"
       >
-        <CardTitle className="text-base font-medium text-gray-700">
+        <CardTitle className="text-sm font-bold text-gray-700">
           Have a promo code?
         </CardTitle>
         <ChevronDown
@@ -119,12 +119,12 @@ export default function PromoInput({
           </form>
 
           {isInvalid && (
-            <p className="mx-2 mt-1 text-xs font-medium text-red-500">
+            <p className="mx-3 mt-1 text-xs font-medium text-red-500">
               Invalid promo code.
             </p>
           )}
           {isValidAndApplied && (
-            <p className="mx-2 mt-1 text-xs font-medium text-green-600">
+            <p className="mx-3 mt-1 text-xs font-medium text-green-600">
               Promo {appliedPromo?.code} applied successfully!
             </p>
           )}
