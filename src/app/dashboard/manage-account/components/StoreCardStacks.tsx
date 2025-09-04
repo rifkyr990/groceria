@@ -1,0 +1,135 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { IStoreProps } from "@/types/store";
+import { Check, Store, Trash, Users, X } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import UserDetailsDialog from "./btndetails/UserDetailsDialog";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
+import StoreDetailsDialog from "./btndetails/StoreDetailsDialog";
+import StoreAdminList from "./btndetails/StoreAdmin";
+
+interface IStoreCard {
+  className?: string;
+  stores: IStoreProps[];
+}
+
+export default function StoreCardStacks({ stores, className }: IStoreCard) {
+  const [deleteSelectedStore, setDeleteSelectedStore] =
+    useState<IStoreProps | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [selectedStore, setSelectedStore] = useState<IStoreProps | null>(null);
+  const [selectedAdminStore, setSelectedAdminStore] =
+    useState<IStoreProps | null>(null);
+
+  const btnDelete = (store: IStoreProps) => {
+    setDeleteSelectedStore(store);
+    setDeleteConfirm((prev) => !prev);
+  };
+
+  const handlerDelete = (data: IStoreProps) => {
+    if (!data) return;
+    console.log(data);
+  };
+
+  return (
+    <div
+      className={`${className} lg:hidden grid grid-cols-1 md:grid-cols-[repeat(auto-fit,_minmax(250px,_1fr))] gap-2`}
+    >
+      {stores.map((store) => {
+        return (
+          <Card key={store.id} className="p-1">
+            <CardContent className="flex items-center gap-x-2 p-1">
+              <div id="storelogo">
+                <div className="relative w-25 h-25 rounded-md overflow-hidden">
+                  <Image
+                    src={"https://picsum.photos/id/237/500/300"}
+                    alt="store-banner"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div id="profile">
+                  <p className="font-semibold">{store.storeName}</p>
+
+                  {store.storeStatus ? (
+                    <Badge className="bg-green-500">
+                      <Check />
+                      Store Active
+                    </Badge>
+                  ) : (
+                    <Badge variant={"destructive"}>
+                      <X />
+                      Store Inactive
+                    </Badge>
+                  )}
+
+                  <p className="text-xs">
+                    {store.storeCity},{store.storeProvince}
+                  </p>
+
+                  <p className="text-xs">
+                    Admin : {store.storeAdmin?.length} Admin{" "}
+                  </p>
+                </div>
+                <div id="button" className="flex gap-x-1">
+                  <Button
+                    className="h-8 bg-yellow-500 hover:bg-yellow-600"
+                    onClick={() => setSelectedAdminStore(store)}
+                  >
+                    <Users />
+                  </Button>
+                  <Button
+                    className="h-8 rounded-md bg-blue-500 hover:bg-blue-600"
+                    onClick={() => setSelectedStore(store)}
+                  >
+                    <Store />
+                  </Button>
+                  <Button
+                    className="h-8 rounded-md bg-red-500/80"
+                    onClick={() => btnDelete(store)}
+                  >
+                    <Trash />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
+      {/* Details Dialog */}
+      {selectedStore && (
+        <StoreDetailsDialog
+          open={!!selectedStore}
+          setOpen={(open) => {
+            if (!open) setSelectedStore(null);
+          }}
+          store={selectedStore}
+        />
+      )}
+
+      {/* Delete Dialog */}
+      <ConfirmDeleteDialog
+        open={deleteConfirm}
+        setOpen={setDeleteConfirm}
+        data={deleteSelectedStore}
+        onConfirm={handlerDelete}
+      />
+
+      {/* Store Admin List */}
+      {selectedAdminStore && (
+        <StoreAdminList
+          open={!!selectedAdminStore}
+          setOpen={(open) => {
+            if (!open) setSelectedAdminStore(null);
+          }}
+          store={selectedAdminStore}
+        />
+      )}
+    </div>
+  );
+}

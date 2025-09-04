@@ -8,6 +8,7 @@ import {
   MessageCircleMore,
   MessagesSquare,
   Search,
+  Sun,
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -47,7 +48,7 @@ export default function DashboardNavbar() {
 
       <div className="flex items-center gap-x-5">
         <Bell className="bg-gradient-to-b from-emerald-500 to-teal-600 text-white size-8 md:size-10   rounded-xl p-2 max-md:hidden " />
-        <MessageCircleMore className="bg-gradient-to-b from-emerald-500 to-teal-600 text-white size-8 md:size-10   rounded-xl p-2 max-md:hidden " />
+        <Sun className="bg-gradient-to-b from-emerald-500 to-teal-600 text-white size-8 md:size-10   rounded-xl p-2 max-md:hidden " />
 
         <div className="flex items-center justify-between gap-x-3 ">
           <div className="w-1 h-8 bg-blue-500 max-md:hidden"></div>
