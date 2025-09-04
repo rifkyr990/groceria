@@ -11,10 +11,10 @@ export default function RemoveButton({ id, onRemove }: RemoveButtonProps) {
     <Button
       variant="ghost"
       size="icon"
-      className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-full"
+      className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-full h-8 w-8 sm:h-10 sm:w-10"
       onClick={() => onRemove(id)}
     >
-      <IoTrashOutline className="text-xl" />
+      <IoTrashOutline className="text-lg sm:text-xl" />
     </Button>
   );
 }

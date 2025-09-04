@@ -32,7 +32,7 @@ export default function CheckoutSection({
   }, [items, appliedPromo]);
 
   return (
-    <div className="space-y-6 sticky top-28">
+    <div className="space-y-4 sm:space-y-6">
       <StepIndicator />
       <OrderSummary
         subtotal={subtotal}

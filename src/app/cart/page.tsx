@@ -69,27 +69,33 @@ export default function CartPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F3F4F6] p-6 md:p-12">
-      <section className="max-w-6xl mx-auto grid grid-cols-1 gap-10 lg:grid-cols-3 ">
-        <div className="md:col-span-2 space-y-6">
-          <CartList
-            items={items}
-            onDecrement={handleDecrement}
-            onIncrement={handleIncrement}
-            onRemove={handleRemove}
-          />
-        </div>
-        <div className="space-y-6">
-          <CheckoutSection
-            items={items}
-            appliedPromo={appliedPromo}
-            promoInputText={promoInputText}
-            promoStatus={promoStatus}
-            promoCodes={promoCodes}
-            onApplyPromo={handleApplyPromo}
-            onRemovePromo={handleRemovePromo}
-            onPromoInputChange={handlePromoInputChange}
-          />
+    <main className="min-h-screen bg-[#F3F4F6] p-4 sm:p-6 md:p-8 lg:p-12">
+      <section className="max-w-6xl mx-auto">
+        {/* Mobile-first layout: stack vertically by default, then side by side on larger screens */}
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-10">
+          {/* Cart items section - full width on mobile, 2/3 on desktop */}
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+            <CartList
+              items={items}
+              onDecrement={handleDecrement}
+              onIncrement={handleIncrement}
+              onRemove={handleRemove}
+            />
+          </div>
+
+          {/* Checkout section - full width on mobile, 1/3 on desktop, fixed position on large screens */}
+          <div className="space-y-4 sm:space-y-6 lg:sticky lg:top-6 lg:h-fit">
+            <CheckoutSection
+              items={items}
+              appliedPromo={appliedPromo}
+              promoInputText={promoInputText}
+              promoStatus={promoStatus}
+              promoCodes={promoCodes}
+              onApplyPromo={handleApplyPromo}
+              onRemovePromo={handleRemovePromo}
+              onPromoInputChange={handlePromoInputChange}
+            />
+          </div>
         </div>
       </section>
     </main>
