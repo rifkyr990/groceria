@@ -49,9 +49,9 @@ export default function Navbar() {
     return (
         <nav className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between bg-white dark:bg-gray-900">
         {/* Logo */}
-        <div className="flex items-center gap-2">
-            <img src="/assets/logo-long.svg" alt="logo" className="w-40" />
-        </div>
+            <div className="flex items-center gap-2">
+                <img src="/assets/logo-long.svg" alt="logo" className="w-40" />
+            </div>
 
         {/* Menu utama (desktop) */}
         <ul className="hidden md:flex items-center gap-6 text-gray-600 dark:text-gray-200">

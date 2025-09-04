@@ -1,20 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "leaflet/dist/leaflet.css";
-@custom-variant dark (&: is(.dark *));
+@custom-variant dark (&:is(.dark *));
 
 @theme {
   --color-blue-green: #219ebc;
   --color-prussian-blue: #023047;
   --color-ut-orange: #fb8500;
   --color-selective-orange: #ffb703;
-
   --font-poppins: "Poppins", sans-serif;
-
-
   --animate-bounce-slow: bounce 2s infinite;
-
-
   --color-primary-green-50: #f0fdf4;
   --color-primary-green-100: #dcfce7;
   --color-primary-green-200: #bbf7d0;
