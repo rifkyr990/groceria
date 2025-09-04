@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
+import { ToastContainer } from "react-toastify";
 import ClientWrapper from "./client-wrapper";
 
 const geistSans = Geist({
@@ -36,7 +37,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${PoppinsFont.variable} antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <ClientWrapper>{children}</ClientWrapper>
+          <ClientWrapper>
+            <ToastContainer/>{children}
+          </ClientWrapper>
         </ThemeProvider>
       </body>
     </html>

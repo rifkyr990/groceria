@@ -1,11 +1,9 @@
 import DashboardLayout from "../components/DashboardLayout";
 
-export default function StorePage() {
+export default function ManageOrder() {
   return (
     <DashboardLayout>
-      <section>
-        <h1>This is store management page</h1>
-      </section>
+      <h1>This is order management page</h1>
     </DashboardLayout>
   );
 }

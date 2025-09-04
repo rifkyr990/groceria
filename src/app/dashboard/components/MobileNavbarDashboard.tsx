@@ -52,7 +52,7 @@ export default function MobileNavbarDashboard({ className }: IMobileNavbar) {
   const pathname = usePathname();
   return (
     <div
-      className={`${className} bg-white w-full h-18 fixed bottom-0   flex rounded-t-md  `}
+      className={`${className} bg-white w-full h-18 fixed bottom-0 z-20   flex rounded-t-md  `}
     >
       <ul className="flex items-center w-full justify-around mx-4 ">
         {items.map((item) => {
