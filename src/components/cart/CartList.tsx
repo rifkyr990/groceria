@@ -23,7 +23,7 @@ export default function CartList({
         </a>
       </div>
 
-      <Card className="shadow-lg shadow-gray-200/50">
+      <Card className="shadow-lg shadow-gray-200/50 border-0">
         <CardHeader className="flex flex-row items-center gap-3 border-b border-gray-200 pb-4">
           <IoStorefrontOutline className="text-xl text-primary-green-600" />
           <CardTitle className="text-lg font-semibold text-text-dark">

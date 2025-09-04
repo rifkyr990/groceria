@@ -24,16 +24,16 @@ export default function StepIndicator({
       label: "Shopping Cart",
       icon: <AiOutlineShoppingCart className="w-5 h-5" />,
     },
-    // {
-    //   id: "payment",
-    //   label: "Payment",
-    //   icon: <FiCreditCard className="w-5 h-5" />,
-    // },
-    // {
-    //   id: "confirmation",
-    //   label: "Confirmation",
-    //   icon: <FiCheckCircle className="w-5 h-5" />,
-    // },
+    {
+      id: "payment",
+      label: "Payment",
+      icon: <FiCreditCard className="w-5 h-5" />,
+    },
+    {
+      id: "confirmation",
+      label: "Confirmation",
+      icon: <FiCheckCircle className="w-5 h-5" />,
+    },
   ],
   currentStep = 0,
   variant = "timeline",
@@ -64,7 +64,7 @@ export default function StepIndicator({
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full ">
       <div
         className={cn("grid items-center w-full", getAdaptiveGap(steps.length))}
         style={{
@@ -78,7 +78,6 @@ export default function StepIndicator({
 
           return (
             <React.Fragment key={step.id}>
-              {/* Step circle and label */}
               <div className="flex flex-col items-center justify-center">
                 <div
                   className={cn(
@@ -107,7 +106,6 @@ export default function StepIndicator({
                 )}
               </div>
 
-              {/* Line between steps */}
               {!isLast && (
                 <div className="flex items-center justify-center h-10">
                   <div

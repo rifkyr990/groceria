@@ -15,7 +15,7 @@ export default function OrderSummary({
   total,
 }: OrderSummaryProps) {
   return (
-    <Card className="rounded-2xl shadow-lg">
+    <Card className="rounded-2xl shadow-lg border-0">
       <CardHeader>
         <CardTitle className="text-lg font-bold">Order Summary</CardTitle>
       </CardHeader>

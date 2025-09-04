@@ -69,8 +69,8 @@ export default function CartPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6 md:p-12">
-      <section className="max-w-7xl mx-auto grid grid-cols-1 gap-6 md:grid-cols-3">
+    <main className="min-h-screen bg-[#F3F4F6] p-6 md:p-12">
+      <section className="max-w-6xl mx-auto grid grid-cols-1 gap-10 lg:grid-cols-3 ">
         <div className="md:col-span-2 space-y-6">
           <CartList
             items={items}
