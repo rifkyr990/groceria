@@ -4,7 +4,24 @@ const nextConfig: NextConfig = {
   /* config options here */
   devIndicators: false,
   images: {
-    domains: ["picsum.photos", "placehold.co"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "media.istockphoto.com",
+      }, 
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+      },
+      {
+        protocol: "https",
+        hostname: "placehold.co",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
   },
 };
 
