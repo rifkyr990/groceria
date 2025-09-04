@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import OrderSummary from "./OrderSummary";
 import PromoInput from "./PromoInput";
 import { CheckoutSectionProps } from "@/components/types";
+import CheckoutButton from "./CheckoutButton";
 
 export default function CheckoutSection({
   items,
@@ -45,6 +46,7 @@ export default function CheckoutSection({
         onApply={onApplyPromo}
         onRemove={onRemovePromo}
       />
+      <CheckoutButton onCheckout={() => {}} total={total} />
     </div>
   );
 }
