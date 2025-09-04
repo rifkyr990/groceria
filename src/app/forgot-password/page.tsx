@@ -5,26 +5,20 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
+    const { requestPasswordReset, loading } = useAuthStore();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
-        setMessage(null);
-        setError(null);
-
-        try {
-            const res = await axios.post("http://localhost:5000/api/auth/request-reset", { email });
-            setMessage(res.data.message || "Link reset password telah dikirim ke email Anda.");
-        } catch (err: any) {
-            setError(err.response?.data?.message || "Terjadi kesalahan, coba lagi.");
-        } finally {
-            setLoading(false);
+        const success = await requestPasswordReset(email);
+        if (success) {
+            toast.success("Link reset password sudah dikirim ke email Anda.");
+        } else {
+            toast.error("Gagal, coba lagi.");
         }
     };
 
@@ -74,10 +68,6 @@ export default function ForgotPasswordPage() {
                         {loading ? "Mengirim..." : "Kirim Link Reset"}
                     </button>
                 </form>
-
-                {message && <p className="text-green-600 text-sm mt-4 text-center">{message}</p>}
-                {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
-
                 <p className="text-center text-sm text-gray-600 mt-6 dark:text-gray-300">
                     Kembali ke{" "}
                     <Link href="/login" className="text-green-600 font-medium hover:underline">
@@ -85,6 +75,8 @@ export default function ForgotPasswordPage() {
                     </Link>
                 </p>
             </motion.div>
+
+            <ToastContainer position="top-right" autoClose={3000} />
         </div>
     );
 }

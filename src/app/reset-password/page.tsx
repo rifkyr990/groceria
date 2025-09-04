@@ -1,52 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Lock } from "lucide-react";
 import Link from "next/link";
-import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function ResetPasswordPage() {
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
-
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
+    const { resetPassword, loading } = useAuthStore();
+    const router = useRouter();
+    
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setMessage(null);
-        setError(null);
-
-        if (newPassword !== confirmPassword) {
-            setError("Password tidak sama, silakan cek kembali.");
-            toast.error("Password tidak sama, silahkan cek kembali.")
-            return;
-        }
 
         if (!token) {
-            setError("Token tidak ditemukan, silakan cek link reset password Anda.");
-            toast.error("Token tidak ditemukan, silakan cek link reset password Anda.")
+            toast.error("Token tidak ditemukan.");
             return;
         }
 
-        setLoading(true);
-        try {
-            const res = await axios.post("http://localhost:5000/api/auth/reset-password", {
-                token,
-                new_password: newPassword,
-            });
+        if (newPassword !== confirmPassword) {
+            toast.error("Konfirmasi password tidak cocok.");
+            return;
+        }
 
-            setMessage(res.data.message || "Password berhasil direset, silakan login.");
-        } catch (err: any) {
-            setError(err.response?.data?.message || "Terjadi kesalahan, coba lagi.");
-        } finally {
-            setLoading(false);
+        const success = await resetPassword(token, newPassword);
+
+        if (success) {
+            toast.success("Password berhasil direset! Silakan login.");
+            setNewPassword("");
+            router.push("/login");
+        } else {
+            toast.error("Gagal reset password. Token mungkin tidak valid.");
         }
     };
 
@@ -102,10 +93,6 @@ export default function ResetPasswordPage() {
                         {loading ? "Mengatur ulang..." : "Reset Password"}
                     </button>
                 </form>
-
-                {message && <p className="text-green-600 text-sm mt-4 text-center dark:text-gray-300">{message}</p>}
-                {error && <p className="text-red-500 text-sm mt-4 text-center dark:text-gray-300">{error}</p>}
-
                 <p className="text-center text-sm text-gray-600 mt-6 dark:text-gray-300">
                     Kembali ke{" "}
                     <Link href="/login" className="text-green-600 font-medium hover:underline">
@@ -113,6 +100,8 @@ export default function ResetPasswordPage() {
                     </Link>
                 </p>
             </motion.div>
+
+            <ToastContainer position="top-right" autoClose={3000} />
         </div>
     );
 }

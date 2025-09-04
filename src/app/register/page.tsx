@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ShoppingCart } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 import { useRouter } from "next/navigation";
 import GoogleLoginButton from "@/components/ui/GoogleBtn";
@@ -21,6 +20,7 @@ export default function RegisterPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const success = await register(form);
+        
         if (success) {
             router.push("/check-email");
         }
