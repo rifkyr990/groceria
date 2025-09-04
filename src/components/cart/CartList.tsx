@@ -13,7 +13,6 @@ export default function CartList({
 }: CartListProps) {
   return (
     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
-      {/* Header section - responsive typography and layout */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-2 sm:gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-text-dark">
           Your Cart
@@ -26,7 +25,6 @@ export default function CartList({
         </a>
       </div>
 
-      {/* Cart items card */}
       <Card className="shadow-lg shadow-gray-200/50 border-0">
         <CardHeader className="flex flex-row items-center gap-3 border-b border-gray-200 pb-3 sm:pb-4 px-3 sm:px-6">
           <IoStorefrontOutline className="text-lg sm:text-xl text-primary-green-600 flex-shrink-0" />

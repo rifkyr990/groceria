@@ -17,9 +17,7 @@ export default function CartItem({
 }: CartItemComponentProps) {
   return (
     <div className="py-3 sm:py-4 border-b border-gray-200 last:border-none">
-      {/* Horizontal layout for all screen sizes */}
       <div className="flex flex-row gap-3 sm:gap-4 lg:gap-6">
-        {/* Product image - responsive sizing */}
         <div className="flex-shrink-0">
           <Image
             src={image}
@@ -30,9 +28,7 @@ export default function CartItem({
           />
         </div>
 
-        {/* Product info and controls - full width */}
         <div className="flex-1 min-w-0">
-          {/* Product name, details, and price */}
           <div className="flex justify-between items-start gap-2 sm:gap-4">
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-sm sm:text-base lg:text-lg text-text-dark leading-tight truncate">
@@ -47,7 +43,6 @@ export default function CartItem({
             </p>
           </div>
 
-          {/* Quantity controls and remove button */}
           <div className="flex items-center justify-between mt-2 sm:mt-3 lg:mt-4">
             <QuantityIncrementer
               id={id}
