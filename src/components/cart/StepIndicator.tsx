@@ -24,16 +24,16 @@ export default function StepIndicator({
       label: "Shopping Cart",
       icon: <AiOutlineShoppingCart className="w-5 h-5" />,
     },
-    {
-      id: "payment",
-      label: "Payment",
-      icon: <FiCreditCard className="w-5 h-5" />,
-    },
-    {
-      id: "confirmation",
-      label: "Confirmation",
-      icon: <FiCheckCircle className="w-5 h-5" />,
-    },
+    // {
+    //   id: "payment",
+    //   label: "Payment",
+    //   icon: <FiCreditCard className="w-5 h-5" />,
+    // },
+    // {
+    //   id: "confirmation",
+    //   label: "Confirmation",
+    //   icon: <FiCheckCircle className="w-5 h-5" />,
+    // },
   ],
   currentStep = 0,
   variant = "timeline",
