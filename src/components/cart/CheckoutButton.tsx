@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatIDRCurrency } from "@/utils/format";
+import { IoLockClosed } from "react-icons/io5";
 
 interface CheckoutButtonProps {
   total: number;
@@ -43,7 +44,7 @@ export default function CheckoutButton({
       onClick={handleClick}
       disabled={loading}
       className={cn(
-        "w-full p-6 rounded-xl flex items-center py-8 justify-between transform transition-all shadow-lg shadow-primary-green-500/40",
+        "w-full p-6 rounded-xl flex items-center  py-8 justify-between transform transition-all shadow-lg shadow-primary-green-500/40",
         "hover:scale-105 hover:shadow-xl active:scale-95",
         loading
           ? "bg-gradient-to-r from-primary-green-600 to-primary-green-500 cursor-not-allowed animate-pulse-subtle disabled:opacity-100"
@@ -59,7 +60,8 @@ export default function CheckoutButton({
       </div>
 
       <span className="font-mono text-lg font-bold whitespace-nowrap">
-        {formatIDRCurrency(total)}
+        {/* {formatIDRCurrency(total)} */}{" "}
+        <IoLockClosed className="scale-x-110" />
       </span>
     </Button>
   );

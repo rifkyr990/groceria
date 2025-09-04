@@ -47,7 +47,7 @@ export default function PromoInput({
   return (
     <Card
       className={cn(
-        "border shadow-lg transition-all duration-300",
+        "border-0 shadow-lg transition-all duration-300 ",
         open ? "" : "pb-2"
       )}
     >
@@ -73,7 +73,7 @@ export default function PromoInput({
         <div ref={innerRef}>
           <form
             onSubmit={handleSubmit}
-            className="flex items-center gap-2 mx-2 my-2"
+            className="flex items-center gap-2 mx-0 my-2"
           >
             <Input
               ref={inputRef}
@@ -111,7 +111,7 @@ export default function PromoInput({
                 type="button"
                 onClick={onRemove}
                 variant="ghost"
-                className="h-10 px-2 text-sm text-gray-600 hover:text-red-600"
+                className="h-7 w-7 px-2 text-sm text-gray-600 hover:text-red-600"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -124,7 +124,7 @@ export default function PromoInput({
             </p>
           )}
           {isValidAndApplied && (
-            <p className="mx-3 mt-1 text-xs font-medium text-green-600">
+            <p className="mx-2 mt-1 text-xs font-medium text-green-600">
               Promo {appliedPromo?.code} applied successfully!
             </p>
           )}
