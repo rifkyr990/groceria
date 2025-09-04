@@ -1,7 +1,7 @@
+import { email } from 'zod';
 // auth-store.ts
 import { create } from "zustand";
-import axios from "axios";
-import { error } from "console";
+import { apiCall } from "@/app/helper/apiCall";
 
 interface User {
     id: string;
@@ -22,6 +22,9 @@ interface AuthState {
     register: (data: { first_name: string; last_name: string; email: string}) => Promise<boolean>;
     loginWithGoogle: (idToken: string) => Promise<void>;
     setUserAndToken: (user: any, token: string) => void;
+    requestPasswordReset: (email: string) => Promise<boolean>;
+    resetPassword: (token: string, newPassword: string) => Promise<boolean>
+    verifyEmail: (token: string, password: string) => Promise<boolean>
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -33,8 +36,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     register: async (data) => {
         set({ loading: true, error: null });
         try {
-            await axios.post("http://localhost:5000/api/auth/register", data);
-            set({ loading: false });
+            const res = await apiCall.post("/api/auth/register", data);
+            set({ user: { email: res.data.data.email },loading: false });
             
             return true;
         } catch (err: any) {
@@ -50,7 +53,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     login: async(data) => {
         set({ loading: true, error: null });
         try {
-            const res = await axios.post("http://localhost:5000/api/auth/login", data);
+            const res = await apiCall.post("/api/auth/login", data);
             const { user, token } = res.data.data;
 
             set({ user , token, loading: false });
@@ -82,10 +85,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     loginWithGoogle: async (idToken) => {
         set({ loading: true, error: null });
         try {
-            const res = await axios.post("http://localhost:5000/api/auth/google-login", {
+            const res = await apiCall.post("/api/auth/google-login", {
                 idToken,
             });
-            set({ user: res.data.user, token: res.data.token, loading: false });
+            const { user, token } = res.data.data;
+            set({ user, token, loading: false });
+            localStorage.setItem("token", token);
+            localStorage.setItem("user", JSON.stringify(user));
         } catch (err: any) {
             set({
                 loading: false,
@@ -95,4 +101,57 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
 
     setUserAndToken: (user, token) => set({ user, token }),
+
+    verifyEmail: async(token, password) => {
+        set({ loading: true, error: null });
+        try {
+            await apiCall.post("/api/auth/verify-email", {
+                token,
+                password,
+            });
+            set({ loading: false });
+            return true;
+        } catch (error: any) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Verifikasi gagal.",
+            });
+            return false
+        }
+    },
+
+    requestPasswordReset: async(email) => {
+        set({ loading: true, error: null });
+        try {
+            await apiCall.post("/api/auth/request-reset", { email });
+            set({ loading: false });
+
+            return true;
+        } catch (error: any) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Gagal meminta reset password",
+            });
+
+            return false;
+        }
+    },
+
+    resetPassword: async (token, newPassword) => {
+        set({ loading: true, error: null });
+        try {
+            await apiCall.post("/api/auth/reset-password", {
+                token,
+                new_password: newPassword,
+            });
+            set({ loading: false });
+            return true;
+        } catch (err: any) {
+            set({
+                loading: false,
+                error: err.response?.data?.message || "Gagal reset password",
+            });
+            return false;
+        }
+    },
 }));
