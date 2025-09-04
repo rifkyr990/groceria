@@ -69,27 +69,29 @@ export default function ComponentTest() {
   };
 
   return (
-    <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
-      <div className="md:col-span-2 space-y-4">
-        <CartList
-          items={items}
-          onDecrement={handleDecrement}
-          onIncrement={handleIncrement}
-          onRemove={handleRemove}
-        />
-      </div>
-      <div>
-        <CheckoutSection
-          items={items}
-          appliedPromo={appliedPromo}
-          promoInputText={promoInputText}
-          promoStatus={promoStatus}
-          promoCodes={promoCodes}
-          onApplyPromo={handleApplyPromo}
-          onRemovePromo={handleRemovePromo}
-          onPromoInputChange={handlePromoInputChange}
-        />
-      </div>
-    </section>
+    <main className="min-h-screen bg-gray-50 p-6 md:p-12">
+      <section className="max-w-7xl mx-auto grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="md:col-span-2 space-y-6">
+          <CartList
+            items={items}
+            onDecrement={handleDecrement}
+            onIncrement={handleIncrement}
+            onRemove={handleRemove}
+          />
+        </div>
+        <div className="space-y-6">
+          <CheckoutSection
+            items={items}
+            appliedPromo={appliedPromo}
+            promoInputText={promoInputText}
+            promoStatus={promoStatus}
+            promoCodes={promoCodes}
+            onApplyPromo={handleApplyPromo}
+            onRemovePromo={handleRemovePromo}
+            onPromoInputChange={handlePromoInputChange}
+          />
+        </div>
+      </section>
+    </main>
   );
 }

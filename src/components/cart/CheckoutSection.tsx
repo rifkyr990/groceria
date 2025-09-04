@@ -5,6 +5,7 @@ import OrderSummary from "./OrderSummary";
 import PromoInput from "./PromoInput";
 import { CheckoutSectionProps } from "@/components/types";
 import CheckoutButton from "./CheckoutButton";
+import StepIndicator from "./StepIndicator";
 
 export default function CheckoutSection({
   items,
@@ -32,6 +33,7 @@ export default function CheckoutSection({
 
   return (
     <div className="space-y-6 sticky top-28">
+      <StepIndicator />
       <OrderSummary
         subtotal={subtotal}
         discountCut={discountCut}
