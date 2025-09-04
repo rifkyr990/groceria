@@ -45,8 +45,8 @@ export default function LoginPage() {
                 <h2 className="text-2xl font-bold text-center text-gray-800 mb-2 dark:text-gray-200">
                     Selamat Datang Kembali
                 </h2>
-                <p className="text-center text-gray-500 mb-6">
-                    Masuk ke akun FreshCart Anda untuk melanjutkan belanja
+                <p className="text-center text-gray-500 mb-6 dark:text-gray-300">
+                    Masuk ke akun Groceria Anda untuk melanjutkan belanja
                 </p>
 
                 {/* Form */}

@@ -8,7 +8,7 @@ import { Lock } from "lucide-react";
 
 export default function VerifyEmailPage() {
     const searchParams = useSearchParams();
-    const token = searchParams.get("token"); // token dari URL
+    const token = searchParams.get("token");
     const router = useRouter();
 
     const [password, setPassword] = useState("");
@@ -45,27 +45,27 @@ export default function VerifyEmailPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-orange-50 px-4">
+        <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 px-4">
             <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg"
+                className="w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg"
             >
             <div className="flex justify-center mb-4">
                 <Lock className="w-12 h-12 text-green-600" />
             </div>
 
-            <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
+            <h2 className="text-2xl font-bold text-center text-gray-800 mb-2 dark:text-gray-200">
                 Verifikasi Email
             </h2>
-            <p className="text-center text-gray-600 mb-6">
+            <p className="text-center text-gray-600 mb-6 dark:text-gray-200">
                 Silakan atur password baru untuk akun Anda.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Password Baru
                     </label>
                     <input
@@ -88,12 +88,12 @@ export default function VerifyEmailPage() {
             </form>
 
             {message && (
-            <p className="mt-4 text-center text-green-600 font-medium">
+            <p className="mt-4 text-center text-green-600 font-medium dark:text-gray-300">
                 {message}
             </p>
             )}
             {error && (
-            <p className="mt-4 text-center text-red-600 font-medium">
+            <p className="mt-4 text-center text-red-600 font-medium dark:text-gray-300">
                 {error}
             </p>
             )}
