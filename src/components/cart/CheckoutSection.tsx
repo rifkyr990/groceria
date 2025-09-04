@@ -1,35 +1,33 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import OrderSummary from "./OrderSummary";
-import { CartItemProps } from "../types";
+import PromoInput from "./PromoInput";
+import { CheckoutSectionProps } from "@/components/types";
 
-interface Props {
-  items: CartItemProps[];
-}
-
-export default function CheckoutSection({ items }: Props) {
-  const [promo, setPromo] = useState<null | {
-    code: string;
-    type: "percentage" | "fixed";
-    value: number;
-  }>(null);
-
+export default function CheckoutSection({
+  items,
+  appliedPromo,
+  promoInputText,
+  promoStatus,
+  promoCodes,
+  onApplyPromo,
+  onRemovePromo,
+  onPromoInputChange,
+}: CheckoutSectionProps) {
   const { subtotal, discountCut, total } = useMemo(() => {
     const subtotal = items.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
-
-    const discountCut = promo
-      ? promo.type === "percentage"
-        ? Math.round((subtotal * promo.value) / 100)
-        : promo.value
+    const discountCut = appliedPromo
+      ? appliedPromo.type === "percentage"
+        ? Math.round((subtotal * appliedPromo.value) / 100)
+        : appliedPromo.value
       : 0;
-
-    const total = subtotal - discountCut;
+    const total = Math.max(0, subtotal - discountCut);
     return { subtotal, discountCut, total };
-  }, [items, promo]);
+  }, [items, appliedPromo]);
 
   return (
     <div className="space-y-6 sticky top-28">
@@ -37,6 +35,15 @@ export default function CheckoutSection({ items }: Props) {
         subtotal={subtotal}
         discountCut={discountCut}
         total={total}
+      />
+      <PromoInput
+        inputText={promoInputText}
+        status={promoStatus}
+        appliedPromo={appliedPromo}
+        promoCodes={promoCodes}
+        onInputChange={onPromoInputChange}
+        onApply={onApplyPromo}
+        onRemove={onRemovePromo}
       />
     </div>
   );
