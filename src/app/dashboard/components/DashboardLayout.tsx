@@ -14,7 +14,7 @@ export default function DashboardLayout({
 }) {
   const [openSidebar, setOpenSidebar] = useState(true);
   return (
-    <section className="bg-green-100/40 flex flex-col h-full">
+    <section className="bg-green-100/40 flex flex-col h-full max-sm:pb-10">
       {/* Header */}
       <header className="">
         <DashboardNavbar />
@@ -26,8 +26,8 @@ export default function DashboardLayout({
         onOpenChange={() => setOpenSidebar((prev) => !prev)}
       >
         <AppSidebar className="" />
-        <main className=" flex flex-col md:px-5 ">
-          <div id="sidebartrigger" className="flex items-center">
+        <main className=" flex flex-col md:px-5  w-full overflow-y-auto ">
+          <div id="sidebartrigger" className=" flex items-center">
             <CustomSidebarTrigger />
           </div>
 
@@ -35,7 +35,11 @@ export default function DashboardLayout({
         </main>
       </SidebarProvider>
       {/* Footer */}
-      <footer className="bg-red-500 w-full h-20">This is footer</footer>
+      <footer className=" w-full p-10  bg-white/70 border-t border-sky_blue-700/10 flex items-center justify-center">
+        <p className="text-center font-poppins text-sm text-prussian-blue/50">
+          &copy; 2025 My Grocery Store. All Rights Reserved
+        </p>
+      </footer>
     </section>
   );
 }

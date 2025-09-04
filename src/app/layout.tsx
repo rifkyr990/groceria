@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Poppins } from "next/font/google";
+import { ToastContainer } from "react-toastify";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${PoppinsFont.variable} antialiased`}
       >
+        <ToastContainer />
         {children}
       </body>
     </html>
