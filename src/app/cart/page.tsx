@@ -1,78 +1,71 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import CartList from "@/components/cart/CartList";
 import CheckoutSection from "@/components/cart/CheckoutSection";
-import { mockCartItems } from "@/components/cart/dummy-data/Data-CartItem";
-import { mockPromoCodes } from "@/components/cart/dummy-data/Data-Promo";
-import { CartItemProps, PromoCode } from "@/components/types";
 import { useCartStore } from "@/store/cart-store";
 
 export default function CartPage() {
-  const [items, setItems] = useState<CartItemProps[]>(mockCartItems);
-  const [promoCodes, setPromoCodes] = useState<PromoCode[]>(mockPromoCodes);
-  const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
   const [promoInputText, setPromoInputText] = useState("");
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
 
-  const { fetchCart } = useCartStore();
+  const {
+    items,
+    appliedPromo: appliedPromoCode,
+    incrementItem,
+    decrementItem,
+    removeItem,
+    promoCodes,
+    tryApplyPromoCode,
+    storeName,
+    removePromoCode,
+    fetchCart,
+    saveCart,
+  } = useCartStore();
 
   useEffect(() => {
     fetchCart();
-  }, []);
+  }, [fetchCart]);
 
-  const handleIncrement = (id: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
-  };
+  const isInitialMount = useRef(true);
 
-  const handleDecrement = (id: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity - 1) }
-          : item
-      )
-    );
-  };
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
 
-  const handleRemove = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-  };
+    const debounceTimer = setTimeout(() => {
+      console.log("User stopped making changes. Saving cart...");
+      saveCart();
+    }, 1000);
+
+    return () => {
+      clearTimeout(debounceTimer);
+    };
+  }, [items, saveCart]);
+
+  const appliedPromo = appliedPromoCode
+    ? promoCodes.find((p) => p.code === appliedPromoCode) || null
+    : null;
 
   const handleApplyPromo = () => {
-    const code = promoInputText.trim();
-    if (!code) return;
-
-    const found = promoCodes.find(
-      (p) => p.code.toLowerCase() === code.toLowerCase()
-    );
-    if (found) {
-      setAppliedPromo(found);
-      setPromoStatus("idle");
-    } else {
-      setAppliedPromo(null);
+    const success = tryApplyPromoCode(promoInputText);
+    if (!success) {
       setPromoStatus("invalid");
     }
+  };
+  const handleRemovePromo = () => {
+    removePromoCode();
+    setPromoInputText("");
+    setPromoStatus("idle");
   };
 
   const handlePromoInputChange = (value: string) => {
     setPromoInputText(value);
-    if (appliedPromo && value !== appliedPromo.code) {
-      setAppliedPromo(null);
-    }
     if (promoStatus === "invalid") {
       setPromoStatus("idle");
     }
-  };
-
-  const handleRemovePromo = () => {
-    setAppliedPromo(null);
-    setPromoInputText("");
-    setPromoStatus("idle");
   };
 
   return (
@@ -82,9 +75,10 @@ export default function CartPage() {
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <CartList
               items={items}
-              onDecrement={handleDecrement}
-              onIncrement={handleIncrement}
-              onRemove={handleRemove}
+              onDecrement={decrementItem}
+              onIncrement={incrementItem}
+              onRemove={removeItem}
+              storeName={storeName}
             />
           </div>
 

@@ -10,6 +10,7 @@ export default function CartList({
   onDecrement,
   onIncrement,
   onRemove,
+  storeName,
 }: CartListProps) {
   return (
     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
@@ -30,7 +31,7 @@ export default function CartList({
           <IoStorefrontOutline className="text-lg sm:text-xl text-primary-green-600 flex-shrink-0" />
           <CardTitle className="text-base sm:text-lg font-semibold text-text-dark">
             Items from{" "}
-            <span className="text-primary-green-600">MarketIpsum</span> (
+            <span className="text-primary-green-600">{storeName}</span> (
             {items.length})
           </CardTitle>
         </CardHeader>

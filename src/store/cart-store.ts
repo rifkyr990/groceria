@@ -1,3 +1,7 @@
+import { apiCall } from "@/app/helper/apiCall";
+import { mockPromoCodes } from "@/components/cart/dummy-data/Data-Promo";
+import { PromoCode } from "@/components/types";
+import { AxiosError } from "axios";
 import { create } from "zustand";
 
 interface CartItem {
@@ -23,34 +27,50 @@ interface ApiCartItem {
 }
 
 interface ApiCartResponse {
-  storeId: number;
+  store: { name: string; id: number };
   cartItems: ApiCartItem[];
   appliedPromo?: string;
 }
 
+interface ApiError {
+  error: string;
+}
+
 interface CartState {
   storeId: number | null;
+  storeName: string | null;
   items: CartItem[];
   appliedPromo: string | null;
+  promoCodes: PromoCode[];
+  tryApplyPromoCode: (code: string) => boolean;
+  loading: boolean;
+  error: string | null;
 
   addItem: (
     product: Omit<CartItem, "quantity">,
     storeId: number,
     quantity?: number
   ) => void;
+  incrementItem: (productId: number) => void;
+  decrementItem: (productId: number) => void;
   removeItem: (productId: number) => void;
-  updateItemQuantity: (productId: number, newQuantity: number) => void;
-  applyPromoCode: (promoCode: string) => void;
+
   removePromoCode: () => void;
   clearCart: () => void;
 
   fetchCart: () => Promise<void>;
+  saveCart: () => Promise<void>;
 }
 
-export const useCartStore = create<CartState>((set) => ({
+export const useCartStore = create<CartState>((set, get) => ({
   storeId: null,
+  storeName: null,
   items: [],
   appliedPromo: null,
+  loading: false,
+  error: null,
+
+  promoCodes: mockPromoCodes, // mock data
 
   addItem: (product, storeId, quantity = 1) =>
     set((state) => {
@@ -78,24 +98,41 @@ export const useCartStore = create<CartState>((set) => ({
       };
     }),
 
-  removeItem: (productId) =>
-    set((state) => ({
-      items: state.items.filter((item) => item.id !== productId),
-    })),
+  incrementItem: (productId) =>
+    set({
+      items: get().items.map((item) =>
+        item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+      ),
+    }),
 
-  updateItemQuantity: (productId, newQuantity) =>
-    set((state) => ({
-      items: state.items.map((item) =>
+  decrementItem: (productId) =>
+    set({
+      items: get().items.map((item) =>
         item.id === productId
-          ? { ...item, quantity: Math.max(1, newQuantity) }
+          ? { ...item, quantity: Math.max(1, item.quantity - 1) }
           : item
       ),
-    })),
+    }),
 
-  applyPromoCode: (promo) =>
-    set(() => ({
-      appliedPromo: promo,
-    })),
+  removeItem: (productId) =>
+    set({
+      items: get().items.filter((item) => item.id !== productId),
+    }),
+
+  tryApplyPromoCode: (code) => {
+    const { promoCodes } = get();
+    const codeToApply = code.trim().toLowerCase();
+
+    const found = promoCodes.find((p) => p.code.toLowerCase() === codeToApply);
+
+    if (found) {
+      set({ appliedPromo: found.code });
+      return true;
+    } else {
+      set({ appliedPromo: null });
+      return false;
+    }
+  },
 
   removePromoCode: () =>
     set(() => ({
@@ -110,13 +147,14 @@ export const useCartStore = create<CartState>((set) => ({
     })),
 
   fetchCart: async () => {
+    set({ loading: true, error: null });
     try {
-      const response = await fetch("/api/cart");
-      if (!response.ok) throw new Error("Failed to fetch cart");
-      const data: ApiCartResponse = await response.json();
+      const response = await apiCall.get("/api/cart");
+      const data: ApiCartResponse = response.data;
 
       set({
-        storeId: data.storeId,
+        storeId: data.store.id,
+        storeName: data.store.name,
         items: data.cartItems.map((item) => ({
           id: item.id,
           productId: item.product.id,
@@ -127,9 +165,45 @@ export const useCartStore = create<CartState>((set) => ({
           image: item.product.imageUrl,
         })),
         appliedPromo: data.appliedPromo ?? null,
+        loading: false,
       });
     } catch (err) {
-      console.error("Error fetching cart:", err);
+      const error = err as AxiosError<ApiError>;
+
+      set({
+        error: error.response?.data?.error || "Failed to fetch cart",
+        loading: false,
+      });
+    }
+  },
+  saveCart: async () => {
+    set({ loading: true, error: null });
+    try {
+      const { storeId, items } = get();
+
+      if (!storeId) {
+        console.warn("Cannot save cart without a storeId.");
+        set({ loading: false });
+        return;
+      }
+
+      const payload = {
+        storeId,
+        items: items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+        })),
+      };
+
+      await apiCall.put("/api/cart", payload);
+
+      set({ loading: false });
+    } catch (err) {
+      const error = err as AxiosError<ApiError>;
+      set({
+        error: error.response?.data?.error || "Failed to save cart",
+        loading: false,
+      });
     }
   },
 }));

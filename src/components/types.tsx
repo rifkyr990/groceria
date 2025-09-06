@@ -1,23 +1,24 @@
 export interface CartItemProps {
-  id: string;
+  id: number;
   name: string;
-  details: string;
+  description: string;
   price: number;
   image: string;
   quantity: number;
 }
 
 export interface CartItemComponentProps extends CartItemProps {
-  onIncrement: (id: string) => void;
-  onDecrement: (id: string) => void;
-  onRemove: (id: string) => void;
+  onIncrement: (id: number) => void;
+  onDecrement: (id: number) => void;
+  onRemove: (id: number) => void;
 }
 
 export interface CartListProps {
   items: CartItemProps[];
-  onDecrement: (id: string) => void;
-  onIncrement: (id: string) => void;
-  onRemove: (id: string) => void;
+  storeName?: string | null;
+  onDecrement: (id: number) => void;
+  onIncrement: (id: number) => void;
+  onRemove: (id: number) => void;
 }
 
 export interface PromoCode {
