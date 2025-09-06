@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CartList from "@/components/cart/CartList";
 import CheckoutSection from "@/components/cart/CheckoutSection";
 import { mockCartItems } from "@/components/cart/dummy-data/Data-CartItem";
 import { mockPromoCodes } from "@/components/cart/dummy-data/Data-Promo";
 import { CartItemProps, PromoCode } from "@/components/types";
+import { useCartStore } from "@/store/cart-store";
 
 export default function CartPage() {
   const [items, setItems] = useState<CartItemProps[]>(mockCartItems);
@@ -13,6 +14,12 @@ export default function CartPage() {
   const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
   const [promoInputText, setPromoInputText] = useState("");
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
+
+  const { fetchCart } = useCartStore();
+
+  useEffect(() => {
+    fetchCart();
+  }, []);
 
   const handleIncrement = (id: string) => {
     setItems((prev) =>
