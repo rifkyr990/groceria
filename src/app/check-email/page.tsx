@@ -5,9 +5,7 @@ import Link from "next/link";
 import { MailCheck, RefreshCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import axios from "axios";
 import { apiCall } from "../helper/apiCall";
-import { email } from "zod";
 import { useAuthStore } from "@/store/auth-store";
 
 export default function CheckEmailPage() {
@@ -29,8 +27,8 @@ export default function CheckEmailPage() {
 
     const resendVerification = async () => {
         if(countdown > 0) return;
-        setResending(true);
-        setMessage("");
+            setResending(true);
+            setMessage("");
         try {
             const res = await apiCall.post("/api/auth/resend-verification", { email });
             toast.success(res.data.message || "Email verifikasi sudah dikirim ulang");

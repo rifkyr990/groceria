@@ -41,8 +41,7 @@ export const useUserStore = create<UserState>((set) => ({
                     Authorization: `Bearer ${token}`,
                 },
             });
-
-
+            
             const user = res.data.data;
             localStorage.setItem("user", JSON.stringify(user));
             useAuthStore.getState().setUserAndToken(user, token!);
@@ -131,7 +130,7 @@ export const useUserStore = create<UserState>((set) => ({
         set({ loading: true, error: null });
         try {
             const token = useAuthStore.getState().token;
-            const res = await apiCall.put("/api/user/change-password", { oldPassword, newPassword }, {
+            await apiCall.put("/api/user/change-password", { oldPassword, newPassword }, {
                 headers: {
                     "Content-Type" : "application/json",
                     Authorization: `Bearer ${token}`,

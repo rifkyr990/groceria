@@ -1,16 +1,8 @@
 import { email } from 'zod';
-// auth-store.ts
 import { create } from "zustand";
 import { apiCall } from "@/app/helper/apiCall";
+import { toast } from "react-toastify";
 
-interface User {
-    id: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    role: string;
-    image_url?: string | null;
-}
 interface AuthState {
     user: any | null;
     token: string | null;
@@ -25,6 +17,7 @@ interface AuthState {
     requestPasswordReset: (email: string) => Promise<boolean>;
     resetPassword: (token: string, newPassword: string) => Promise<boolean>
     verifyEmail: (token: string, password: string) => Promise<boolean>
+    resendVerificationEmail: (email: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -54,11 +47,15 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ loading: true, error: null });
         try {
             const res = await apiCall.post("/api/auth/login", data);
+            console.log("Login response:", res.data);
+
             const { user, token } = res.data.data;
+            console.log("User:", user);
+            console.log("Token:", token);
 
             set({ user , token, loading: false });
-            localStorage.setItem("token", token);
             localStorage.setItem("user", JSON.stringify(user));
+            localStorage.setItem("token", token);
 
             return true;
         } catch (err: any) {
@@ -74,13 +71,21 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
 
     hydrate: () => {
-        const token = localStorage.getItem("token");
+        if (typeof window === "undefined") return;
+
+        const token = localStorage.getItem("token") || sessionStorage.getItem("token");
         const user = localStorage.getItem("user");
 
-        if (token && user) {
-            set({ token,user: JSON.parse(user) })
+        console.log("🔥 hydrate dijalankan");
+        console.log("Storage Token:", token);
+        console.log("Storage User:", user);
+
+        if (token) {
+            set({ token, user: user ? JSON.parse(user) : null });
         }
+
     },
+
 
     loginWithGoogle: async (idToken) => {
         set({ loading: true, error: null });
@@ -152,6 +157,19 @@ export const useAuthStore = create<AuthState>((set) => ({
                 error: err.response?.data?.message || "Gagal reset password",
             });
             return false;
+        }
+    },
+
+    resendVerificationEmail: async (email) => { 
+        set({ loading: true, error: null });
+        try {
+            await apiCall.post("/api/auth/resend-verification", { email });
+            set({loading: false});
+        } catch (err: any) {
+            set({
+                loading: false,
+                error: err.response?.data?.message || "Gagal verifikasi ulang",
+            });
         }
     },
 }));
