@@ -9,6 +9,7 @@ interface AddressFormValues {
     province: string;
     city: string;
     district: string;
+    subdistrict: string;
     postal_code: string;
     street: string;
     detail: string;
@@ -24,10 +25,10 @@ interface Address {
     province: string;
     city: string;
     district: string;
+    subdistrict: string;
     postal_code: string;
     street: string;
     detail: string;
-    // address_line: string;
     label: "RUMAH" | "KANTOR";
     is_primary: boolean;
 }
@@ -38,7 +39,7 @@ interface AddressState {
     error: string | null;
     fetchAddress: () => Promise<void>;
     addAddress: (data: AddressFormValues) => Promise<boolean>;
-    updateAddress: (id: number, data: Partial<Address>) => Promise<void>;
+    updateAddress: (id: number, data: Partial<Address>) => Promise<boolean>;
     deleteAddress: (id: number) => Promise<void>;
     setPrimary: (id: number) => Promise<void>;
 }
@@ -86,10 +87,12 @@ export const useAddressStore = create<AddressState>((set, get) => ({
           addr.id === id ? res.data.data : addr
         ),
       });
+      return true;
     } catch (error: any) {
       set({
         error: error.response?.data?.message || "Gagal update alamat",
       });
+      return false;
     }
   },
 

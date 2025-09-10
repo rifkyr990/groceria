@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useAddressStore } from "@/store/address-store";
 import AddAddressModal from "./address/AddAddressModal";
+import EditAddressModal from "./address/EditAddressModal";
 
 export default function AddressList() {
   const {
@@ -39,7 +40,7 @@ export default function AddressList() {
               <p className="text-gray-600">| {addr.phone}</p>
             </div>
             <div className="flex gap-4 text-blue-500 text-sm">
-              <button className="hover:underline">Ubah</button>
+              <EditAddressModal address={addr} />
               <button
                 onClick={() => deleteAddress(addr.id)}
                 className="hover:underline"
@@ -49,7 +50,7 @@ export default function AddressList() {
             </div>
           </div>
 
-          <p className="text-gray-600">{addr.street} {addr.detail}</p>
+          <p className="text-gray-600">{addr.street} ({addr.detail})</p>
           <p className="text-gray-700">
             {addr.district}, {addr.city}, {addr.province}, ID,{" "}
             {addr.postal_code}
