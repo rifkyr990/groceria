@@ -15,13 +15,22 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 import Image from "next/image";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import Link from "next/link";
 
 const products = [
   {
     id: 1,
-    name: "Sepatu Adidas KW Super kalimantan",
+    name: "T-Shirt Naruto",
     productPic: "/assets/defaultbanner2.svg",
-    category: "Shoes",
+    category: "T-Shirt",
     availStock: 50,
     price: 50000,
     active: true,
@@ -38,7 +47,7 @@ const products = [
 ];
 
 export default function ProductList() {
-  const [productList, setProductList] = useState(products);
+  const [productList, setProductList] = useState([]);
   return (
     <DashboardLayout>
       <section className="bg-white p-5 rounded-md h-full shadow-sm">
@@ -56,13 +65,46 @@ export default function ProductList() {
           </div>
           <div className="flex gap-x-3">
             <div id="newprdbtn">
-              <Button>Add Product</Button>
+              <Link href="/dashboard/manage-product/new-product">
+                <Button>+ Add New Product</Button>
+              </Link>
             </div>
             <div id="filter-category">
-              <Button>filter</Button>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Category"></SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {products.map((product) => (
+                    <SelectGroup key={product.id}>
+                      <SelectItem value={product.category}>
+                        {product.category}
+                      </SelectItem>
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div id="filter-options">
-              <Button>Filter2</Button>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by"></SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="highest-price">Highest Price</SelectItem>
+                    <SelectItem value="lowest-price">Lowest Price</SelectItem>
+                    <SelectItem value="highest-stock">Highest Stock</SelectItem>
+                    <SelectItem value="lowest-stock">Lowest Stock</SelectItem>
+                    <SelectItem value="active-product">
+                      Active Product
+                    </SelectItem>
+                    <SelectItem value="inactive-product">
+                      Inactive Product
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
@@ -72,7 +114,7 @@ export default function ProductList() {
             <TableHeader>
               <TableRow>
                 <TableHead>
-                  <Checkbox />
+                  <Checkbox className="rounded-full" />
                 </TableHead>
                 <TableHead className="">Product Info</TableHead>
                 <TableHead className="text-center">Category</TableHead>
@@ -86,7 +128,7 @@ export default function ProductList() {
               {products.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell>
-                    <Checkbox />
+                    <Checkbox className="rounded-full" />
                   </TableCell>
                   <TableCell
                     id="product-profile"

@@ -23,9 +23,10 @@ export const updateUserSchema = z.object({
   phone: z.string(),
   city: z.string().min(1, "Must be at least 1 character"),
   province: z.string().min(1, "Must be at least 1 character"),
-  role: z.enum(["customer", "storeadmin", "superadmin"]).optional(),
+  role: z.enum(["CUSTOMER", "STORE_ADMIN", "SUPER_ADMIN"]).optional(),
   postalCode: z.string(),
-  address: z.string().min(1, "Must be at least 1 character"),
+  // addresses: z.string().min(1, "Must be at least 1 character"),
+  main_address: z.string().min(1, "Must be at least 1 character"),
   storeName: z.string(),
   profilePic: z
     .union([z.string(), z.instanceof(File), z.null()])

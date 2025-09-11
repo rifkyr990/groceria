@@ -2,13 +2,16 @@ import { IUserProps } from "./user";
 
 export interface IStoreProps {
   id: number;
-  storeName: string;
-  storeAddress: string;
-  storeCity: string;
-  storeProvince: string;
-  storeStatus: boolean;
+  name: string;
+  address: string;
+  province?: string;
+  city?: string;
+  latitude: number;
+  longitude: number;
+  is_active: boolean;
+  is_main_store: boolean;
   storeBanner?: string;
-  storeAdmin?: IUserProps[];
+  admins?: IUserProps[];
   storeLat?: number;
   storeLong?: number;
 }

@@ -26,34 +26,45 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { apiCall } from "@/helper/apiCall";
 import { IUserProps } from "@/types/user";
 import { FileSearch, Search, Trash } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import UserDetailsDialog from "./btndetails/UserDetailsDialog";
 import UsersDataCardStacks from "./CardStacksUsersData";
+import { IStoreProps } from "@/types/store";
 interface IUsersTable {
   className?: string;
-  users: IUserProps[];
+  customers: IUserProps[];
+  stores: IStoreProps[];
 }
 
-export default function UsersTableCard({ className, users }: IUsersTable) {
+export default function CustomerTable({
+  className,
+  customers,
+  stores,
+}: IUsersTable) {
+  const [userList, setUserList] = useState<IUserProps[]>(customers);
+  // console.log(userList);
   const [searchQuery, setSearchQuery] = useState("");
   const [orderStatus, setOrderStatus] = useState<
     "all" | "verified" | "unverified"
   >("all");
-  const filteredUsers = users.filter(
+  const filteredUsers = userList.filter(
     (user) =>
       user.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.role?.toLowerCase().includes(searchQuery.toLowerCase())
+      user.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     if (!orderStatus) return 0;
     if (orderStatus === "verified") {
-      return Number(b.verifystatus) - Number(a.verifystatus);
+      return Number(b.is_verified) - Number(a.is_verified);
     }
     if (orderStatus === "unverified") {
-      return Number(a.verifystatus) - Number(b.verifystatus);
+      return Number(a.is_verified) - Number(b.is_verified);
     }
     return 0;
   });
@@ -63,52 +74,53 @@ export default function UsersTableCard({ className, users }: IUsersTable) {
   const [deleteSelectedUser, setDeleteSelectedUser] =
     useState<IUserProps | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
-  const usersPerPage = 3;
+  const usersPerPage = 5;
   const indexOfLast = currentPage * usersPerPage;
   const indexOfFirst = indexOfLast - usersPerPage;
   const currentUsers = sortedUsers.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(sortedUsers.length / usersPerPage);
-
   const btnDelete = (user: IUserProps) => {
-    // console.log(selectedUser);
     setDeleteSelectedUser(user);
     setDeleteConfirm((prev) => !prev);
   };
-
-  const handlerDelete = (data: IUserProps) => {
+  const handlerDelete = async (data: IUserProps) => {
     if (data) {
-      console.log(data);
-      alert(`Delete ${data.first_name}${data.last_name} Success`);
-      setDeleteConfirm(false);
+      const userId = data.id;
+      console.log(userId);
+      try {
+        const res = await apiCall.delete(`/api/user/${userId}`);
+        console.log(res);
+        toast.success("Delete User Data Success");
+        setUserList((prev) => prev.filter((user) => user.id !== data.id));
+        setDeleteConfirm(false);
+      } catch (error) {
+        console.log(error);
+        alert("eror bos");
+      }
     }
   };
 
+  useEffect(() => {
+    setUserList(customers);
+  }, [customers]);
   return (
     <>
       <Card className={`${className} `}>
         <CardHeader className="flex max-lg:flex-col items-center justify-between ">
           <div className="w-full">
-            <h1 className="font-semibold text-xl">Registered Users</h1>
+            <h1 className="font-semibold text-xl">Registered Customers</h1>
           </div>
           <div className="flex max-lg:flex-col gap-x-2 w-full ">
             <div id="searcbar" className="relative w-full">
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by first name/role ..."
+                placeholder="Search by first/last name or email."
                 className="text-xs"
               ></Input>
               <Search className="absolute size-4 top-2.5 right-2 text-gray-400" />
             </div>
             <div className="flex gap-x-2 max-lg:justify-between max-lg:mt-5">
-              <div id="newuser">
-                <Button
-                  className="bg-blue-500 hover:bg-blue-600
-            "
-                >
-                  New User
-                </Button>
-              </div>
               <div id="filter">
                 <Select
                   value={orderStatus}
@@ -140,12 +152,10 @@ export default function UsersTableCard({ className, users }: IUsersTable) {
           <Table className="max-lg:hidden">
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center">User ID</TableHead>
                 <TableHead className="text-center">First Name</TableHead>
                 <TableHead className="text-center">Last Name</TableHead>
                 <TableHead className="text-center">Phone</TableHead>
                 <TableHead className="text-center">Email</TableHead>
-                <TableHead className="text-center">Role</TableHead>
                 <TableHead className="text-center max-xl:hidden">
                   Status
                 </TableHead>
@@ -155,14 +165,12 @@ export default function UsersTableCard({ className, users }: IUsersTable) {
             <TableBody className="text-center">
               {currentUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell>{user.id}</TableCell>
                   <TableCell>{user.first_name}</TableCell>
                   <TableCell>{user.last_name}</TableCell>
                   <TableCell>{user.phone}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.role}</TableCell>
+                  <TableCell className="">{user.email}</TableCell>
                   <TableCell className="max-xl:hidden">
-                    {user.verifystatus ? "Verified" : "Unverified"}
+                    {user.is_verified ? "Verified" : "Unverified"}
                   </TableCell>
                   <TableCell className="flex gap-x-2 items-center text-center justify-center">
                     <Button
@@ -184,7 +192,7 @@ export default function UsersTableCard({ className, users }: IUsersTable) {
             </TableBody>
           </Table>
           {/* Mobile Version - Card Stacks */}
-          <UsersDataCardStacks users={currentUsers} />
+          <UsersDataCardStacks users={currentUsers} stores={stores} />
         </CardContent>
         <CardFooter className="max-lg:hidden">
           <PaginationControls
@@ -202,6 +210,7 @@ export default function UsersTableCard({ className, users }: IUsersTable) {
             if (!open) setSelectedUser(null);
           }}
           users={selectedUser}
+          stores={stores}
         />
       )}
       {/* Confirm Details  */}
