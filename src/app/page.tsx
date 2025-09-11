@@ -10,17 +10,17 @@ export default function Home() {
   return (
     <section>
       <header>
-        <Navbar/>
+        <Navbar />
       </header>
       <main>
-        <HeroCarousel/>
-        <LocationFetcher/>
-        <ProductList/>
-        <AboutSection/>
-        <FeaturesSection/>
+        <HeroCarousel />
+        <LocationFetcher />
+        <ProductList />
+        <AboutSection />
+        <FeaturesSection />
       </main>
       <footer>
-        <Footer/>
+        <Footer className="mt-12" />
       </footer>
     </section>
   );

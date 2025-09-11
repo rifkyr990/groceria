@@ -10,12 +10,17 @@ import { BadgeAlert, BadgeCheckIcon, FileSearch, Trash } from "lucide-react";
 import { useState } from "react";
 import UserDetailsDialog from "./btndetails/UserDetailsDialog";
 import { toast } from "react-toastify";
+import { IStoreProps } from "@/types/store";
 
 interface IUsersDataCardStacks {
   users: IUserProps[];
+  stores: IStoreProps[];
 }
 
-export default function UsersDataCardStacks({ users }: IUsersDataCardStacks) {
+export default function UsersDataCardStacks({
+  users,
+  stores,
+}: IUsersDataCardStacks) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<IUserProps | null>(null);
   const usersPerPage = 2;
@@ -56,7 +61,7 @@ export default function UsersDataCardStacks({ users }: IUsersDataCardStacks) {
                 <p className="text-md font-semibold">
                   {user.first_name} {user.last_name}
                 </p>
-                {user.verifystatus ? (
+                {user.is_verified ? (
                   <Badge
                     variant="secondary"
                     className="bg-blue-500 text-white dark:bg-blue-600 text-xs"
@@ -74,11 +79,7 @@ export default function UsersDataCardStacks({ users }: IUsersDataCardStacks) {
                   </Badge>
                 )}
               </div>
-              <div id="role-email" className="flex items-center gap-x-0.5">
-                <p className="text-xs truncate">{user.role}</p>
-                {"|"}
-                <p className="text-xs">{user.email}</p>
-              </div>
+              <p className="text-xs my-1">{user.email}</p>
               <div id="btn" className="flex gap-x-2">
                 <Button
                   className="h-8 rounded-md"
@@ -114,6 +115,7 @@ export default function UsersDataCardStacks({ users }: IUsersDataCardStacks) {
             if (!open) setSelectedUser(null);
           }}
           users={selectedUser}
+          stores={stores}
         />
       )}
       {/* Delete Dialog */}

@@ -29,7 +29,7 @@ const items = [
   {
     id: 3,
     icon: <Package className="size-6" />,
-    url: "/dashboard/manage-product",
+    url: "/dashboard/manage-product/product-list",
   },
   {
     id: 4,

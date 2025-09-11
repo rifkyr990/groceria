@@ -1,15 +1,13 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { IStoreProps } from "@/types/store";
 import { Check, Store, Trash, Users, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import UserDetailsDialog from "./btndetails/UserDetailsDialog";
-import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
-import StoreDetailsDialog from "./btndetails/StoreDetailsDialog";
 import StoreAdminList from "./btndetails/StoreAdmin";
+import StoreDetailsDialog from "./btndetails/StoreDetailsDialog";
 
 interface IStoreCard {
   className?: string;

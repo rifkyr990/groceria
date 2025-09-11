@@ -1,13 +1,8 @@
-import AvatarUploader from "@/app/helper/AvatarUploader";
-import {
-  updateUserSchema,
-  UpdateUserSchema,
-} from "@/app/helper/updateUserSchema";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -20,203 +15,65 @@ import {
   SelectItem,
   SelectLabel,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
+import { apiCall } from "@/helper/apiCall";
 import { IStoreProps } from "@/types/store";
 import { IUserProps } from "@/types/user";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Edit, Mail } from "lucide-react";
+import { IUserAddressProps } from "@/types/user_address";
+import { SelectValue } from "@radix-ui/react-select";
+import { Mail, User } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 interface IUserDetailsDialog {
   open: boolean;
   setOpen: (value: boolean) => void;
   users: IUserProps;
+  stores: IStoreProps[];
 }
-
-// dummy stores data
-const stores: IStoreProps[] = [
-  {
-    id: 1,
-    storeName: "Fulano Store",
-    storeAddress: "Jl Gedang Raja 2",
-    storeCity: "Surabaya",
-    storeProvince: "Jawa Timur",
-    storeStatus: true,
-    storeAdmin: [
-      {
-        id: 1,
-        first_name: "Hendro",
-        last_name: "Monawaroh",
-        phone: "08555",
-        email: "hendro@mail.com",
-      },
-      {
-        id: 2,
-        first_name: "Fulan",
-        last_name: "Muamar",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-      {
-        id: 3,
-        first_name: "Mulan",
-        last_name: "Sabrina",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-    ],
-    storeBanner: "https://picsum.photos/seed/picsum/500/300",
-  },
-  {
-    id: 2,
-    storeName: "Fulani Store",
-    storeAddress: "Jl Tentara Istimewa 1",
-    storeCity: "Jakarta",
-    storeProvince: "Jawa Timur",
-    storeStatus: false,
-    storeAdmin: [
-      {
-        id: 1,
-        first_name: "Hendro",
-        last_name: "Monawaroh",
-        phone: "08555",
-        email: "hendro@mail.com",
-      },
-      {
-        id: 2,
-        first_name: "Fulan",
-        last_name: "Muamar",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-      {
-        id: 3,
-        first_name: "Mulan",
-        last_name: "Sabrina",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-    ],
-    storeBanner: "https://picsum.photos/seed/picsum/500/300",
-  },
-  {
-    id: 3,
-    storeName: "Aldino Store",
-    storeAddress: "Jl Jakarta Istimewa 1",
-    storeCity: "Jakarta",
-    storeProvince: "DKI Jakarta",
-    storeStatus: true,
-    storeAdmin: [
-      {
-        id: 1,
-        first_name: "Eko",
-        last_name: "Monawaroh",
-        phone: "08555",
-        email: "random@mail.com",
-      },
-      {
-        id: 2,
-        first_name: "Rustam",
-        last_name: "Muamar",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-      {
-        id: 3,
-        first_name: "Mulan",
-        last_name: "Sabrina",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-    ],
-  },
-  {
-    id: 4,
-    storeName: "Alden Store",
-    storeAddress: "Jl Jakarta Istimewa 1",
-    storeCity: "Bogor",
-    storeProvince: "Jawa Barat",
-    storeStatus: true,
-    storeAdmin: [
-      {
-        id: 1,
-        first_name: "Hendro",
-        last_name: "Monawaroh",
-        phone: "08555",
-        email: "random@mail.com",
-      },
-    ],
-  },
-];
-
 export default function UserDetailsDialog({
   open,
   setOpen,
   users,
+  stores,
 }: IUserDetailsDialog) {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors, isSubmitting },
-  } = useForm<UpdateUserSchema>({
-    resolver: zodResolver(updateUserSchema),
-    defaultValues: {
-      first_name: users.first_name,
-      last_name: users.last_name,
-      email: users.email,
-      phone: users.phone,
-      city: users.city,
-      province: users.province,
-      role: users.role,
-      address: users.address,
-      storeName: users.storename,
-      profilePic: undefined,
-    },
-  });
-
-  const [initialData, setInitialData] = useState<IUserProps>(users);
-  const [userRole, setUserRole] = useState<
-    "customer" | "storeadmin" | "superadmin"
-  >(users.role || "customer");
-  const [edit, setEdit] = useState(false);
-
-  const handleCancelEdit = () => {
-    setEdit(false);
-
-    reset({
-      first_name: users.first_name,
-      last_name: users.last_name ?? "",
-      email: users.email,
-      phone: users.phone,
-      city: users.city,
-      province: users.province,
-      role: users.role,
-      postalCode: users.postalCode ?? "",
-      address: users.address,
-      storeName: users.storename,
-      profilePic: undefined,
-    });
-  };
-
-  const onUpdate = async (data: UpdateUserSchema) => {
+  const main_address =
+    users.addresses?.find((addr: IUserAddressProps) => addr.is_primary)
+      ?.address_line ?? "";
+  const first_name = users.first_name;
+  const last_name = users.last_name;
+  const email = users.email;
+  const phone = users.phone;
+  const city = users.addresses?.find(
+    (addr: IUserAddressProps) => addr.city
+  )?.city;
+  const province = users.addresses?.find(
+    (addr: IUserAddressProps) => addr.province
+  )?.province;
+  const profilePic = users.image_url;
+  const full_address = main_address + ", " + city + ", " + province;
+  const [openStoreSelect, setOpenStoreSelect] = useState(false);
+  const [selectedStore, setSelectedStore] = useState<string | undefined>(
+    undefined
+  );
+  // assign admin handler
+  const handlerAssignAdmin = async (userId: string, storeId: string) => {
+    if (!storeId) return alert("You have to choose the store");
     try {
-      console.log("Update Data", data);
-      await new Promise((res) => setTimeout(res, 1000));
-
-      alert("Data berhasil diupdate");
-
-      setEdit(false);
-      setInitialData((prev) => ({ ...prev, role: userRole, ...data }));
+      const id = userId;
+      const store_id = parseInt(storeId);
+      const res = await apiCall.patch(`/api/user/new-admin/${id}`, {
+        store_id,
+      });
+      if (res && res.data.success) {
+        toast.success("Assign Admin Success");
+        setOpen(false);
+        window.location.reload();
+      }
     } catch (error) {
       console.log(error);
-      alert("Error");
     }
   };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
@@ -224,99 +81,38 @@ export default function UserDetailsDialog({
           <DialogTitle>User Details</DialogTitle>
         </DialogHeader>
         {/* Avatar */}
-        {edit ? (
-          <div className="relative flex justify-center items-center h-full cursor-pointer">
-            <AvatarUploader
-              defaultImage={users.profilePic ?? undefined}
-              register={register("profilePic")}
-              className="brightness-50"
-            />
-            <Edit className="absolute top-10 text-white cursor-pointer" />
-          </div>
-        ) : (
-          <AvatarUploader
-            defaultImage={users.profilePic ?? undefined}
-            register={register("profilePic")}
-            disabled
-          />
-        )}
-
+        <div className="relative flex justify-center items-center cursor-pointer">
+          <Avatar className="size-15">
+            <AvatarImage className="" src={profilePic} />
+            <AvatarFallback>ID</AvatarFallback>
+          </Avatar>
+        </div>
         {/* Content */}
-        <form onSubmit={handleSubmit(onUpdate)}>
+        <form>
           <div className="flex max-sm:flex-col gap-x-2 w-full">
             <div id="first_name" className="w-full">
               <label className="max-md:text-sm">First Name</label>
-              <Input
-                {...register("first_name")}
-                disabled={edit ? false : true}
-                className="max-md:text-sm"
-              />
-              {errors.first_name?.message}
+              <Input value={first_name} disabled className="max-md:text-sm" />
             </div>
             <div id="last_name" className="w-full">
               <label className="max-md:text-sm">Last Name</label>
-              <Input
-                {...register("last_name")}
-                disabled={edit ? false : true}
-                className="max-md:text-sm"
-              />
+              <Input disabled value={last_name} className="max-md:text-sm" />
             </div>
           </div>
           <div className="flex gap-x-1 max-sm:flex-col">
             <div id="email" className="w-full">
               <label className="max-md:text-sm">Email</label>
-              <Input
-                type="email"
-                {...register("email")}
-                disabled={edit ? false : true}
-                className="max-md:text-sm"
-              />
+              <Input disabled value={email} className="max-md:text-sm" />
             </div>
             <div id="phone" className="w-full">
               <label className="max-md:text-sm">Phone Number</label>
-              <Input {...register("phone")} disabled={edit ? false : true} />
+              <Input disabled value={phone} />
             </div>
           </div>
           <div className="flex gap-x-1">
             <div id="address" className="w-full">
               <label className="max-md:text-sm">Main Address</label>
-              <Input
-                {...register("address")}
-                disabled={edit ? false : true}
-                className="max-md:text-sm"
-              />
-            </div>
-            <div id="user-role" className="w-full">
-              <label className="max-md:text-sm">Role</label>
-              <Select
-                value={userRole}
-                onValueChange={(
-                  value: "customer" | "storeadmin" | "superadmin"
-                ) => {
-                  setUserRole(value);
-                  setValue("role", value);
-                }}
-                disabled={edit ? false : true}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select Role">
-                    {userRole}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="w-full">
-                  <SelectGroup>
-                    <SelectItem value="customer" className="text-xs">
-                      Customer
-                    </SelectItem>
-                    <SelectItem value="storeadmin" className="text-xs ">
-                      Store Admin
-                    </SelectItem>
-                    <SelectItem value="superadmin" className="text-xs ">
-                      Super Admin
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              <Input disabled value={full_address} className="max-md:text-sm" />
             </div>
           </div>
           <div className="flex gap-x-1">
@@ -324,9 +120,7 @@ export default function UserDetailsDialog({
               <label className="max-md:text-sm"> Status</label>
               <Input
                 disabled
-                defaultValue={
-                  users.verifystatus ? "✅ Verified" : "⚠️Unverified"
-                }
+                value={users.is_verified ? "✅ Verified" : "⚠️Unverified"}
                 className="max-md:text-sm"
               />
             </div>
@@ -339,48 +133,68 @@ export default function UserDetailsDialog({
               />
             </div>
           </div>
-          {userRole.toLowerCase() !== "customer" && (
-            <div id="store-name">
-              <label>Store Name</label>
-              <Select disabled={edit ? false : true}>
-                <SelectTrigger>
-                  <SelectValue placeholder="store-name"></SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Stores</SelectLabel>
-                    {stores.map((store) => (
-                      <div key={store.id}>
-                        <SelectItem value={store.storeName}>
-                          {store.storeName}
-                        </SelectItem>
-                      </div>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
         </form>
         {/* Footer */}
         <DialogFooter>
-          {edit ? (
+          {/* Store Selection for Assign Admin */}
+          {!openStoreSelect ? (
             <>
-              {users.verifystatus === false && (
+              {users.is_verified === false && (
                 <Button>
                   <Mail /> Send Verification
                 </Button>
               )}
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving Data" : "Save Data"}
-              </Button>
-
-              <Button onClick={handleCancelEdit} variant={"destructive"}>
-                Cancel Edit
+              <Button
+                className="bg-green-600 hover:bg-green-700"
+                onClick={() => setOpenStoreSelect(true)}
+              >
+                <User />
+                Assign as Admin
               </Button>
             </>
           ) : (
-            <Button onClick={() => setEdit((prev) => !prev)}>Edit Data</Button>
+            <div className="flex flex-col md:flex-row md:gap-3">
+              <div className="flex items-center">
+                <Select value={selectedStore} onValueChange={setSelectedStore}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Choose Store" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Store List</SelectLabel>
+                      {stores.map((store, idx) => (
+                        <div key={idx}>
+                          <SelectItem value={store.id.toString()}>
+                            {store.name}
+                          </SelectItem>
+                        </div>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-between items-center gap-x-3  mt-2">
+                <div>
+                  <Button
+                    type="button"
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={() =>
+                      handlerAssignAdmin(users.id, selectedStore ?? "")
+                    }
+                  >
+                    Assign Admin
+                  </Button>
+                </div>
+                <div>
+                  <Button
+                    variant={"destructive"}
+                    onClick={() => setOpenStoreSelect(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
           )}
         </DialogFooter>
       </DialogContent>
