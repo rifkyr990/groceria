@@ -26,121 +26,6 @@ const MapPicker = dynamic(() => import("@/components/MapPickerInner"), {
   ssr: false,
 });
 
-const stores: IStoreProps[] = [
-  {
-    id: 1,
-    storeName: "Fulano Store",
-    storeAddress: "Jl Gedang Raja 2",
-    storeCity: "Surabaya",
-    storeProvince: "Jawa Timur",
-    storeStatus: true,
-    storeAdmin: [
-      {
-        id: 1,
-        first_name: "Hendro",
-        last_name: "Monawaroh",
-        phone: "08555",
-        email: "hendro@mail.com",
-      },
-      {
-        id: 2,
-        first_name: "Fulan",
-        last_name: "Muamar",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-      {
-        id: 3,
-        first_name: "Mulan",
-        last_name: "Sabrina",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-    ],
-    storeBanner: "https://picsum.photos/seed/picsum/500/300",
-  },
-  {
-    id: 2,
-    storeName: "Fulani Store",
-    storeAddress: "Jl Tentara Istimewa 1",
-    storeCity: "Jakarta",
-    storeProvince: "Jawa Timur",
-    storeStatus: false,
-    storeAdmin: [
-      {
-        id: 1,
-        first_name: "Hendro",
-        last_name: "Monawaroh",
-        phone: "08555",
-        email: "hendro@mail.com",
-      },
-      {
-        id: 2,
-        first_name: "Fulan",
-        last_name: "Muamar",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-      {
-        id: 3,
-        first_name: "Mulan",
-        last_name: "Sabrina",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-    ],
-    storeBanner: "https://picsum.photos/seed/picsum/500/300",
-  },
-  {
-    id: 3,
-    storeName: "Aldino Store",
-    storeAddress: "Jl Jakarta Istimewa 1",
-    storeCity: "Jakarta",
-    storeProvince: "DKI Jakarta",
-    storeStatus: true,
-    storeAdmin: [
-      {
-        id: 1,
-        first_name: "Eko",
-        last_name: "Monawaroh",
-        phone: "08555",
-        email: "random@mail.com",
-      },
-      {
-        id: 2,
-        first_name: "Rustam",
-        last_name: "Muamar",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-      {
-        id: 3,
-        first_name: "Mulan",
-        last_name: "Sabrina",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-    ],
-  },
-  {
-    id: 4,
-    storeName: "Alden Store",
-    storeAddress: "Jl Jakarta Istimewa 1",
-    storeCity: "Bogor",
-    storeProvince: "Jawa Barat",
-    storeStatus: true,
-    storeAdmin: [
-      {
-        id: 1,
-        first_name: "Hendro",
-        last_name: "Monawaroh",
-        phone: "08555",
-        email: "random@mail.com",
-      },
-    ],
-  },
-];
-
 interface IStoreDetailsDialog {
   open: boolean;
   setOpen: (value: boolean) => void;
@@ -154,16 +39,16 @@ export default function StoreDetailsDialog({
 }: IStoreDetailsDialog) {
   const { register, setValue, watch } = useForm({
     defaultValues: {
-      storeName: store.storeName,
-      address: store.storeAddress,
-      city: store.storeCity,
-      province: store.storeProvince,
+      storeName: store.name,
+      address: store.address,
+      city: store.city,
+      province: store.province,
     },
   });
   const address = watch("address");
 
   const [storeStatus, setStoreStatus] = useState<string>(
-    store.storeStatus ? "active" : "inactive"
+    store.is_active ? "active" : "inactive"
   );
 
   return (

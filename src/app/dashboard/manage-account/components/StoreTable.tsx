@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/table";
 import { IStoreProps } from "@/types/store";
 import { FileSearch, Trash, Users } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import StoreDetailsDialog from "./btndetails/StoreDetailsDialog";
 import StoreAdminList from "./btndetails/StoreAdmin";
 import { toast } from "react-toastify";
+import { apiCall } from "@/helper/apiCall";
 
 interface IStoreTable {
   className?: string;
@@ -21,6 +22,7 @@ interface IStoreTable {
 }
 
 export default function StoreTable({ className, stores }: IStoreTable) {
+  const [storesList, setStoreList] = useState<IStoreProps[]>(stores);
   const [deleteSelectedStore, setDeleteSelectedStore] =
     useState<IStoreProps | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
@@ -33,11 +35,23 @@ export default function StoreTable({ className, stores }: IStoreTable) {
     setDeleteConfirm((prev) => !prev);
   };
 
-  const handlerDelete = (data: IStoreProps) => {
+  const handlerDelete = async (data: IStoreProps) => {
+    const storeId = data.id;
     if (!data) return;
-    // console.log(data);
-    toast.success("Delete Data Success");
+    try {
+      const res = await apiCall.delete(`/api/store/${storeId}`);
+      // console.log(res.data);
+      toast.success("Delete Data Success");
+      setStoreList((prev) => prev.filter((store) => store.id !== data.id));
+    } catch (error) {
+      console.log(error);
+      alert("error bos");
+    }
   };
+
+  useEffect(() => {
+    setStoreList(stores);
+  }, [stores]);
 
   return (
     <div className={`${className} max-lg:hidden`}>
@@ -50,24 +64,24 @@ export default function StoreTable({ className, stores }: IStoreTable) {
               Province
             </TableHead>
             <TableHead className="text-center max-xl:hidden">Address</TableHead>
+            <TableHead className="text-center">Total Admin</TableHead>
             <TableHead className="text-center">Status</TableHead>
             <TableHead className="text-center">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="text-center">
-          {stores.map((store) => (
+          {storesList.map((store) => (
             <TableRow key={store.id}>
-              <TableCell className="">{store.storeName}</TableCell>
-              <TableCell className="">{store.storeCity}</TableCell>
-              <TableCell className="max-xl:hidden">
-                {store.storeProvince}
-              </TableCell>
+              <TableCell className="">{store.name}</TableCell>
+              <TableCell className="">{store.city}</TableCell>
+              <TableCell className="max-xl:hidden">{store.province}</TableCell>
 
+              <TableCell className="max-xl:hidden">{store.address}</TableCell>
               <TableCell className="max-xl:hidden">
-                {store.storeAddress}
+                {store.admins?.length}
               </TableCell>
               <TableCell className="">
-                {store.storeStatus ? "Active" : "Inactive"}
+                {store.is_active ? "Active" : "Inactive"}
               </TableCell>
               <TableCell className="flex gap-x-2 items-center text-center justify-center">
                 <Button
