@@ -52,7 +52,7 @@ export default function StoreAdminList({
                 <TableRow>
                   <TableHead className="text-center">Admin Name</TableHead>
                   <TableHead className="text-center">Phone</TableHead>
-                  <TableHead className="text-center">Action</TableHead>
+                  <TableHead className="text-center">Contact</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -75,9 +75,6 @@ export default function StoreAdminList({
                             height={50}
                             className="size-5 p-0"
                           />
-                        </Button>
-                        <Button className="bg-blue-600 hover:bg-blue-700 cursor-pointer">
-                          <Mail />
                         </Button>
                       </div>
                     </TableCell>

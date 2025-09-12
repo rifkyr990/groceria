@@ -37,12 +37,14 @@ export default function StoreTable({ className, stores }: IStoreTable) {
 
   const handlerDelete = async (data: IStoreProps) => {
     const storeId = data.id;
-    if (!data) return;
     try {
-      const res = await apiCall.delete(`/api/store/${storeId}`);
-      // console.log(res.data);
-      toast.success("Delete Data Success");
-      setStoreList((prev) => prev.filter((store) => store.id !== data.id));
+      const deleteStore = await apiCall.delete(`/api/store/${storeId}`); // delete store
+
+      if (deleteStore) {
+        toast.success("Delete Store and Revert Admin Success");
+        setStoreList((prev) => prev.filter((store) => store.id !== data.id));
+        window.location.reload();
+      }
     } catch (error) {
       console.log(error);
       alert("error bos");
@@ -60,10 +62,8 @@ export default function StoreTable({ className, stores }: IStoreTable) {
           <TableRow>
             <TableHead className="text-center">Name</TableHead>
             <TableHead className="text-center">City</TableHead>
-            <TableHead className="text-center max-xl:hidden">
-              Province
-            </TableHead>
-            <TableHead className="text-center max-xl:hidden">Address</TableHead>
+            <TableHead className="text-center">Province</TableHead>
+            <TableHead className="text-center">Address</TableHead>
             <TableHead className="text-center">Total Admin</TableHead>
             <TableHead className="text-center">Status</TableHead>
             <TableHead className="text-center">Action</TableHead>
@@ -74,12 +74,10 @@ export default function StoreTable({ className, stores }: IStoreTable) {
             <TableRow key={store.id}>
               <TableCell className="">{store.name}</TableCell>
               <TableCell className="">{store.city}</TableCell>
-              <TableCell className="max-xl:hidden">{store.province}</TableCell>
+              <TableCell>{store.province}</TableCell>
 
-              <TableCell className="max-xl:hidden">{store.address}</TableCell>
-              <TableCell className="max-xl:hidden">
-                {store.admins?.length}
-              </TableCell>
+              <TableCell>{store.address}</TableCell>
+              <TableCell>{store.admins?.length}</TableCell>
               <TableCell className="">
                 {store.is_active ? "Active" : "Inactive"}
               </TableCell>
