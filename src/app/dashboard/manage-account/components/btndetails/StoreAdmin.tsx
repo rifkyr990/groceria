@@ -50,7 +50,6 @@ export default function StoreAdminList({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-center">No</TableHead>
                   <TableHead className="text-center">Admin Name</TableHead>
                   <TableHead className="text-center">Phone</TableHead>
                   <TableHead className="text-center">Action</TableHead>
@@ -59,9 +58,6 @@ export default function StoreAdminList({
               <TableBody>
                 {store.admins?.map((admin) => (
                   <TableRow key={admin.id} className="text-center">
-                    <TableCell>
-                      {admin.id.substring(0, 5).toUpperCase()}
-                    </TableCell>
                     <TableCell>
                       {admin.first_name} {admin.last_name}
                     </TableCell>

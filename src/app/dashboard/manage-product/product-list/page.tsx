@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   Select,
@@ -24,33 +24,34 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
-
-const products = [
-  {
-    id: 1,
-    name: "T-Shirt Naruto",
-    productPic: "/assets/defaultbanner2.svg",
-    category: "T-Shirt",
-    availStock: 50,
-    price: 50000,
-    active: true,
-  },
-  {
-    id: 2,
-    name: "Sepatu Nike Original",
-    productPic: "/assets/fashion-shoes.jpg",
-    category: "Shoes",
-    availStock: 10,
-    price: 150000,
-    active: false,
-  },
-];
+import { useProduct } from "@/store/useProduct";
+import { useShallow } from "zustand/shallow";
+import { formatIDRCurrency } from "@/utils/format";
 
 export default function ProductList() {
-  const [productList, setProductList] = useState([]);
+  const { products, getProductList } = useProduct(
+    useShallow((state) => ({
+      products: state.products,
+      getProductList: state.getProductList,
+    }))
+  );
+  const productCategories = products.reduce(
+    (acc, product) => {
+      if (!acc.some((item) => item.id === product.category.id)) {
+        acc.push(product.category);
+      }
+      return acc;
+    },
+    [] as (typeof products)[0]["category"][]
+  );
+
+  // console.log(productCategories.map((category) => category.category));
+  useEffect(() => {
+    getProductList();
+  }, []);
   return (
     <DashboardLayout>
-      <section className="bg-white p-5 rounded-md h-full shadow-sm">
+      <section className="bg-white p-5 rounded-md  shadow-sm">
         {/* Header */}
         <div id="header" className="flex justify-between items-center">
           <div>
@@ -75,10 +76,10 @@ export default function ProductList() {
                   <SelectValue placeholder="Category"></SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {products.map((product) => (
-                    <SelectGroup key={product.id}>
-                      <SelectItem value={product.category}>
-                        {product.category}
+                  {productCategories.map((category) => (
+                    <SelectGroup key={category.id}>
+                      <SelectItem value={category.category}>
+                        {category.category}
                       </SelectItem>
                     </SelectGroup>
                   ))}
@@ -136,7 +137,10 @@ export default function ProductList() {
                   >
                     <div id="picture">
                       <Image
-                        src={product.productPic}
+                        src={
+                          product.images?.[0].image_url ??
+                          "/assets/fallback.png"
+                        }
                         alt="prdPic"
                         width={100}
                         height={100}
@@ -148,14 +152,19 @@ export default function ProductList() {
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    {product.category}
-                  </TableCell>
-                  <TableCell className="text-center">{product.price}</TableCell>
-                  <TableCell className="text-center">
-                    {product.availStock}
+                    {product.category.category}
                   </TableCell>
                   <TableCell className="text-center">
-                    <Switch checked={product.active} />
+                    {formatIDRCurrency(product.price)}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {product.stocks.reduce(
+                      (acc, stock) => acc + stock.stock_quantity,
+                      0
+                    )}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Switch checked={product.is_active} />
                   </TableCell>
                   <TableCell className="text-center">
                     <div className="flex gap-x-2 justify-center items-center">

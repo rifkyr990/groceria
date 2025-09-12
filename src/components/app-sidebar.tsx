@@ -78,9 +78,21 @@ const items = [
 
   {
     id: 5,
-    icon: <Archive className="size-10" />,
+    icon: <Archive className="size-4 ml-2" />,
     menu: "Inventory ",
-    url: "/dashboard/manage-inventory",
+    // url: "/dashboard/manage-inventory",
+    subMenu: [
+      {
+        id: 1,
+        subMenu: "Stock List",
+        url: "/dashboard/manage-inventory/prd-stock-list",
+      },
+      {
+        id: 2,
+        subMenu: "Stock History",
+        url: "/dashboard/manage-inventory/prd-stock-history",
+      },
+    ],
   },
   {
     id: 6,
