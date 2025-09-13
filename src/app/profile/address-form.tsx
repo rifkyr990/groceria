@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { useAddressStore } from "@/store/address-store";
 import AddAddressModal from "./address/AddAddressModal";
 import EditAddressModal from "./address/EditAddressModal";
+import { useState } from "react";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 
 export default function AddressList() {
   const {
@@ -18,6 +20,9 @@ export default function AddressList() {
   useEffect(() => {
     fetchAddress();
   }, [fetchAddress]);
+
+  const [open, setOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<Number | null>(null);
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow">
@@ -42,11 +47,14 @@ export default function AddressList() {
             <div className="flex gap-4 text-blue-500 text-sm">
               <EditAddressModal address={addr} />
               <button
-                onClick={() => deleteAddress(addr.id)}
-                className="hover:underline"
+                onClick={() => {
+                  setSelectedId(addr.id);
+                  setOpen(true);
+                }}
+                className="text-red-600 hover:underline"
               >
                 Hapus
-              </button>
+            </button>
             </div>
           </div>
 
@@ -75,6 +83,16 @@ export default function AddressList() {
           </div>
         </div>
       ))}
+      <ConfirmDeleteDialog
+        open={open}
+        setOpen={setOpen}
+        data={selectedId}
+        onConfirm={(id) => {
+          if (id) {
+            deleteAddress(id);
+          }
+        }}
+      />
     </div>
   );
 }

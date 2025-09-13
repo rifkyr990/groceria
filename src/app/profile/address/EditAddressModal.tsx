@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
@@ -16,54 +17,68 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 interface AddressFormValues {
-    name: string;
-    phone: string;
-    province: string;
-    city: string;
-    district?: string;
-    postal_code: string;
-    street: string;
-    detail: string;
-    label: "RUMAH" | "KANTOR";
-    is_primary: boolean;
+  name: string;
+  phone: string;
+  province: string;
+  city: string;
+  district: string;
+  subdistrict: string;
+  postal_code: string;
+  street: string;
+  detail: string;
+  label: "RUMAH" | "KANTOR";
+  is_primary: boolean;
 }
 
 interface EditAddressModalProps {
-  address: any; // bisa diketik lebih detail sesuai type address-store
+  address: AddressFormValues & { id: Number };
 }
 
 export default function EditAddressModal({ address }: EditAddressModalProps) {
   const { updateAddress } = useAddressStore();
-  const [open, setOpen] = useState(false);
-
   const { register, handleSubmit, watch, reset, setValue } =
     useForm<AddressFormValues>({
-      defaultValues: {
-        name: address.name,
-        phone: address.phone,
-        province: address.province_id || "",
-        city: address.city_id || "",
-        district: address.district_id || "",
-        postal_code: address.postal_code,
-        street: address.street,
-        detail: address.detail,
-        label: address.label,
-        is_primary: address.is_primary,
-      },
+      defaultValues: address,
     });
 
-  const { provinces, cities, subdistricts } = useWilayah({
+  const [open, setOpen] = useState(false);
+
+  const { provinces, cities, districts, subdistricts } = useWilayah({
     provinceId: watch("province"),
     cityId: watch("city"),
+    districtId: watch("district"),
   });
 
-  // auto isi postal_code berdasarkan city
-  const selectedCity = cities.find((c) => c.city_id === watch("city"));
+  const selectedSub = subdistricts.find(
+    (s) => s.subdistrict_id === watch("subdistrict")
+  );
+
   useEffect(() => {
-    if (selectedCity?.postal_code) {
-      setValue("postal_code", selectedCity.postal_code);
+    if (selectedSub?.zip_code) {
+      setValue("postal_code", selectedSub.zip_code);
+    } else {
+      setValue("postal_code", "");
     }
-  }, [selectedCity, setValue]);
+  }, [selectedSub, setValue]);
+
+  useEffect(() => {
+    if (address) {
+      // cari province_id berdasarkan nama
+      const provinceId = provinces.find((p) => p.province === address.province)?.province_id || "";
+      const cityId = cities.find((c) => c.city_name === address.city)?.city_id || "";
+      const districtId = districts.find((d) => d.district_name === address.district)?.district_id || "";
+      const subdistrictId = subdistricts.find((s) => s.subdistrict_name === address.subdistrict)?.subdistrict_id || "";
+
+      reset({
+        ...address,
+        province: provinceId,
+        city: cityId,
+        district: districtId,
+        subdistrict: subdistrictId,
+      });
+    }
+  }, [address, provinces, cities, districts, subdistricts, reset]);
+
 
   const onSubmit = async (data: AddressFormValues) => {
     const provinceName =
@@ -71,21 +86,25 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
     const cityName =
       cities.find((c) => c.city_id === data.city)?.city_name || "";
     const districtName =
-      subdistricts.find((d) => d.subdistrict_id === data.district)
+      districts.find((d) => d.district_id === data.district)?.district_name ||
+      "";
+    const subdistrictName =
+      subdistricts.find((s) => s.subdistrict_id === data.subdistrict)
         ?.subdistrict_name || "";
 
     const payload = {
-        ...data,
-        province: provinceName,
-        city: cityName,
-        district: districtName,
+      ...data,
+      province: provinceName,
+      city: cityName,
+      district: districtName,
+      subdistrict: subdistrictName,
     };
 
-    const success = await updateAddress(address.id, payload);
+    const success = await updateAddress(Number(address.id), payload);
     if (success) {
-        toast.success("Alamat berhasil diperbarui!");
-        setOpen(false);
-        reset();
+      toast.success("Alamat berhasil diperbarui!");
+      setOpen(false);
+      reset(payload);
     }
   };
 
@@ -106,122 +125,139 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
   );
 
   return (
-    <>
-      <button onClick={() => setOpen(true)} className="hover:underline">
-        Ubah
-      </button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-xl rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">
-              Ubah Alamat
-            </DialogTitle>
-          </DialogHeader>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-blue-600 text-white">Edit</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl scrollbar-thin scrollbar-thumb-gray-400 hover:scrollbar-thumb-gray-500">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-semibold">
+            Edit Alamat
+          </DialogTitle>
+        </DialogHeader>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
+          <div>
+            <Label>Nama</Label>
+            <Input {...register("name")} placeholder="Nama penerima" />
+          </div>
+
+          <div>
+            <Label>Nomor Telepon</Label>
+            <Input {...register("phone")} placeholder="08xxxx" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Nama</Label>
-              <Input {...register("name")} />
-            </div>
-
-            <div>
-              <Label>Nomor Telepon</Label>
-              <Input {...register("phone")} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Provinsi</Label>
-                <select {...register("province")} className="input w-full">
-                  {renderOptions(
-                    provinces,
-                    "province_id",
-                    "province",
-                    "Pilih Provinsi"
-                  )}
-                </select>
-              </div>
-              <div>
-                <Label>Kota/Kabupaten</Label>
-                <select
-                  {...register("city")}
-                  className="input w-full"
-                  disabled={!watch("province")}
-                >
-                  {renderOptions(cities, "city_id", "city_name", "Pilih Kota")}
-                </select>
-              </div>
-            </div>
-
-            {subdistricts.length > 0 && (
-              <div>
-                <Label>Kecamatan</Label>
-                <select {...register("district")}
-                  className="input w-full"
-                  disabled={!watch("city")}
-                >
-                  {renderOptions(
-                    subdistricts,
-                    "subdistrict_id",
-                    "subdistrict_name",
-                    "Pilih Kecamatan"
-                  )}
-                </select>
-              </div>
-            )}
-
-            <div>
-              <Label>Kode Pos</Label>
-              <Input {...register("postal_code")} readOnly />
+              <Label>Provinsi</Label>
+              <select {...register("province")} className="input w-full">
+                {renderOptions(
+                  provinces,
+                  "province_id",
+                  "province",
+                  "Pilih Provinsi"
+                )}
+              </select>
             </div>
 
             <div>
-              <Label>Nama Jalan</Label>
-              <Input {...register("street")} />
-            </div>
-
-            <div>
-              <Label>Detail Alamat</Label>
-              <textarea
-                {...register("detail")}
-                className="w-full border rounded p-2"
-              ></textarea>
-            </div>
-
-            <div>
-              <Label>Label Alamat</Label>
-              <div className="flex gap-6 mt-1">
-                <label className="flex items-center gap-2">
-                  <input type="radio" value="RUMAH" {...register("label")} />
-                  Rumah
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="radio" value="KANTOR" {...register("label")} />
-                  Kantor
-                </label>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input type="checkbox" {...register("is_primary")} />
-              <span>Jadikan alamat utama</span>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="bg-gray-500 text-white"
+              <Label>Kota/Kabupaten</Label>
+              <select
+                {...register("city")}
+                className="input w-full"
+                disabled={!watch("province")}
               >
-                Batal
-              </Button>
-              <Button type="submit" className="bg-green-600 text-white">
-                Simpan Perubahan
-              </Button>
+                {renderOptions(cities, "city_id", "city_name", "Pilih Kota")}
+              </select>
             </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Kecamatan</Label>
+              <select
+                {...register("district")}
+                className="input w-full"
+                disabled={!watch("city")}
+              >
+                {renderOptions(
+                  districts,
+                  "district_id",
+                  "district_name",
+                  "Pilih Kecamatan"
+                )}
+              </select>
+            </div>
+
+            <div>
+              <Label>Kelurahan/Desa</Label>
+              <select
+                {...register("subdistrict")}
+                className="input w-full"
+                disabled={!watch("district")}
+              >
+                {renderOptions(
+                  subdistricts,
+                  "subdistrict_id",
+                  "subdistrict_name",
+                  "Pilih Kelurahan/Desa"
+                )}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <Label>Kode Pos</Label>
+            <Input {...register("postal_code")} readOnly />
+          </div>
+
+          <div>
+            <Label>Nama Jalan</Label>
+            <Input {...register("street")} placeholder="Jl. Contoh No. 123" />
+          </div>
+
+          <div>
+            <Label>Detail Alamat</Label>
+            <textarea
+              {...register("detail")}
+              placeholder="Blok, RT/RW, patokan, dll"
+              className="w-full border rounded p-2"
+            ></textarea>
+          </div>
+
+          <div>
+            <Label>Label Alamat</Label>
+            <div className="flex gap-6 mt-1">
+              <label className="flex items-center gap-2">
+                <input type="radio" value="RUMAH" {...register("label")} />
+                Rumah
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="radio" value="KANTOR" {...register("label")} />
+                Kantor
+              </label>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input type="checkbox" {...register("is_primary")} />
+            <span>Jadikan alamat utama</span>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="bg-gray-500 text-white"
+            >
+              Batal
+            </Button>
+            <Button type="submit" className="bg-blue-600 text-white">
+              Simpan Perubahan
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
