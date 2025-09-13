@@ -7,6 +7,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { useProduct } from "@/store/useProduct";
 import { IProductProps } from "@/types/product";
 import Autoplay from "embla-carousel-autoplay";
 import { Headset, MapPin, ShoppingCart, Store } from "lucide-react";
@@ -26,10 +27,12 @@ export default function DesktopPrdDetails({
   className,
   allProduct,
 }: IDesktopPrdDetails) {
+  // const { selectedProductDetails } = useProduct();
+  // console.log(selectedProductDetails);
   const dummyPrdImage = [
     {
       id: 1,
-      picUrl: detailsData?.image,
+      picUrl: detailsData?.images,
     },
     {
       id: 2,
@@ -87,7 +90,7 @@ export default function DesktopPrdDetails({
             className="relative w-full h-70 lg:h-80 xl:h-90  rounded-lg overflow-hidden shadow-md  "
           >
             <Image
-              src={preview || detailsData?.image}
+              src={preview || detailsData?.images[0]}
               alt="prd-picture"
               fill
               className="object-cover"

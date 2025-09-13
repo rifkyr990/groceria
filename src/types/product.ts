@@ -1,9 +1,11 @@
+import { IStoreProps } from "./store";
+
 export interface IProductProps {
   id: number;
   name: string;
   price: number;
   stocks: {
-    store_id: number;
+    store: IStoreProps[];
     product_id: number;
     stock_quantity: number;
   }[];
@@ -12,7 +14,7 @@ export interface IProductProps {
     product_id: number;
     image_url: string;
   }[];
-  province: string;
+  // province: string;
   category: {
     id: number;
     category: string;

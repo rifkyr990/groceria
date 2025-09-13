@@ -1,20 +1,7 @@
 "use client";
-import { Input } from "@/components/ui/input";
-import DashboardLayout from "../../components/DashboardLayout";
-import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -23,10 +10,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Link from "next/link";
+import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useProduct } from "@/store/useProduct";
-import { useShallow } from "zustand/shallow";
 import { formatIDRCurrency } from "@/utils/format";
+import { Search } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect } from "react";
+import { useShallow } from "zustand/shallow";
+import DashboardLayout from "../../components/DashboardLayout";
 
 export default function ProductList() {
   const { products, getProductList } = useProduct(
@@ -64,11 +64,16 @@ export default function ProductList() {
             "
             />
           </div>
-          <div className="flex gap-x-3">
+          <div className="flex gap-x-3 items-center">
             <div id="newprdbtn">
               <Link href="/dashboard/manage-product/new-product">
                 <Button>+ Add New Product</Button>
               </Link>
+            </div>
+            <div id="edit-category">
+              <Button className="bg-blue-500 hover:bg-blue-600">
+                Add/Edit Category
+              </Button>
             </div>
             <div id="filter-category">
               <Select>
