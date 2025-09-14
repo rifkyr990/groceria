@@ -1,15 +1,13 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { IStoreProps } from "@/types/store";
 import { Check, Store, Trash, Users, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import UserDetailsDialog from "./btndetails/UserDetailsDialog";
-import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
-import StoreDetailsDialog from "./btndetails/StoreDetailsDialog";
 import StoreAdminList from "./btndetails/StoreAdmin";
+import StoreDetailsDialog from "./btndetails/StoreDetailsDialog";
 
 interface IStoreCard {
   className?: string;
@@ -41,8 +39,8 @@ export default function StoreCardStacks({ stores, className }: IStoreCard) {
       {stores.map((store) => {
         return (
           <Card key={store.id} className="p-1">
-            <CardContent className="flex items-center gap-x-2 p-1">
-              <div id="storelogo">
+            <CardContent className="flex items-center gap-x-2 p-2">
+              {/* <div id="storelogo">
                 <div className="relative w-25 h-25 rounded-md overflow-hidden">
                   <Image
                     src={"https://picsum.photos/id/237/500/300"}
@@ -51,12 +49,12 @@ export default function StoreCardStacks({ stores, className }: IStoreCard) {
                     className="object-cover"
                   />
                 </div>
-              </div>
+              </div> */}
               <div className="flex flex-col">
                 <div id="profile">
-                  <p className="font-semibold">{store.storeName}</p>
+                  <p className="font-semibold">{store.name}</p>
 
-                  {store.storeStatus ? (
+                  {store.is_active ? (
                     <Badge className="bg-green-500">
                       <Check />
                       Store Active
@@ -69,11 +67,11 @@ export default function StoreCardStacks({ stores, className }: IStoreCard) {
                   )}
 
                   <p className="text-xs">
-                    {store.storeCity},{store.storeProvince}
+                    {store.city},{store.province}
                   </p>
 
                   <p className="text-xs">
-                    Admin : {store.storeAdmin?.length} Admin{" "}
+                    Admin : {store.admins?.length} Admin{" "}
                   </p>
                 </div>
                 <div id="button" className="flex gap-x-1">

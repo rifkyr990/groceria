@@ -1,18 +1,12 @@
 "use client";
+import PaginationControls from "@/components/PaginationControls";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import StoreTable from "./StoreTable";
-import StoreCardStacks from "./StoreCardStacks";
-import { IStoreProps } from "@/types/store";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -22,155 +16,160 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { IStoreProps } from "@/types/store";
+import { Search } from "lucide-react";
 import { useState } from "react";
-import PaginationControls from "@/components/PaginationControls";
+import StoreCardStacks from "./StoreCardStacks";
+import StoreTable from "./StoreTable";
 interface IStoreAdminTable {
   className?: string;
+  stores: IStoreProps[];
 }
 
-const stores: IStoreProps[] = [
-  {
-    id: 1,
-    storeName: "Fulano Store",
-    storeAddress: "Jl Gedang Raja 2",
-    storeCity: "Surabaya",
-    storeProvince: "Jawa Timur",
-    storeStatus: true,
-    storeAdmin: [
-      {
-        id: 1,
-        first_name: "Hendro",
-        last_name: "Monawaroh",
-        phone: "08555",
-        email: "hendro@mail.com",
-      },
-      {
-        id: 2,
-        first_name: "Fulan",
-        last_name: "Muamar",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-      {
-        id: 3,
-        first_name: "Mulan",
-        last_name: "Sabrina",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-    ],
-    storeBanner: "https://picsum.photos/seed/picsum/500/300",
-  },
-  {
-    id: 2,
-    storeName: "Fulani Store",
-    storeAddress: "Jl Tentara Istimewa 1",
-    storeCity: "Jakarta",
-    storeProvince: "Jawa Timur",
-    storeStatus: false,
-    storeAdmin: [
-      {
-        id: 1,
-        first_name: "Hendro",
-        last_name: "Monawaroh",
-        phone: "08555",
-        email: "hendro@mail.com",
-      },
-      {
-        id: 2,
-        first_name: "Fulan",
-        last_name: "Muamar",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-      {
-        id: 3,
-        first_name: "Mulan",
-        last_name: "Sabrina",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-    ],
-    storeBanner: "https://picsum.photos/seed/picsum/500/300",
-  },
-  {
-    id: 3,
-    storeName: "Aldino Store",
-    storeAddress: "Jl Jakarta Istimewa 1",
-    storeCity: "Jakarta",
-    storeProvince: "DKI Jakarta",
-    storeStatus: true,
-    storeAdmin: [
-      {
-        id: 1,
-        first_name: "Eko",
-        last_name: "Monawaroh",
-        phone: "08555",
-        email: "random@mail.com",
-      },
-      {
-        id: 2,
-        first_name: "Rustam",
-        last_name: "Muamar",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-      {
-        id: 3,
-        first_name: "Mulan",
-        last_name: "Sabrina",
-        phone: "08123123",
-        email: "random@mail.com",
-      },
-    ],
-  },
-  {
-    id: 4,
-    storeName: "Alden Store",
-    storeAddress: "Jl Jakarta Istimewa 1",
-    storeCity: "Bogor",
-    storeProvince: "Jawa Barat",
-    storeStatus: true,
-    storeAdmin: [
-      {
-        id: 1,
-        first_name: "Hendro",
-        last_name: "Monawaroh",
-        phone: "08555",
-        email: "random@mail.com",
-      },
-    ],
-  },
-];
+// const stores: IStoreProps[] = [
+//   {
+//     id: 1,
+//     storeName: "Fulano Store",
+//     storeAddress: "Jl Gedang Raja 2",
+//     storeCity: "Surabaya",
+//     storeProvince: "Jawa Timur",
+//     storeStatus: true,
+//     storeAdmin: [
+//       {
+//         id: 1,
+//         first_name: "Hendro",
+//         last_name: "Monawaroh",
+//         phone: "08555",
+//         email: "hendro@mail.com",
+//       },
+//       {
+//         id: 2,
+//         first_name: "Fulan",
+//         last_name: "Muamar",
+//         phone: "08123123",
+//         email: "random@mail.com",
+//       },
+//       {
+//         id: 3,
+//         first_name: "Mulan",
+//         last_name: "Sabrina",
+//         phone: "08123123",
+//         email: "random@mail.com",
+//       },
+//     ],
+//     storeBanner: "https://picsum.photos/seed/picsum/500/300",
+//   },
+//   {
+//     id: 2,
+//     storeName: "Fulani Store",
+//     storeAddress: "Jl Tentara Istimewa 1",
+//     storeCity: "Jakarta",
+//     storeProvince: "Jawa Timur",
+//     storeStatus: false,
+//     storeAdmin: [
+//       {
+//         id: 1,
+//         first_name: "Hendro",
+//         last_name: "Monawaroh",
+//         phone: "08555",
+//         email: "hendro@mail.com",
+//       },
+//       {
+//         id: 2,
+//         first_name: "Fulan",
+//         last_name: "Muamar",
+//         phone: "08123123",
+//         email: "random@mail.com",
+//       },
+//       {
+//         id: 3,
+//         first_name: "Mulan",
+//         last_name: "Sabrina",
+//         phone: "08123123",
+//         email: "random@mail.com",
+//       },
+//     ],
+//     storeBanner: "https://picsum.photos/seed/picsum/500/300",
+//   },
+//   {
+//     id: 3,
+//     storeName: "Aldino Store",
+//     storeAddress: "Jl Jakarta Istimewa 1",
+//     storeCity: "Jakarta",
+//     storeProvince: "DKI Jakarta",
+//     storeStatus: true,
+//     storeAdmin: [
+//       {
+//         id: 1,
+//         first_name: "Eko",
+//         last_name: "Monawaroh",
+//         phone: "08555",
+//         email: "random@mail.com",
+//       },
+//       {
+//         id: 2,
+//         first_name: "Rustam",
+//         last_name: "Muamar",
+//         phone: "08123123",
+//         email: "random@mail.com",
+//       },
+//       {
+//         id: 3,
+//         first_name: "Mulan",
+//         last_name: "Sabrina",
+//         phone: "08123123",
+//         email: "random@mail.com",
+//       },
+//     ],
+//   },
+//   {
+//     id: 4,
+//     storeName: "Alden Store",
+//     storeAddress: "Jl Jakarta Istimewa 1",
+//     storeCity: "Bogor",
+//     storeProvince: "Jawa Barat",
+//     storeStatus: true,
+//     storeAdmin: [
+//       {
+//         id: 1,
+//         first_name: "Hendro",
+//         last_name: "Monawaroh",
+//         phone: "08555",
+//         email: "random@mail.com",
+//       },
+//     ],
+//   },
+// ];
 
-export default function StoreData({ className }: IStoreAdminTable) {
+export default function StoreData({ className, stores }: IStoreAdminTable) {
   const [searchQuery, setSearchQuery] = useState("");
   const [orderStatus, setOrderStatus] = useState<"active" | "inactive" | "all">(
     "all"
   );
+  // console.log(stores);
 
   const filteredStores = stores.filter(
     (store) =>
-      store.storeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      store.storeCity.toLowerCase().includes(searchQuery.toLowerCase())
+      store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      store.city?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const sortedStores = [...filteredStores].sort((a, b) => {
     if (!orderStatus) return 0;
 
     if (orderStatus === "active") {
-      return Number(b.storeStatus) - Number(a.storeStatus);
+      return Number(b.is_active) - Number(a.is_active);
     }
 
     if (orderStatus === "inactive") {
-      return Number(a.storeStatus) - Number(b.storeStatus);
+      return Number(a.is_active) - Number(b.is_active);
     }
 
     return 0;
   });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const storesPerPage = 3;
+  const storesPerPage = 5;
   const indexOfLast = currentPage * storesPerPage;
   const indexofFirst = indexOfLast - storesPerPage;
   const currentStores = sortedStores.slice(indexofFirst, indexOfLast);

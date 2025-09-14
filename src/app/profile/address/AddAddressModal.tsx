@@ -124,18 +124,18 @@ export default function AddAddressModal() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
           <div>
-            <Label>Nama</Label>
+            <Label className="mb-3">Nama</Label>
             <Input {...register("name")} placeholder="Nama penerima" />
           </div>
 
           <div>
-            <Label>Nomor Telepon</Label>
+            <Label className="mb-3">Nomor Telepon</Label>
             <Input {...register("phone")} placeholder="08xxxx" />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Provinsi</Label>
+              <Label className="mb-3">Provinsi</Label>
               <select {...register("province")} className="input w-full">
                 {renderOptions(
                   provinces,
@@ -147,7 +147,7 @@ export default function AddAddressModal() {
             </div>
 
             <div>
-              <Label>Kota/Kabupaten</Label>
+              <Label className="mb-3">Kota/Kabupaten</Label>
               <select
                 {...register("city")}
                 className="input w-full"
@@ -159,7 +159,7 @@ export default function AddAddressModal() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Kecamatan</Label>
+              <Label className="mb-3">Kecamatan</Label>
               <select
                 {...register("district")}
                 className="input w-full"
@@ -175,7 +175,7 @@ export default function AddAddressModal() {
             </div>
           {/* Kelurahan/Desa */}
             <div>
-              <Label>Kelurahan/Desa</Label>
+              <Label className="mb-3">Kelurahan/Desa</Label>
               <select
                 {...register("subdistrict")}
                 className="input w-full"
@@ -193,17 +193,17 @@ export default function AddAddressModal() {
           </div>
           {/* Kecamatan */}
           <div>
-            <Label>Kode Pos</Label>
+            <Label className="mb-3">Kode Pos</Label>
             <Input {...register("postal_code")} readOnly />
           </div>
 
           <div>
-            <Label>Nama Jalan</Label>
+            <Label className="mb-3">Nama Jalan</Label>
             <Input {...register("street")} placeholder="Jl. Contoh No. 123" />
           </div>
 
           <div>
-            <Label>Detail Alamat</Label>
+            <Label className="mb-3">Detail Alamat</Label>
             <textarea
               {...register("detail")}
               placeholder="Blok, RT/RW, patokan, dll"
@@ -212,7 +212,7 @@ export default function AddAddressModal() {
           </div>
 
           <div>
-            <Label>Label Alamat</Label>
+            <Label className="mb-3">Label Alamat</Label>
             <div className="flex gap-6 mt-1">
               <label className="flex items-center gap-2">
                 <input type="radio" value="RUMAH" {...register("label")} />

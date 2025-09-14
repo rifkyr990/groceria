@@ -78,9 +78,21 @@ const items = [
 
   {
     id: 5,
-    icon: <Archive className="size-10" />,
+    icon: <Archive className="size-4 ml-2" />,
     menu: "Inventory ",
-    url: "/dashboard/manage-inventory",
+    // url: "/dashboard/manage-inventory",
+    subMenu: [
+      {
+        id: 1,
+        subMenu: "Stock List",
+        url: "/dashboard/manage-inventory/prd-stock-list",
+      },
+      {
+        id: 2,
+        subMenu: "Stock History",
+        url: "/dashboard/manage-inventory/prd-stock-history",
+      },
+    ],
   },
   {
     id: 6,
@@ -90,17 +102,34 @@ const items = [
   },
   {
     id: 7,
-    icon: <ChartLine className="size-10" />,
+    icon: <ChartLine className="size-4 ml-2" />,
     menu: "Report and Analysis",
-    url: "/dashboard/manage-reporting",
+    subMenu: [
+      {
+        id: 1,
+        subMenu: "Sales Report",
+        url: "#",
+      },
+      {
+        id: 2,
+        subMenu: "Stock Report",
+        url: "#",
+      },
+    ],
   },
 ];
 
 export function AppSidebar({ className }: IAppSidebar) {
   const defaultOpenId = items.find((item) => item.subMenu)?.id ?? null;
-  const [openItem, setOpenItem] = useState<number | null>(defaultOpenId);
+  const [openItems, setOpenItems] = useState<number[]>([]);
   const { open } = useSidebar();
   const pathname = usePathname();
+
+  const toggleItem = (id: number) => {
+    setOpenItems((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
 
   return (
     <Sidebar
@@ -156,10 +185,8 @@ export function AppSidebar({ className }: IAppSidebar) {
                     className="rounded-md cursor-pointer flex "
                   >
                     <Collapsible
-                      open={openItem === item.id}
-                      onOpenChange={(isOpen) =>
-                        setOpenItem(isOpen ? item.id : null)
-                      }
+                      open={openItems.includes(item.id)}
+                      onOpenChange={() => toggleItem(item.id)}
                     >
                       <CollapsibleTrigger asChild>
                         <div
@@ -175,15 +202,13 @@ export function AppSidebar({ className }: IAppSidebar) {
                               {open && <span>{item.menu}</span>}
 
                               <SidebarMenuAction className="">
-                                {open && (
-                                  <div>
-                                    {openItem === item.id ? (
-                                      <ChevronDown className="size-4 transition-transform relative -top-1.5" />
-                                    ) : (
-                                      <ChevronRight className="size-4 transition-transform relative -top-1.5" />
-                                    )}
-                                  </div>
-                                )}
+                                <ChevronRight
+                                  className={`size-4 transition-transform duration-200 relative -top-1.5 ${
+                                    openItems.includes(item.id)
+                                      ? "rotate-90"
+                                      : ""
+                                  }`}
+                                />
                               </SidebarMenuAction>
                             </div>
                           </div>

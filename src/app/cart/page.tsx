@@ -69,27 +69,30 @@ export default function CartPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6 md:p-12">
-      <section className="max-w-7xl mx-auto grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="md:col-span-2 space-y-6">
-          <CartList
-            items={items}
-            onDecrement={handleDecrement}
-            onIncrement={handleIncrement}
-            onRemove={handleRemove}
-          />
-        </div>
-        <div className="space-y-6">
-          <CheckoutSection
-            items={items}
-            appliedPromo={appliedPromo}
-            promoInputText={promoInputText}
-            promoStatus={promoStatus}
-            promoCodes={promoCodes}
-            onApplyPromo={handleApplyPromo}
-            onRemovePromo={handleRemovePromo}
-            onPromoInputChange={handlePromoInputChange}
-          />
+    <main className="min-h-screen bg-[#F3F4F6] p-4 sm:p-6 md:p-8 lg:p-12">
+      <section className="max-w-6xl mx-auto">
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-10">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+            <CartList
+              items={items}
+              onDecrement={handleDecrement}
+              onIncrement={handleIncrement}
+              onRemove={handleRemove}
+            />
+          </div>
+
+          <div className="space-y-4 sm:space-y-6 lg:sticky lg:top-6 lg:h-fit">
+            <CheckoutSection
+              items={items}
+              appliedPromo={appliedPromo}
+              promoInputText={promoInputText}
+              promoStatus={promoStatus}
+              promoCodes={promoCodes}
+              onApplyPromo={handleApplyPromo}
+              onRemovePromo={handleRemovePromo}
+              onPromoInputChange={handlePromoInputChange}
+            />
+          </div>
         </div>
       </section>
     </main>

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { apiCall } from "@/app/helper/apiCall";
+import { apiCall } from '@/helper/apiCall';
 import { useAuthStore } from "./auth-store";
 import { toast } from "react-toastify";
 
@@ -23,7 +23,7 @@ interface UserState {
     updateProfilePicture: (file: File) => Promise<boolean>;
     fetchProfile: () => Promise<UserProfile | null>;
     changePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
-    resendVerificationEmail: () => Promise<void>;
+    // resendVerificationEmail: () => Promise<void>;
 }
 
 export const useUserStore = create<UserState>((set) => ({
@@ -113,17 +113,17 @@ export const useUserStore = create<UserState>((set) => ({
         }
     },
 
-    resendVerificationEmail: async () => { 
-        try {
-            const { user, token } = useAuthStore.getState();
-            await apiCall.post("/api/user/resend-verification", { email: user.email }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            toast.success("Email verifikasi berhasil dikirim ulang!");
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Gagal kirim email verifikasi");
-        }
-    },
+    // resendVerificationEmail: async () => { 
+    //     try {
+    //         const { user, token } = useAuthStore.getState();
+    //         await apiCall.post("/api/user/resend-verification", { email: user.email }, {
+    //             headers: { Authorization: `Bearer ${token}` }
+    //         });
+    //         toast.success("Email verifikasi berhasil dikirim ulang!");
+    //     } catch (error: any) {
+    //         toast.error(error.response?.data?.message || "Gagal kirim email verifikasi");
+    //     }
+    // },
 
 
     changePassword: async (oldPassword: string, newPassword: string) => {

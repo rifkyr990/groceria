@@ -15,11 +15,13 @@ export default function OrderSummary({
   total,
 }: OrderSummaryProps) {
   return (
-    <Card className="rounded-2xl shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-lg font-bold">Order Summary</CardTitle>
+    <Card className="rounded-2xl shadow-lg border-0">
+      <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
+        <CardTitle className="text-base sm:text-lg font-bold">
+          Order Summary
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 text-sm">
+      <CardContent className="space-y-3 text-sm px-4 sm:px-6 pb-4 sm:pb-6">
         <div className="flex justify-between text-gray-500">
           <span>Subtotal</span>
           <span className="font-medium">{formatIDRCurrency(subtotal)}</span>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatIDRCurrency } from "@/utils/format";
+import { IoLockClosed } from "react-icons/io5";
 
 interface CheckoutButtonProps {
   total: number;
@@ -43,7 +44,7 @@ export default function CheckoutButton({
       onClick={handleClick}
       disabled={loading}
       className={cn(
-        "w-full p-6 rounded-xl flex items-center py-8 justify-between transform transition-all shadow-lg shadow-primary-green-500/40",
+        "w-full p-6 py-7 sm:p-6 sm:py-7 rounded-xl flex items-center justify-between transform transition-all shadow-lg shadow-primary-green-500/40",
         "hover:scale-105 hover:shadow-xl active:scale-95",
         loading
           ? "bg-gradient-to-r from-primary-green-600 to-primary-green-500 cursor-not-allowed animate-pulse-subtle disabled:opacity-100"
@@ -51,16 +52,16 @@ export default function CheckoutButton({
         "text-white font-bold"
       )}
     >
-      <div className="flex items-center gap-3 min-w-[180px]">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
         {loading && (
-          <span className="w-5 h-5 border-2 border-white border-t-black rounded-full animate-spin"></span>
+          <span className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-black rounded-full animate-spin flex-shrink-0"></span>
         )}
-        <span className="text-lg font-sans">{text}</span>
+        <span className="text-sm sm:text-lg font-sans truncate">{text}</span>
       </div>
 
-      <span className="font-mono text-lg font-bold whitespace-nowrap">
-        {formatIDRCurrency(total)}
-      </span>
+      <div className="flex-shrink-0 ml-2">
+        <IoLockClosed className="text-base sm:text-lg scale-x-110" />
+      </div>
     </Button>
   );
 }

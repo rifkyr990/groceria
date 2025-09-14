@@ -5,7 +5,7 @@ import Link from "next/link";
 import { MailCheck, RefreshCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import { apiCall } from "../helper/apiCall";
+import { apiCall } from '@/helper/apiCall';
 import { useAuthStore } from "@/store/auth-store";
 
 export default function CheckEmailPage() {

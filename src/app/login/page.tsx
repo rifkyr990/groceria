@@ -8,15 +8,12 @@ import { ShoppingCart, Eye, EyeOff } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 import { useRouter } from "next/navigation";
 import GoogleLoginButton from "@/components/ui/GoogleBtn";
-import { toast } from "react-toastify"; 
 
 export default function LoginPage() {
-    const { resendVerificationEmail } = useAuthStore();
     const { login, loading, error } = useAuthStore();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [isVerifying, setIsVerifying] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const router = useRouter();
 
@@ -35,18 +32,6 @@ export default function LoginPage() {
                 }
             }
             router.push("/");
-        }
-    };
-
-    const verification = async () => {
-        try {
-            setIsVerifying(true);
-            await resendVerificationEmail(email);
-            toast.success("Email verifikasi berhasil dikirim ulang!");
-        } catch (err: any) {
-            toast.error(err.response?.data?.message || "Gagal mengirim ulang email");
-        } finally {
-            setTimeout(() => setIsVerifying(false), 5000); 
         }
     };
 
@@ -114,18 +99,7 @@ export default function LoginPage() {
                     </div>
                     
                     {/* Error message */}
-                    {error === "Akun belum diverifikasi" ? (
-                        <button
-                            type="button"
-                            onClick={verification}
-                            disabled={isVerifying}
-                            className={`ml-1 underline ${
-                                isVerifying ? "text-gray-400 cursor-not-allowed" : "text-green-500"
-                            }`}
-                        >
-                            {isVerifying ? "Mengirim..." : "Verifikasi sekarang"}
-                        </button>
-                    ): (<p className="text-red-500 text-sm mt-2">{error}</p>)}
+                    <p className="text-red-500 text-sm mt-2">{error}</p>
 
                     <div className="flex items-center justify-between">
                         <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-200">

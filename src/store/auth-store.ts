@@ -1,6 +1,6 @@
 import { email } from 'zod';
 import { create } from "zustand";
-import { apiCall } from "@/app/helper/apiCall";
+import { apiCall } from '@/helper/apiCall';
 import { toast } from "react-toastify";
 
 interface AuthState {
@@ -17,6 +17,7 @@ interface AuthState {
     requestPasswordReset: (email: string) => Promise<boolean>;
     resetPassword: (token: string, newPassword: string) => Promise<boolean>
     verifyEmail: (token: string, password: string) => Promise<boolean>
+    verifyNewEmail: (token: string) => Promise<boolean>;
     resendVerificationEmail: (email: string) => Promise<void>;
 }
 
@@ -75,17 +76,27 @@ export const useAuthStore = create<AuthState>((set) => ({
 
         const token = localStorage.getItem("token") || sessionStorage.getItem("token");
         const user = localStorage.getItem("user");
-
-        console.log("🔥 hydrate dijalankan");
-        console.log("Storage Token:", token);
-        console.log("Storage User:", user);
-
         if (token) {
             set({ token, user: user ? JSON.parse(user) : null });
         }
 
     },
 
+    verifyNewEmail: async (token: string) => { 
+      set({ loading: true, error: null });
+      try {
+        const res = await apiCall.post(`/api/user/verify-new-email`, { token });
+        set({ user: res.data.data, loading: false }); // pakai .data.data sesuai ApiResponse
+        return true;
+      } catch (err: any) {
+        const message =
+          err.response?.data?.message ||
+          err.message ||
+          "Verifikasi gagal";
+        set({ error: message, loading: false });
+        return false;
+      }
+    },
 
     loginWithGoogle: async (idToken) => {
         set({ loading: true, error: null });

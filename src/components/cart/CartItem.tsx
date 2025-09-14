@@ -16,32 +16,40 @@ export default function CartItem({
   onRemove,
 }: CartItemComponentProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-6 py-4 border-b border-gray-200 last:border-none">
-      <Image
-        src={image}
-        alt={name}
-        width={112}
-        height={112}
-        className="w-28 h-28 object-cover rounded-xl flex-shrink-0"
-      />
-      <div className="flex-1 w-full">
-        <div className="flex justify-between items-start gap-4">
-          <div>
-            <h3 className="font-semibold text-lg text-text-dark">{name}</h3>
-            <p className="text-sm text-text-muted">{details}</p>
-          </div>
-          <p className="font-bold text-lg text-text-dark whitespace-nowrap">
-            {formatIDRCurrency(price)}
-          </p>
-        </div>
-        <div className="flex items-center gap-4 mt-4">
-          <QuantityIncrementer
-            id={id}
-            quantity={quantity}
-            onIncrement={onIncrement}
-            onDecrement={onDecrement}
+    <div className="py-3 sm:py-4 border-b border-gray-200 last:border-none">
+      <div className="flex flex-row gap-3 sm:gap-4 lg:gap-6">
+        <div className="flex-shrink-0">
+          <Image
+            src={image}
+            alt={name}
+            width={112}
+            height={112}
+            className="w-16 h-16 sm:w-24 sm:h-24 lg:w-28 lg:h-28 object-cover rounded-xl"
           />
-          <div className="ml-auto">
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-start gap-2 sm:gap-4">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm sm:text-base lg:text-lg text-text-dark leading-tight truncate">
+                {name}
+              </h3>
+              <p className="text-xs sm:text-sm text-text-muted mt-0.5 sm:mt-1 truncate">
+                {details}
+              </p>
+            </div>
+            <p className="font-bold text-sm sm:text-base lg:text-lg text-text-dark whitespace-nowrap flex-shrink-0">
+              {formatIDRCurrency(price)}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between mt-2 sm:mt-3 lg:mt-4">
+            <QuantityIncrementer
+              id={id}
+              quantity={quantity}
+              onIncrement={onIncrement}
+              onDecrement={onDecrement}
+            />
             <RemoveButton id={id} onRemove={onRemove} />
           </div>
         </div>

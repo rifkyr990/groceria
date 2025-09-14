@@ -1,4 +1,3 @@
-import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,10 +16,8 @@ import {
 } from "@/components/ui/table";
 import { IStoreProps } from "@/types/store";
 import { IUserProps } from "@/types/user";
-import { Trash } from "lucide-react";
+import { Mail } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
-import { toast } from "react-toastify";
 
 interface IStoreAdminList {
   open: boolean;
@@ -33,24 +30,6 @@ export default function StoreAdminList({
   setOpen,
   store,
 }: IStoreAdminList) {
-  const [deleteSelectedAdmin, setDeleteSelectedAdmin] =
-    useState<IUserProps | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState(false);
-
-  const btnDelete = (admin: IUserProps) => {
-    // console.log(admin);
-    setDeleteSelectedAdmin(admin);
-
-    setDeleteConfirm((prev) => !prev);
-  };
-
-  const handlerDelete = (admin: IUserProps) => {
-    if (!admin) return;
-    // console.log(admin.first_name);
-    // alert(admin.first_name);
-    toast.success("Delete Data Success");
-  };
-
   const handlerWhatsapp = (admin: IUserProps) => {
     const waUrl = `https://wa.me/${admin.phone}`;
     window.open(waUrl);
@@ -71,16 +50,14 @@ export default function StoreAdminList({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-center">Admin ID</TableHead>
                   <TableHead className="text-center">Admin Name</TableHead>
                   <TableHead className="text-center">Phone</TableHead>
-                  <TableHead className="text-center">Action</TableHead>
+                  <TableHead className="text-center">Contact</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {store.storeAdmin?.map((admin) => (
+                {store.admins?.map((admin) => (
                   <TableRow key={admin.id} className="text-center">
-                    <TableCell>{admin.id}</TableCell>
                     <TableCell>
                       {admin.first_name} {admin.last_name}
                     </TableCell>
@@ -99,13 +76,6 @@ export default function StoreAdminList({
                             className="size-5 p-0"
                           />
                         </Button>
-                        <Button
-                          variant={"destructive"}
-                          className="cursor-pointer"
-                          onClick={() => btnDelete(admin)}
-                        >
-                          <Trash />
-                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -116,12 +86,6 @@ export default function StoreAdminList({
         </form>
       </Dialog>
       {/* Delete Dialog */}
-      <ConfirmDeleteDialog
-        open={deleteConfirm}
-        setOpen={setDeleteConfirm}
-        data={deleteSelectedAdmin}
-        onConfirm={handlerDelete}
-      />
     </>
   );
 }
