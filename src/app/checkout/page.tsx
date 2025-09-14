@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart-store";
+import { useOrderStore } from "@/store/order-store";
+import { toast } from "react-toastify";
 import { MoreHorizontal } from "lucide-react";
 import AddressSelector from "@/components/checkout/AddressSelector";
 import PaymentMethodDrawer from "@/components/checkout/PaymentMethodDrawer";
@@ -54,8 +57,14 @@ const checkoutStep = [
 ];
 
 export default function CheckoutPage() {
+  const router = useRouter();
+  const { placeOrder, loading: isPlacingOrder } = useOrderStore();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
+    null
+  );
   const [selectedShipping, setSelectedShipping] =
     useState<ShippingOption | null>(MockShippingOptions[0]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
@@ -116,6 +125,46 @@ export default function CheckoutPage() {
     }
   };
 
+  const handlePlaceOrder = async () => {
+    if (!selectedAddressId) {
+      toast.error("Please select a delivery address.");
+      return;
+    }
+    if (!selectedShipping) {
+      toast.error("Please select a shipping method.");
+      return;
+    }
+    if (!selectedPaymentMethod) {
+      toast.error("Please select a payment method.");
+      return;
+    }
+
+    // This mapping is temporary until we fetch payment methods from the API
+    const paymentMethodIdMap: { [key: string]: number } = {
+      manual_transfer: 1,
+      payment_gateway: 2,
+    };
+    const paymentMethodId = paymentMethodIdMap[selectedPaymentMethod.id];
+    if (!paymentMethodId) {
+      toast.error("Invalid payment method selected.");
+      return;
+    }
+
+    const payload = {
+      addressId: selectedAddressId,
+      shippingCost: selectedShipping.cost,
+      paymentMethodId,
+    };
+
+    const result = await placeOrder(payload);
+
+    if (result.success && result.orderId) {
+      // Redirect to the new order's detail page
+      router.push(`/profile/orders/${result.orderId}`);
+    }
+    // Error toasts are handled within the store
+  };
+
   return (
     <>
       <main className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8 pb-28 lg:pb-8">
@@ -125,7 +174,10 @@ export default function CheckoutPage() {
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
                 Checkout
               </h1>
-              <AddressSelector />
+              <AddressSelector
+                selectedAddressId={selectedAddressId}
+                setSelectedAddressId={setSelectedAddressId}
+              />
               <OrderReview
                 items={items}
                 storeName={storeName}
@@ -160,8 +212,9 @@ export default function CheckoutPage() {
               <div className="hidden lg:block">
                 <CheckoutButton
                   mode="checkout"
-                  onClick={() => console.log("Placing order...")}
+                  onClick={handlePlaceOrder}
                   total={total}
+                  disabled={isPlacingOrder}
                 />
               </div>
             </div>
@@ -183,8 +236,9 @@ export default function CheckoutPage() {
         </div>
         <CheckoutButton
           mode="checkout"
-          onClick={() => console.log("Placing order...")}
+          onClick={handlePlaceOrder}
           total={total}
+          disabled={isPlacingOrder}
         />
       </div>
 

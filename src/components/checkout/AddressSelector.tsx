@@ -38,14 +38,27 @@ const mockAddresses: UserAddress[] = [
   },
 ];
 
-export default function AddressSelector() {
+interface AddressSelectorProps {
+  selectedAddressId: number | null;
+  setSelectedAddressId: (id: number | null) => void;
+}
+
+export default function AddressSelector({
+  selectedAddressId,
+  setSelectedAddressId,
+}: AddressSelectorProps) {
   const [addresses, setAddresses] = useState<UserAddress[]>(mockAddresses);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const primaryAddress = addresses.find((addr) => addr.isPrimary);
-  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
-    primaryAddress ? primaryAddress.id : null,
-  );
+  // Set initial address selection when component mounts
+  useState(() => {
+    if (!selectedAddressId) {
+      const primaryAddress = mockAddresses.find((addr) => addr.isPrimary);
+      if (primaryAddress) {
+        setSelectedAddressId(primaryAddress.id);
+      }
+    }
+  });
 
   const handleAddressAdded = (newAddressData: Omit<UserAddress, "id">) => {
     const newAddress: UserAddress = {
