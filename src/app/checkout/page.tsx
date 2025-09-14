@@ -139,7 +139,6 @@ export default function CheckoutPage() {
       return;
     }
 
-    // This mapping is temporary until we fetch payment methods from the API
     const paymentMethodIdMap: { [key: string]: number } = {
       manual_transfer: 1,
       payment_gateway: 2,
@@ -159,10 +158,8 @@ export default function CheckoutPage() {
     const result = await placeOrder(payload);
 
     if (result.success && result.orderId) {
-      // Redirect to the new order's detail page
       router.push(`/profile/orders/${result.orderId}`);
     }
-    // Error toasts are handled within the store
   };
 
   return (

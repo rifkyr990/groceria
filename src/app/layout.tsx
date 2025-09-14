@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import ClientWrapper from "./client-wrapper";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import StoreInitializer from "@/components/StoreInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +38,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${PoppinsFont.variable} antialiased`}
       >
+        <StoreInitializer />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <ClientWrapper>
             {children}

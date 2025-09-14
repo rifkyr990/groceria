@@ -3,6 +3,7 @@ import { mockPromoCodes } from "@/components/cart/dummy-data/Data-Promo";
 import { PromoCode } from "@/components/types";
 import { AxiosError } from "axios";
 import { create } from "zustand";
+import { useAuthStore } from "./auth-store";
 
 interface CartItem {
   id: number;
@@ -58,8 +59,8 @@ interface CartState {
   removePromoCode: () => void;
   clearCart: () => void;
 
-  fetchCart: () => Promise<void>;
-  saveCart: () => Promise<void>;
+  fetchCart: (token: string | null) => Promise<void>;
+  saveCart: (token: string | null) => Promise<void>;
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -146,16 +147,24 @@ export const useCartStore = create<CartState>((set, get) => ({
       appliedPromo: null,
     })),
 
-  fetchCart: async () => {
+  fetchCart: async (token: string | null) => {
+    if (!token) {
+      set({ items: [], storeId: null, storeName: null, loading: false });
+      return;
+    }
     set({ loading: true, error: null });
+
     try {
-      const response = await apiCall.get("/api/cart");
-      const data: ApiCartResponse = response.data;
+      const authHeader = { headers: { Authorization: `Bearer ${token}` } };
+
+      const response = await apiCall.get("/api/cart", authHeader);
+
+      const data: ApiCartResponse = response.data.data;
 
       set({
-        storeId: data.store.id,
-        storeName: data.store.name,
-        items: data.cartItems.map((item) => ({
+        storeId: data.store?.id || null,
+        storeName: data.store?.name || null,
+        items: (data.cartItems || []).map((item) => ({
           id: item.id,
           productId: item.product.id,
           name: item.product.name,
@@ -164,16 +173,23 @@ export const useCartStore = create<CartState>((set, get) => ({
           quantity: item.quantity,
           image: item.product.imageUrl,
         })),
-        appliedPromo: data.appliedPromo ?? null,
+        appliedPromo: null, // will be handled later
         loading: false,
       });
     } catch (err) {
       const error = err as AxiosError<ApiError>;
 
-      set({
-        error: error.response?.data?.error || "Failed to fetch cart",
-        loading: false,
-      });
+      if (error.response?.status !== 401 && error.response?.status !== 404) {
+        set({
+          error: error.response?.data?.error || "Failed to fetch cart",
+          loading: false,
+        });
+      } else {
+        set({
+          loading: false,
+          error: error.response?.data?.error || "Failed to fetch cart",
+        });
+      }
     }
   },
   saveCart: async () => {
@@ -195,7 +211,11 @@ export const useCartStore = create<CartState>((set, get) => ({
         })),
       };
 
-      await apiCall.put("/api/cart", payload);
+      const token = useAuthStore.getState().token;
+
+      const authHeader = { headers: { Authorization: `Bearer ${token}` } };
+
+      await apiCall.put("/api/cart", payload, authHeader);
 
       set({ loading: false });
     } catch (err) {

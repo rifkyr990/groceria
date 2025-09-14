@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import CartList from "@/components/cart/CartList";
 import CheckoutSection from "@/components/cart/CheckoutSection";
 import { useCartStore } from "@/store/cart-store";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function CartPage() {
   const [promoInputText, setPromoInputText] = useState("");
@@ -22,10 +23,11 @@ export default function CartPage() {
     fetchCart,
     saveCart,
   } = useCartStore();
+  const { token } = useAuthStore.getState();
 
   useEffect(() => {
-    fetchCart();
-  }, [fetchCart]);
+    fetchCart(token);
+  }, [token, fetchCart]);
 
   const isInitialMount = useRef(true);
 
@@ -36,14 +38,16 @@ export default function CartPage() {
     }
 
     const debounceTimer = setTimeout(() => {
-      console.log("User stopped making changes. Saving cart...");
-      saveCart();
+      if (token) {
+        console.log("User stopped making changes. Saving cart...");
+        saveCart(token);
+      }
     }, 1000);
 
     return () => {
       clearTimeout(debounceTimer);
     };
-  }, [items, saveCart]);
+  }, [items, saveCart, token]);
 
   const appliedPromo = appliedPromoCode
     ? promoCodes.find((p) => p.code === appliedPromoCode) || null
