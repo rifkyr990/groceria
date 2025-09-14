@@ -16,7 +16,7 @@ export default function PromoInput({
   onApply,
   onRemove,
 }: PromoInputProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!!appliedPromo);
   const [maxHeight, setMaxHeight] = useState("0px");
   const innerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -47,7 +47,7 @@ export default function PromoInput({
   return (
     <Card
       className={cn(
-        "border-0 shadow-lg transition-all duration-300",
+        "border-0 shadow-lg shadow-gray-200/50 transition-all duration-300",
         open ? "" : "pb-2"
       )}
     >

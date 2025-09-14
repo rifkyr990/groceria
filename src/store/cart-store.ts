@@ -1,4 +1,4 @@
-import { apiCall } from "@/app/helper/apiCall";
+import { apiCall } from "@/helper/apiCall";
 import { mockPromoCodes } from "@/components/cart/dummy-data/Data-Promo";
 import { PromoCode } from "@/components/types";
 import { AxiosError } from "axios";

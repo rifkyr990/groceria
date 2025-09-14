@@ -1,3 +1,32 @@
+export interface UserAddress {
+  id: number;
+  name: string;
+  phone: string;
+  label: string;
+  province: string;
+  city: string;
+  district: string;
+  subdistrict?: string | null;
+  postalCode: string;
+  street: string;
+  detail?: string | null;
+  isPrimary: boolean;
+}
+
+export interface ShippingOption {
+  id: number;
+  courier: string;
+  service: string;
+  cost: number;
+  estimated: string;
+}
+
+export interface PaymentMethod {
+  id: string;
+  name: string;
+  description: string;
+}
+
 export interface CartItemProps {
   id: number;
   name: string;
