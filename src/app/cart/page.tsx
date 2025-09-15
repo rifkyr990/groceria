@@ -7,9 +7,6 @@ import { useCartStore } from "@/store/cart-store";
 import { useAuthStore } from "@/store/auth-store";
 
 export default function CartPage() {
-  const [promoInputText, setPromoInputText] = useState("");
-  const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
-
   const {
     items,
     appliedPromo: appliedPromoCode,
@@ -23,11 +20,17 @@ export default function CartPage() {
     fetchCart,
     saveCart,
   } = useCartStore();
+  const [promoInputText, setPromoInputText] = useState(appliedPromoCode || "");
+  const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
   const { token } = useAuthStore.getState();
 
   useEffect(() => {
     fetchCart(token);
   }, [token, fetchCart]);
+
+  useEffect(() => {
+    setPromoInputText(appliedPromoCode || "");
+  }, [appliedPromoCode]);
 
   const isInitialMount = useRef(true);
 

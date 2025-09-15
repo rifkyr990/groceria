@@ -24,6 +24,12 @@ export default function PromoInput({
   const toggleOpen = () => setOpen((prev) => !prev);
 
   useEffect(() => {
+    if (appliedPromo) {
+      setOpen(true);
+    }
+  }, [appliedPromo]);
+
+  useEffect(() => {
     if (innerRef.current) {
       if (open) {
         setMaxHeight(`${innerRef.current.scrollHeight + 10}px`);

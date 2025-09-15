@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart-store";
 import { useOrderStore } from "@/store/order-store";
@@ -17,6 +17,7 @@ import { ShippingOption, PaymentMethod } from "@/components/types";
 import ShippingMethodModal from "@/components/checkout/ShippingMethodModal";
 import StepIndicator from "@/components/cart/StepIndicator";
 import { FiCreditCard } from "react-icons/fi";
+import { useAuthStore } from "@/store/auth-store";
 
 const MockShippingOptions: ShippingOption[] = [
   {
@@ -82,7 +83,20 @@ export default function CheckoutPage() {
     storeName,
     tryApplyPromoCode,
     removePromoCode,
+    fetchCart,
   } = useCartStore();
+
+  const { token } = useAuthStore.getState();
+
+  useEffect(() => {
+    if (token) {
+      fetchCart(token);
+    }
+  }, [fetchCart, token]);
+
+  useEffect(() => {
+    setPromoInputText(appliedPromoCode || "");
+  }, [appliedPromoCode]);
 
   const [promoInputText, setPromoInputText] = useState(appliedPromoCode || "");
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");

@@ -61,6 +61,7 @@ interface CartState {
 
   fetchCart: (token: string | null) => Promise<void>;
   saveCart: (token: string | null) => Promise<void>;
+  hydratePromo: () => void;
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -123,29 +124,39 @@ export const useCartStore = create<CartState>((set, get) => ({
   tryApplyPromoCode: (code) => {
     const { promoCodes } = get();
     const codeToApply = code.trim().toLowerCase();
-
     const found = promoCodes.find((p) => p.code.toLowerCase() === codeToApply);
 
     if (found) {
+      localStorage.setItem("applied_promo", found.code);
       set({ appliedPromo: found.code });
       return true;
     } else {
+      localStorage.removeItem("applied_promo");
       set({ appliedPromo: null });
       return false;
     }
   },
 
-  removePromoCode: () =>
-    set(() => ({
-      appliedPromo: null,
-    })),
+  removePromoCode: () => {
+    localStorage.removeItem("applied_promo");
+    set({ appliedPromo: null });
+  },
 
-  clearCart: () =>
-    set(() => ({
+  clearCart: () => {
+    localStorage.removeItem("applied_promo");
+    set({
       storeId: null,
       items: [],
       appliedPromo: null,
-    })),
+    });
+  },
+
+  hydratePromo: () => {
+    const savedPromo = localStorage.getItem("applied_promo");
+    if (savedPromo) {
+      set({ appliedPromo: savedPromo });
+    }
+  },
 
   fetchCart: async (token: string | null) => {
     if (!token) {
@@ -173,7 +184,7 @@ export const useCartStore = create<CartState>((set, get) => ({
           quantity: item.quantity,
           image: item.product.imageUrl,
         })),
-        appliedPromo: null, // will be handled later
+        // appliedPromo: null,
         loading: false,
       });
     } catch (err) {
