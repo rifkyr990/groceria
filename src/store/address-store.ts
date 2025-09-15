@@ -51,7 +51,6 @@ export const useAddressStore = create<AddressState>((set, get) => ({
       await apiCall.post("/api/address", addressData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // Refetch addresses to get the latest list including the new one
       await get().fetchAddresses();
       toast.success("Address added successfully!");
       set({ loading: false });

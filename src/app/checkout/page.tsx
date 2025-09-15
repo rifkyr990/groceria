@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart-store";
 import { useOrderStore } from "@/store/order-store";
 import { useAddressStore } from "@/store/address-store";
+import { useShippingStore } from "@/store/shipping-store";
 import { toast } from "react-toastify";
 import { MoreHorizontal } from "lucide-react";
 import AddressSelector from "@/components/checkout/AddressSelector";
@@ -19,23 +20,6 @@ import ShippingMethodModal from "@/components/checkout/ShippingMethodModal";
 import StepIndicator from "@/components/cart/StepIndicator";
 import { FiCreditCard } from "react-icons/fi";
 import { useAuthStore } from "@/store/auth-store";
-
-const MockShippingOptions: ShippingOption[] = [
-  {
-    id: 1,
-    courier: "JNE",
-    service: "Reguler",
-    cost: 20000,
-    estimated: "2-3 days",
-  },
-  {
-    id: 2,
-    courier: "SiCepat",
-    service: "Express",
-    cost: 35000,
-    estimated: "1-2 days",
-  },
-];
 
 const MockPaymentMethods: PaymentMethod[] = [
   {
@@ -66,6 +50,11 @@ export default function CheckoutPage() {
     loading: addressesLoading,
     fetchAddresses,
   } = useAddressStore();
+  const {
+    fetchOptions,
+    options: shippingOptions,
+    loading: shippingLoading,
+  } = useShippingStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -73,7 +62,7 @@ export default function CheckoutPage() {
     null
   );
   const [selectedShipping, setSelectedShipping] =
-    useState<ShippingOption | null>(MockShippingOptions[0]);
+    useState<ShippingOption | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<PaymentMethod | null>(MockPaymentMethods[0]);
 
@@ -100,6 +89,20 @@ export default function CheckoutPage() {
       fetchAddresses();
     }
   }, [token, fetchCart, fetchAddresses]);
+
+  useEffect(() => {
+    if (selectedAddressId) {
+      const getOptions = async () => {
+        const options = await fetchOptions(selectedAddressId);
+        if (options && options.length > 0) {
+          setSelectedShipping(options[0]);
+        } else {
+          setSelectedShipping(null);
+        }
+      };
+      getOptions();
+    }
+  }, [selectedAddressId, fetchOptions]);
 
   useEffect(() => {
     setPromoInputText(appliedPromoCode || "");
@@ -265,7 +268,8 @@ export default function CheckoutPage() {
       <ShippingMethodModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        shippingOptions={MockShippingOptions}
+        shippingOptions={shippingOptions}
+        loading={shippingLoading}
         selectedOption={selectedShipping}
         onSelectOption={setSelectedShipping}
       />

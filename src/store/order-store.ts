@@ -41,7 +41,7 @@ export const useOrderStore = create<OrderState>((set) => ({
       });
 
       useCartStore.getState().clearCart();
-      useCartStore.getState().saveCart();
+      useCartStore.getState().saveCart(token);
 
       toast.success("Order placed successfully!");
       set({ loading: false });
