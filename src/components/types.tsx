@@ -11,6 +11,8 @@ export interface UserAddress {
   street: string;
   detail?: string | null;
   is_primary: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface ShippingOption {
