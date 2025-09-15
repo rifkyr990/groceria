@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart-store";
 import { useOrderStore } from "@/store/order-store";
+import { useAddressStore } from "@/store/address-store";
 import { toast } from "react-toastify";
 import { MoreHorizontal } from "lucide-react";
 import AddressSelector from "@/components/checkout/AddressSelector";
@@ -60,6 +61,11 @@ const checkoutStep = [
 export default function CheckoutPage() {
   const router = useRouter();
   const { placeOrder, loading: isPlacingOrder } = useOrderStore();
+  const {
+    addresses,
+    loading: addressesLoading,
+    fetchAddresses,
+  } = useAddressStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -86,13 +92,14 @@ export default function CheckoutPage() {
     fetchCart,
   } = useCartStore();
 
-  const { token } = useAuthStore.getState();
+  const { token } = useAuthStore();
 
   useEffect(() => {
     if (token) {
       fetchCart(token);
+      fetchAddresses();
     }
-  }, [fetchCart, token]);
+  }, [token, fetchCart, fetchAddresses]);
 
   useEffect(() => {
     setPromoInputText(appliedPromoCode || "");
@@ -186,6 +193,8 @@ export default function CheckoutPage() {
                 Checkout
               </h1>
               <AddressSelector
+                addresses={addresses}
+                loading={addressesLoading}
                 selectedAddressId={selectedAddressId}
                 setSelectedAddressId={setSelectedAddressId}
               />

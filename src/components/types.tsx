@@ -7,10 +7,10 @@ export interface UserAddress {
   city: string;
   district: string;
   subdistrict?: string | null;
-  postalCode: string;
+  postal_code: string;
   street: string;
   detail?: string | null;
-  isPrimary: boolean;
+  is_primary: boolean;
 }
 
 export interface ShippingOption {

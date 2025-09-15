@@ -14,19 +14,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { UserAddress } from "../types";
+import { useAddressStore } from "@/store/address-store";
+import { Loader2 } from "lucide-react";
 
 interface AddNewAddressModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddressAdded: (newAddress: Omit<UserAddress, "id">) => void;
+  onSuccess: () => void;
 }
 
 export default function AddNewAddressModal({
   open,
   onOpenChange,
-  onAddressAdded,
+  onSuccess,
 }: AddNewAddressModalProps) {
+  const { addAddress, loading } = useAddressStore();
   const initialFormState = {
     label: "",
     name: "",
@@ -35,8 +37,8 @@ export default function AddNewAddressModal({
     city: "",
     district: "",
     street: "",
-    postalCode: "",
-    isPrimary: false,
+    postal_code: "",
+    is_primary: false,
     detail: "",
   };
   const [form, setForm] = useState(initialFormState);
@@ -52,10 +54,13 @@ export default function AddNewAddressModal({
     setForm((prev) => ({ ...prev, isPrimary: checked }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onAddressAdded(form);
-    setForm(initialFormState); // Reset form
+    const success = await addAddress(form);
+    if (success) {
+      setForm(initialFormState);
+      onSuccess();
+    }
   };
 
   const formFields = [
@@ -114,8 +119,8 @@ export default function AddNewAddressModal({
                 Post Code
               </Label>
               <Input
-                id="postalCode"
-                value={form.postalCode}
+                id="postal_code"
+                value={form.postal_code}
                 onChange={handleChange}
                 className="col-span-3"
                 placeholder="e.g., 10110"
@@ -126,7 +131,7 @@ export default function AddNewAddressModal({
               <div className="col-start-2 col-span-3 flex items-center space-x-2">
                 <Checkbox
                   id="isPrimary"
-                  checked={form.isPrimary}
+                  checked={form.is_primary}
                   onCheckedChange={(checked) => handleCheckboxChange(!!checked)}
                 />
                 <Label htmlFor="isPrimary">Set as primary address</Label>
@@ -134,7 +139,10 @@ export default function AddNewAddressModal({
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit">Save Address</Button>
+            <Button type="submit" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Address
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
