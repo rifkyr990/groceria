@@ -18,7 +18,6 @@ interface AuthState {
     resetPassword: (token: string, newPassword: string) => Promise<boolean>
     verifyEmail: (token: string, password: string) => Promise<boolean>
     verifyNewEmail: (token: string) => Promise<boolean>;
-    resendVerificationEmail: (email: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -48,11 +47,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ loading: true, error: null });
         try {
             const res = await apiCall.post("/api/auth/login", data);
-            console.log("Login response:", res.data);
-
             const { user, token } = res.data.data;
-            console.log("User:", user);
-            console.log("Token:", token);
 
             set({ user , token, loading: false });
             localStorage.setItem("user", JSON.stringify(user));
@@ -79,23 +74,6 @@ export const useAuthStore = create<AuthState>((set) => ({
         if (token) {
             set({ token, user: user ? JSON.parse(user) : null });
         }
-
-    },
-
-    verifyNewEmail: async (token: string) => { 
-      set({ loading: true, error: null });
-      try {
-        const res = await apiCall.post(`/api/user/verify-new-email`, { token });
-        set({ user: res.data.data, loading: false }); // pakai .data.data sesuai ApiResponse
-        return true;
-      } catch (err: any) {
-        const message =
-          err.response?.data?.message ||
-          err.message ||
-          "Verifikasi gagal";
-        set({ error: message, loading: false });
-        return false;
-      }
     },
 
     loginWithGoogle: async (idToken) => {
@@ -171,16 +149,17 @@ export const useAuthStore = create<AuthState>((set) => ({
         }
     },
 
-    resendVerificationEmail: async (email) => { 
+    verifyNewEmail: async (token: string) => { 
         set({ loading: true, error: null });
         try {
-            await apiCall.post("/api/auth/resend-verification", { email });
-            set({loading: false});
+            const res = await apiCall.post(`/api/user/verify-new-email`, { token });
+            set({ user: res.data.data, loading: false });
+            return true;
         } catch (err: any) {
-            set({
-                loading: false,
-                error: err.response?.data?.message || "Gagal verifikasi ulang",
-            });
+            const message =
+                err.response?.data?.message || err.message || "Verifikasi gagal";
+            set({ error: message, loading: false });
+            return false;
         }
     },
 }));
