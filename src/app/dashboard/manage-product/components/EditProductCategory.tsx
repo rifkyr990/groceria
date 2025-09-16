@@ -1,0 +1,181 @@
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { apiCall } from "@/helper/apiCall";
+import { useProduct } from "@/store/useProduct";
+import { IProductProps } from "@/types/product";
+import { upperFirstCharacter } from "@/utils/format";
+import { Edit, Trash } from "lucide-react";
+import { useEffect, useState } from "react";
+
+interface IEditProductCat {
+  open: boolean;
+  setOpen: (value: boolean) => void;
+}
+interface CategoryWithProducts {
+  category: string;
+  products: IProductProps[];
+}
+export default function EditProductCategory({
+  open,
+  setOpen,
+}: IEditProductCat) {
+  const [categories, setCategories] = useState<CategoryWithProducts[]>([]);
+  const [editCat, setEditCat] = useState<CategoryWithProducts | null>(null);
+  const [categoryName, setCategoryName] = useState("");
+  const arrCategories = categories.map((cat) => cat.category);
+  const getCategory = async () => {
+    try {
+      const res = await apiCall.get("/api/product/by-categories");
+      const result = res.data.data;
+      setCategories(result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const deleteCategory = async (cat: string) => {
+    try {
+      const cleanData = cat.trim().toLowerCase();
+      const confirmDelete = window.confirm(
+        `Anda yakin menghapus kategori ${cat}?,\nSemua produk akan berubah menjadi 'Others'`
+      );
+      if (!confirmDelete) return;
+      await apiCall.delete(`api/product/category`, { data: { cleanData } });
+      alert(`Kategori ${cat} berhasil terhapus`);
+      getCategory();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const editCategory = async () => {
+    const newCat = categoryName.trim().toLowerCase();
+    const oldCat = editCat?.category.trim().toLowerCase();
+    if (!newCat) return alert("Harus ada isinya");
+    try {
+      const checkCat = arrCategories.some((cat) => cat === newCat);
+      if (checkCat) return alert("Kategori sudah ada");
+      const res = await apiCall.patch("/api/product/category", {
+        data: { newCat, oldCat },
+      });
+      alert("Update Success");
+      getCategory();
+      setOpen(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const newCategory = async () => {
+    const newCat = categoryName.trim().toLowerCase();
+    const checkCategory = arrCategories.some((cat) => cat === newCat);
+    if (!newCat) return alert("Kategori harus diisi");
+    if (checkCategory) return alert("Kategori sudah ada");
+    const res = await apiCall.post("/api/product/new-category", {
+      newCat,
+    });
+    alert("New Category Created!");
+    setCategoryName("");
+    getCategory();
+  };
+
+  useEffect(() => {
+    getCategory();
+  }, []);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add/Edit Existing Category</DialogTitle>
+        </DialogHeader>
+        <section>
+          <section id="new-category">
+            <label>Category Name</label>
+            <div className="flex gap-x-3">
+              <Input
+                placeholder="Input new category "
+                value={categoryName}
+                onChange={(e) => setCategoryName(e.target.value)}
+              />
+              {!editCat ? (
+                <Button
+                  className="bg-blue-500 hover:bg-blue-600"
+                  onClick={newCategory}
+                >
+                  Create
+                </Button>
+              ) : (
+                <div className="flex gap-x-2">
+                  <Button onClick={() => editCategory()}>Save</Button>
+                  <Button
+                    variant={"destructive"}
+                    onClick={() => {
+                      setCategoryName("");
+                      setEditCat(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
+            </div>
+          </section>
+          <section id="edit-category" className="mt-5">
+            <label>Category List</label>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-center">Category Name</TableHead>
+                  <TableHead className="text-center">Total Product</TableHead>
+                  <TableHead className="text-center">Change</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {categories.map((cat, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell className="text-center">
+                      {upperFirstCharacter(cat.category)}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {cat.products.length}
+                    </TableCell>
+                    <TableCell className="flex items-center gap-x-2 justify-center">
+                      <Button
+                        onClick={() => {
+                          setCategoryName(cat.category);
+                          setEditCat(cat);
+                        }}
+                      >
+                        <Edit />
+                      </Button>
+                      <Button
+                        variant={"destructive"}
+                        onClick={() => deleteCategory(cat.category)}
+                      >
+                        <Trash />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </section>
+        </section>
+      </DialogContent>
+    </Dialog>
+  );
+}

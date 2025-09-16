@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -19,14 +18,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { apiCall } from "@/helper/apiCall";
 import { useProduct } from "@/store/useProduct";
-import { formatIDRCurrency } from "@/utils/format";
-import { Search } from "lucide-react";
+import { formatIDRCurrency, upperFirstCharacter } from "@/utils/format";
+import { Eye, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useShallow } from "zustand/shallow";
 import DashboardLayout from "../../components/DashboardLayout";
+import EditProductCategory from "../components/EditProductCategory";
+import { Switch } from "@/components/ui/switch";
+import EditProductDetails from "../components/EditProductDetails";
+import { useRouter } from "next/navigation";
 
 export default function ProductList() {
   const { products, getProductList } = useProduct(
@@ -35,6 +39,7 @@ export default function ProductList() {
       getProductList: state.getProductList,
     }))
   );
+  const { setSelectedProductDetails } = useProduct();
   const productCategories = products.reduce(
     (acc, product) => {
       if (!acc.some((item) => item.id === product.category.id)) {
@@ -44,11 +49,104 @@ export default function ProductList() {
     },
     [] as (typeof products)[0]["category"][]
   );
+  const [editCategory, setEditCategory] = useState(false);
+  const [editDetails, setEditDetails] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    "all"
+  );
+  const [selectedSort, setSelectedSort] = useState<string | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<number[]>([]);
+  // router
+  const router = useRouter();
 
-  // console.log(productCategories.map((category) => category.category));
+  const toggleActiveStatus = async (productId: number, newStatus: boolean) => {
+    try {
+      // update UI
+      useProduct.setState((state) => ({
+        products: state.products.map((product) =>
+          product.id === productId
+            ? { ...product, is_active: newStatus }
+            : product
+        ),
+      }));
+
+      // Update backend
+      const res = await apiCall.patch(
+        `/api/product/change-status/${productId}`,
+        {
+          is_active: { newStatus },
+        }
+      );
+      await getProductList();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const toggleSelectedProduct = (id: number) => {
+    setSelectedProduct((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const filteredProduct = products
+    .filter((product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .filter((product) => {
+      if (!selectedCategory || selectedCategory === "all") return true;
+      return product.category.category === selectedCategory;
+    })
+    .filter((product) => {
+      if (selectedSort === "active-product") return product.is_active === true;
+      if (selectedSort === "inactive-product")
+        return product.is_active === false;
+      return true;
+    })
+    .sort((a, b) => {
+      switch (selectedSort) {
+        case "highest-price":
+          return b.price - a.price;
+        case "lowest-price":
+          return a.price - b.price;
+        case "highest-stock":
+          return (
+            b.stocks.reduce((acc, s) => acc + s.stock_quantity, 0) -
+            a.stocks.reduce((acc, s) => acc + s.stock_quantity, 0)
+          );
+        case "highest-stock":
+          return (
+            a.stocks.reduce((acc, s) => acc + s.stock_quantity, 0) -
+            b.stocks.reduce((acc, s) => acc + s.stock_quantity, 0)
+          );
+        default:
+          return 0;
+      }
+    });
+
+  const deleteSelectedProduct = async () => {
+    try {
+      const confirm = window.confirm(
+        `Apa Anda yakin ingin hapus ${selectedProduct.length} produk?`
+      );
+      if (!confirm) return;
+      const res = await apiCall.delete("/api/product", {
+        data: selectedProduct,
+      });
+      alert("Delete Product Success");
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     getProductList();
   }, []);
+  useEffect(() => {
+    console.log(selectedProduct);
+  }, [selectedProduct]); // debugging selected
   return (
     <DashboardLayout>
       <section className="bg-white p-5 rounded-md  shadow-sm">
@@ -58,7 +156,12 @@ export default function ProductList() {
             <h1 className="text-2xl font-semibold my-4">Product List</h1>
           </div>
           <div id="searchbar" className="relative w-[40%]">
-            <Input placeholder="Search..." className="w-full "></Input>
+            <Input
+              placeholder="Search product name . . . "
+              className="w-full "
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            ></Input>
             <Search
               className=" absolute top-2 right-2 text-gray-400 size-5
             "
@@ -71,20 +174,24 @@ export default function ProductList() {
               </Link>
             </div>
             <div id="edit-category">
-              <Button className="bg-blue-500 hover:bg-blue-600">
+              <Button
+                className="bg-blue-500 hover:bg-blue-600"
+                onClick={() => setEditCategory((prev) => !prev)}
+              >
                 Add/Edit Category
               </Button>
             </div>
             <div id="filter-category">
-              <Select>
+              <Select onValueChange={(value) => setSelectedCategory(value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Category"></SelectValue>
+                  <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
                   {productCategories.map((category) => (
                     <SelectGroup key={category.id}>
                       <SelectItem value={category.category}>
-                        {category.category}
+                        {upperFirstCharacter(category.category)}
                       </SelectItem>
                     </SelectGroup>
                   ))}
@@ -92,12 +199,13 @@ export default function ProductList() {
               </Select>
             </div>
             <div id="filter-options">
-              <Select>
+              <Select onValueChange={(value) => setSelectedSort(value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Filter by"></SelectValue>
+                  <SelectValue placeholder="Filter/Sort by"></SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
+                    <SelectItem value="all">All</SelectItem>
                     <SelectItem value="highest-price">Highest Price</SelectItem>
                     <SelectItem value="lowest-price">Lowest Price</SelectItem>
                     <SelectItem value="highest-stock">Highest Stock</SelectItem>
@@ -114,27 +222,50 @@ export default function ProductList() {
             </div>
           </div>
         </div>
+        <div>
+          <Button
+            variant={"destructive"}
+            hidden={selectedProduct.length === 0}
+            onClick={deleteSelectedProduct}
+          >
+            Delete Selected Product
+          </Button>
+        </div>
         {/* Table */}
         <div id="prd-table-list">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>
-                  <Checkbox className="rounded-full" />
+                  <Checkbox
+                    className="rounded-full"
+                    checked={selectedProduct.length === filteredProduct.length}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedProduct(filteredProduct.map((p) => p.id));
+                      } else {
+                        setSelectedProduct([]);
+                      }
+                    }}
+                  />
                 </TableHead>
                 <TableHead className="">Product Info</TableHead>
                 <TableHead className="text-center">Category</TableHead>
                 <TableHead className="text-center">Price</TableHead>
                 <TableHead className="text-center">Total Stock</TableHead>
-                <TableHead className="text-center">Active</TableHead>
+                <TableHead className="text-center">Active/Inactive</TableHead>
                 <TableHead className="text-center">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.map((product) => (
+              {filteredProduct.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell>
-                    <Checkbox className="rounded-full" />
+                    <Checkbox
+                      className="rounded-full"
+                      checked={selectedProduct.includes(product.id)}
+                      onCheckedChange={() => toggleSelectedProduct(product.id)}
+                    />
                   </TableCell>
                   <TableCell
                     id="product-profile"
@@ -157,7 +288,7 @@ export default function ProductList() {
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    {product.category.category}
+                    {upperFirstCharacter(product.category.category)}
                   </TableCell>
                   <TableCell className="text-center">
                     {formatIDRCurrency(product.price)}
@@ -169,12 +300,27 @@ export default function ProductList() {
                     )}
                   </TableCell>
                   <TableCell className="text-center">
-                    <Switch checked={product.is_active} />
+                    <Switch
+                      checked={product.is_active}
+                      onCheckedChange={(checked) =>
+                        toggleActiveStatus(product.id, checked)
+                      }
+                    />
                   </TableCell>
                   <TableCell className="text-center">
                     <div className="flex gap-x-2 justify-center items-center">
-                      <Button>Edit</Button>
-                      <Button variant={"destructive"}>Delete</Button>
+                      <Button onClick={() => setEditDetails((prev) => !prev)}>
+                        Edit Product
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setSelectedProductDetails(product);
+                          router.push(`/product-details/${product.id}`);
+                        }}
+                      >
+                        <Eye />
+                        Preview
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -183,6 +329,9 @@ export default function ProductList() {
           </Table>
         </div>
       </section>
+      {/* Add/Edit Category Dialog */}
+      <EditProductCategory open={editCategory} setOpen={setEditCategory} />
+      <EditProductDetails open={editDetails} setOpen={setEditDetails} />
     </DashboardLayout>
   );
 }

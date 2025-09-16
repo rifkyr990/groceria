@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/carousel";
 import { useProduct } from "@/store/useProduct";
 import { IProductProps } from "@/types/product";
-import { formatIDRCurrency } from "@/utils/format";
+import { formatIDRCurrency, upperFirstCharacter } from "@/utils/format";
 import Autoplay from "embla-carousel-autoplay";
 import { Headset, MapPin, ShoppingCart, Store } from "lucide-react";
 import { handler } from "next/dist/build/templates/app-page";
@@ -128,7 +128,9 @@ export default function DesktopPrdDetails({
             {selectedProductDetails?.name}
           </p>
           <Badge className="my-2 p-1.5 bg-amber-400">
-            {selectedProductDetails?.category.category}
+            {upperFirstCharacter(
+              selectedProductDetails?.category.category ?? ""
+            )}
           </Badge>
           {/* Stock */}
           {isOutOfStock ? (

@@ -5,9 +5,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { IStockProps } from "@/types/stock";
 import { PackageCheck, TrendingDown, X } from "lucide-react";
-
-export default function InventoryHeader() {
+interface IInventoryHeader {
+  stocks: IStockProps[];
+}
+export default function InventoryHeader({ stocks }: IInventoryHeader) {
   const cardHeader = [
     {
       id: 1,
@@ -15,7 +18,7 @@ export default function InventoryHeader() {
       icon: (
         <PackageCheck className="bg-green-500 text-white rounded-full p-2 size-10" />
       ),
-      qty: 20,
+      qty: stocks.filter((e) => e.product.is_active === true).length,
     },
     {
       id: 2,
@@ -23,13 +26,13 @@ export default function InventoryHeader() {
       icon: (
         <TrendingDown className="bg-yellow-400 text-white rounded-full p-2 size-10" />
       ),
-      qty: 5,
+      qty: stocks.filter((e) => e.stock_quantity <= e.min_stock).length,
     },
     {
       id: 3,
       name: "Total Out of Stock Product",
       icon: <X className="bg-red-500 text-white rounded-full p-2 size-10" />,
-      qty: 2,
+      qty: stocks.filter((e) => e.stock_quantity === 0).length,
     },
   ];
   return (
