@@ -20,4 +20,5 @@ export interface IProductProps {
     category: string;
   };
   is_active: boolean;
+  description: string;
 }

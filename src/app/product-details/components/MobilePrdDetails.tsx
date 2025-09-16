@@ -20,6 +20,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useProduct } from "@/store/useProduct";
+import { formatIDRCurrency } from "@/utils/format";
+import { motion, AnimatePresence } from "motion/react";
 
 interface IMobilePrdDetails {
   allProduct: IProductProps[] | null;
@@ -28,21 +31,34 @@ interface IMobilePrdDetails {
 }
 
 export default function MobilePrdDetails({
-  allProduct,
   detailsData,
   className,
 }: IMobilePrdDetails) {
+  const { selectedProductDetails, setSelectedProductDetails, productsByLoc } =
+    useProduct();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
-  const stock = detailsData?.stock ?? 0;
-  const isOutOfStock = detailsData?.stock === 0;
-  const isLowStock = detailsData?.stock && detailsData.stock <= 5;
-
-  const filteredCategory = allProduct?.filter(
-    (p) => p.category === detailsData?.category
+  // Stock handler
+  const stock = selectedProductDetails?.stocks.map(
+    (stock) => stock.stock_quantity
+  )[0];
+  const isOutOfStock = stock === 0;
+  const isLowStock = stock && stock <= 5;
+  const filteredCategory = productsByLoc?.filter(
+    (p) => p.category.category === selectedProductDetails?.category.category
   );
+  const images = selectedProductDetails?.images.map((img) => img.image_url);
+  console.log(images);
   const router = useRouter();
+  // store
+  const storeIdentity = selectedProductDetails?.stocks.map((stock: any) => {
+    return {
+      name: stock.store.name,
+      city: stock.store.city,
+      province: stock.store.province,
+    };
+  })[0];
 
   // console.log(filteredCategory);
   // increment/decrement purchasement handler
@@ -67,27 +83,41 @@ export default function MobilePrdDetails({
   return (
     <section className={`${className}`}>
       <section id="prd-picture-carousel">
-        <Image
-          src={
-            detailsData?.image
-              ? detailsData.image
-              : "/assets/defaultbanner2.svg"
-          }
-          alt="prdPic"
-          width={500}
-          height={500}
-          className="w-full"
-        />
+        <Carousel
+          className="w-full max-w-7xl mx-auto mt-5"
+          opts={{ align: "start", loop: true }}
+          plugins={[
+            Autoplay({
+              delay: 4000,
+            }),
+          ]}
+        >
+          <CarouselContent>
+            {images?.map((img, idx) => (
+              <CarouselItem key={idx} className="w-full">
+                <div className="relative h-56 sm:h-72 md:h-96">
+                  <Image
+                    src={img}
+                    alt={`product-image-${idx}`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
       </section>
       <section id="prd-profile" className=" gap-5 px-5 py-3">
         <div className="relative ">
-          <p className="font-bold text-xl text-orange-500">
-            Rp
-            <span className="text-3xl">
-              {detailsData?.price.toLocaleString()}
-            </span>
+          <p className="font-bold text-3xl text-orange-500">
+            {formatIDRCurrency(
+              Math.trunc(Number(selectedProductDetails?.price))
+            )}
           </p>
-          <p className="my-2 text-xl font-semibold">{detailsData?.name}</p>
+          <p className="my-2 text-xl font-semibold">
+            {selectedProductDetails?.name}
+          </p>
           {isOutOfStock ? (
             <p className="text-red-500 ">Out of Stock</p>
           ) : (
@@ -96,7 +126,7 @@ export default function MobilePrdDetails({
             </p>
           )}
           <Badge className="my-2 p-1.5 bg-amber-400">
-            {detailsData?.category}
+            {selectedProductDetails?.category.category}
           </Badge>
 
           <div id="counter-cart" className="flex my-5 justify-between">
@@ -117,7 +147,7 @@ export default function MobilePrdDetails({
                   className="cursor-pointer select-none bg-emerald-500 hover:bg-emerald-600"
                   id="increment"
                   onClick={() => handlerValue("inc")}
-                  disabled={value === detailsData?.stock || isOutOfStock}
+                  disabled={value === stock || isOutOfStock}
                 >
                   +
                 </Button>
@@ -132,7 +162,7 @@ export default function MobilePrdDetails({
               </Button>
             </div>
           </div>
-          {value === detailsData?.stock && (
+          {value === stock && (
             <p className="text-red-500 text-xs my-2 ">
               You have reached our maximum stock
             </p>
@@ -180,8 +210,10 @@ export default function MobilePrdDetails({
             </Avatar>
           </div>
           <div id="profile">
-            <p className="font-semibold">Groceria Semarang</p>
-            <p className="text-xs">Semarang, Jawa Tengah</p>
+            <p className="font-semibold">{storeIdentity?.name}</p>
+            <p className="text-xs">
+              {storeIdentity?.city},{storeIdentity?.province}
+            </p>
           </div>
         </div>
         <div id="cta">
@@ -200,12 +232,7 @@ export default function MobilePrdDetails({
             </AccordionTrigger>
             <AccordionContent className="text-justify">
               {" "}
-              Lorem ipsum dolor sit amet consectetur adipisicing elit.
-              Exercitationem quia fugiat quo, autem id neque provident quam
-              pariatur ipsa incidunt! Lorem ipsum dolor sit, amet consectetur
-              adipisicing elit. Accusamus accusantium delectus dolores optio
-              expedita ipsam id a, consequuntur repellendus itaque. Lorem ipsum
-              dolor sit amet consectetur adipisicing elit. Dolorem, blanditiis?
+              {selectedProductDetails?.description}
             </AccordionContent>
           </AccordionItem>
         </Accordion>
@@ -226,11 +253,14 @@ export default function MobilePrdDetails({
               <CarouselItem key={product.id} className="basis-1/2">
                 <Card
                   className="p-0  rounded-md overflow-hidden gap-1"
-                  onClick={() => router.push(`/product-details/${product.id}`)}
+                  onClick={() => {
+                    setSelectedProductDetails(product);
+                    router.push(`/product-details/${product.id}`);
+                  }}
                 >
                   <div className="relative w-full h-25 ">
                     <Image
-                      src={product.image || ""}
+                      src={product.images.map((img) => img.image_url)[0] || ""}
                       alt="prd-filtered-image"
                       fill
                       className="object-cover "
@@ -239,7 +269,7 @@ export default function MobilePrdDetails({
                   <CardContent className="p-3">
                     <p className="text-xs font-semibold">{product.name}</p>
                     <p className="mt-2 font-bold text-green-600">
-                      Rp.{product.price.toLocaleString()}
+                      {formatIDRCurrency(Math.trunc(Number(product?.price)))}
                     </p>
                   </CardContent>
                   <Button className="text-xs h-7 w-[85%] mx-auto my-3 bg-green-600 ">

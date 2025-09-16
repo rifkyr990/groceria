@@ -1,14 +1,13 @@
 "use client";
-import Image from "next/image";
-import { useLocationStore } from "@/store/use-location-store";
-import { useEffect, useState } from "react";
-import { ShoppingCart, Store } from "lucide-react";
-import ProductDetailsPage from "@/app/product-details/[id]/page";
-import { useRouter } from "next/navigation";
-import { IProductProps } from "@/types/product";
 import { apiCall } from "@/helper/apiCall";
-import { formatIDRCurrency } from "@/utils/format";
+import { useLocationStore } from "@/store/use-location-store";
 import { useProduct } from "@/store/useProduct";
+import { IProductProps } from "@/types/product";
+import { formatIDRCurrency } from "@/utils/format";
+import { ShoppingCart, Store } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 // interface Product {
 //   id: number;
@@ -28,7 +27,7 @@ export default function ProductList() {
   const [selectedCategory, setSelectedCategory] = useState<string>("semua");
   const [categories, setCategories] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const { setSelectedProductDetails } = useProduct();
+  const { setSelectedProductDetails, setProductsByLoc } = useProduct();
 
   const productsPerPage = 8;
 
@@ -51,6 +50,7 @@ export default function ProductList() {
         // const data = json.data || [];
         setProducts(result);
         setFilteredProducts(result);
+        setProductsByLoc(result);
       } catch (error) {
         console.error("Gagal fetch data", error);
       }
