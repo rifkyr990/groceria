@@ -3,7 +3,9 @@ export interface UserAddress {
   name: string;
   phone: string;
   label: string;
+  province_id?: string | null;
   province: string;
+  city_id?: string | null;
   city: string;
   district: string;
   subdistrict?: string | null;
@@ -13,6 +15,18 @@ export interface UserAddress {
   is_primary: boolean;
   latitude?: number | null;
   longitude?: number | null;
+}
+
+export interface Province {
+  province_id: string;
+  province: string;
+}
+
+export interface City {
+  city_id: string;
+  city_name: string;
+  type: string;
+  postal_code: string;
 }
 
 export interface ShippingOption {

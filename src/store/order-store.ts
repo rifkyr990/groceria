@@ -16,6 +16,10 @@ interface OrderState {
   placeOrder: (
     payload: OrderPayload
   ) => Promise<{ success: boolean; orderId?: number }>;
+  getMidtransToken: (orderId: number) => Promise<{
+    success: boolean;
+    token?: string;
+  }>;
 }
 
 export const useOrderStore = create<OrderState>((set) => ({
@@ -49,6 +53,34 @@ export const useOrderStore = create<OrderState>((set) => ({
       return { success: true, orderId: response.data.data.orderId };
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || "Failed to place order.";
+      toast.error(errorMsg);
+      set({ loading: false, error: errorMsg });
+      return { success: false };
+    }
+  },
+
+  getMidtransToken: async (orderId) => {
+    set({ loading: true, error: null });
+    const token = useAuthStore.getState().token;
+    if (!token) {
+      const errorMsg = "Authentication required.";
+      toast.error(errorMsg);
+      set({ loading: false, error: errorMsg });
+      return { success: false };
+    }
+
+    try {
+      const response = await apiCall.post(
+        "/api/payment/create-transaction",
+        { orderId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const transactionToken = response.data.data.transactionToken;
+      set({ loading: false });
+      return { success: true, token: transactionToken };
+    } catch (err: any) {
+      const errorMsg =
+        err.response?.data?.message || "Failed to create payment transaction.";
       toast.error(errorMsg);
       set({ loading: false, error: errorMsg });
       return { success: false };

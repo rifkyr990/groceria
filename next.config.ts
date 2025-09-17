@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "media.istockphoto.com",
-      }, 
+      },
       {
         protocol: "https",
         hostname: "picsum.photos",
@@ -24,6 +24,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "loremflickr.com",
       },
     ],
   },

@@ -22,7 +22,7 @@ interface ApiCartItem {
     id: number;
     name: string;
     description: string;
-    price: string | number;
+    price: number;
     imageUrl: string;
   };
 }
@@ -52,9 +52,9 @@ interface CartState {
     storeId: number,
     quantity?: number
   ) => void;
-  incrementItem: (productId: number) => void;
-  decrementItem: (productId: number) => void;
-  removeItem: (productId: number) => void;
+  incrementItem: (cartItemId: number) => void;
+  decrementItem: (cartItemId: number) => void;
+  removeItem: (cartItemId: number) => void;
 
   removePromoCode: () => void;
   clearCart: () => void;
@@ -100,26 +100,26 @@ export const useCartStore = create<CartState>((set, get) => ({
       };
     }),
 
-  incrementItem: (productId) =>
-    set({
-      items: get().items.map((item) =>
-        item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+  incrementItem: (cartItemId) =>
+    set((state) => ({
+      items: state.items.map((item) =>
+        item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item
       ),
-    }),
+    })),
 
-  decrementItem: (productId) =>
-    set({
-      items: get().items.map((item) =>
-        item.id === productId
+  decrementItem: (cartItemId) =>
+    set((state) => ({
+      items: state.items.map((item) =>
+        item.id === cartItemId
           ? { ...item, quantity: Math.max(1, item.quantity - 1) }
           : item
       ),
-    }),
+    })),
 
-  removeItem: (productId) =>
-    set({
-      items: get().items.filter((item) => item.id !== productId),
-    }),
+  removeItem: (cartItemId) =>
+    set((state) => ({
+      items: state.items.filter((item) => item.id !== cartItemId),
+    })),
 
   tryApplyPromoCode: (code) => {
     const { promoCodes } = get();
@@ -184,7 +184,6 @@ export const useCartStore = create<CartState>((set, get) => ({
           quantity: item.quantity,
           image: item.product.imageUrl,
         })),
-        // appliedPromo: null,
         loading: false,
       });
     } catch (err) {

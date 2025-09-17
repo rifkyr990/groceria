@@ -21,6 +21,12 @@ import StepIndicator from "@/components/cart/StepIndicator";
 import { FiCreditCard } from "react-icons/fi";
 import { useAuthStore } from "@/store/auth-store";
 
+declare global {
+  interface Window {
+    snap: any;
+  }
+}
+
 const MockPaymentMethods: PaymentMethod[] = [
   {
     id: "manual_transfer",
@@ -44,7 +50,8 @@ const checkoutStep = [
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { placeOrder, loading: isPlacingOrder } = useOrderStore();
+  const { placeOrder, getMidtransToken, loading: isPlacingOrder } =
+    useOrderStore();
   const {
     addresses,
     loading: addressesLoading,
@@ -173,16 +180,57 @@ export default function CheckoutPage() {
       return;
     }
 
-    const payload = {
+    const orderPayload = {
       addressId: selectedAddressId,
       shippingCost: selectedShipping.cost,
       paymentMethodId,
     };
 
-    const result = await placeOrder(payload);
+    const orderResult = await placeOrder(orderPayload);
 
-    if (result.success && result.orderId) {
-      router.push(`/profile/orders/${result.orderId}`);
+    if (!orderResult.success || !orderResult.orderId) {
+      toast.error("Failed to create order. Please try again.");
+      return;
+    }
+
+    const newOrderId = orderResult.orderId;
+
+    if (selectedPaymentMethod.id === "payment_gateway") {
+      const paymentResult = await getMidtransToken(newOrderId);
+
+      if (!paymentResult.success || !paymentResult.token) {
+        toast.error("Could not initialize payment. Please try again later.");
+        return;
+      }
+
+      window.snap.pay(paymentResult.token, {
+        onSuccess: function (result: any) {
+          console.log("Midtrans success:", result);
+          toast.success("Payment successful!");
+          router.push(`/profile/orders/${newOrderId}`);
+        },
+        onPending: function (result: any) {
+          console.log("Midtrans pending:", result);
+          toast.info("Your payment is pending. We will update you soon.");
+          router.push(`/profile/orders/${newOrderId}`);
+        },
+        onError: function (result: any) {
+          console.error("Midtrans error:", result);
+          toast.error("Payment failed. Please try again or use another method.");
+        },
+        onClose: function () {
+          console.log(
+            "Customer closed the popup without finishing the payment"
+          );
+          toast.warn(
+            "You closed the payment window without completing the payment."
+          );
+        },
+      });
+    } else {
+      // Manual transfer flow
+      toast.success("Order placed! Please upload your payment proof.");
+      router.push(`/profile/orders/${newOrderId}`);
     }
   };
 

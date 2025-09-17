@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,9 +23,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAddressStore } from "@/store/address-store";
+import { useLocationStore } from "@/store/location-store";
 import { Loader2 } from "lucide-react";
 import MapPicker from "../MapPickerWrapper";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { City, Province } from "../types";
 
 interface AddNewAddressModalProps {
   open: boolean;
@@ -37,7 +46,9 @@ interface AddressFormData {
   label: string;
   name: string;
   phone: string;
+  province_id: string;
   province: string;
+  city_id: string;
   city: string;
   district: string;
   street: string;
@@ -48,6 +59,194 @@ interface AddressFormData {
   longitude: number | null;
 }
 
+interface AddressFormContentProps {
+  form: AddressFormData;
+  setForm: React.Dispatch<React.SetStateAction<AddressFormData>>;
+  provinces: Province[];
+  cities: City[];
+  loadingProvinces: boolean;
+  loadingCities: boolean;
+  fetchCities: (provinceId: string) => void;
+  handleChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
+  handleCheckboxChange: (checked: boolean) => void;
+  handleLocationSelect: (data: {
+    lat: number;
+    long: number;
+    road: string;
+    city: string;
+    province: string;
+  }) => void;
+}
+
+const AddressFormContent = ({
+  form,
+  setForm,
+  provinces,
+  cities,
+  loadingProvinces,
+  loadingCities,
+  fetchCities,
+  handleChange,
+  handleCheckboxChange,
+  handleLocationSelect,
+}: AddressFormContentProps) => (
+  <div className="space-y-4">
+    <div className="h-[150px] w-full bg-gray-200 rounded-lg overflow-hidden">
+      <MapPicker onLocationSelect={handleLocationSelect} />
+    </div>
+
+    <div className="space-y-1">
+      <Label htmlFor="label">Label</Label>
+      <Input
+        id="label"
+        value={form.label}
+        onChange={handleChange}
+        placeholder="Enter label"
+        required
+      />
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="space-y-1">
+        <Label htmlFor="name">Recipient Name</Label>
+        <Input
+          id="name"
+          value={form.name}
+          onChange={handleChange}
+          placeholder="Enter recipient's full name"
+          required
+        />
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="phone">Phone Number</Label>
+        <Input
+          id="phone"
+          value={form.phone}
+          onChange={handleChange}
+          placeholder="Enter phone number"
+          required
+        />
+      </div>
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="space-y-1">
+        <Label htmlFor="province">Province</Label>
+        <Select
+          value={form.province_id}
+          onValueChange={(value) => {
+            const selectedProvince = provinces.find(
+              (p) => p.province_id === value
+            );
+            setForm({
+              ...form,
+              province_id: value,
+              province: selectedProvince?.province || "",
+              city_id: "",
+              city: "",
+            });
+            fetchCities(value);
+          }}
+          disabled={loadingProvinces}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a province" />
+          </SelectTrigger>
+          <SelectContent>
+            {provinces.map((p) => (
+              <SelectItem key={p.province_id} value={p.province_id}>
+                {p.province}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="city">City</Label>
+        <Select
+          value={form.city_id}
+          onValueChange={(value) => {
+            const selectedCity = cities.find((c) => c.city_id === value);
+            setForm({
+              ...form,
+              city_id: value,
+              city: selectedCity?.city_name || "",
+              postal_code: selectedCity?.postal_code || "",
+            });
+          }}
+          disabled={!form.province_id || loadingCities}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a city" />
+          </SelectTrigger>
+          <SelectContent>
+            {cities.map((c) => (
+              <SelectItem key={c.city_id} value={c.city_id}>
+                {c.city_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="space-y-1">
+        <Label htmlFor="district">District</Label>
+        <Input
+          id="district"
+          value={form.district}
+          onChange={handleChange}
+          placeholder="Enter district"
+          required
+        />
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="postal_code">Postal Code</Label>
+        <Input
+          id="postal_code"
+          value={form.postal_code}
+          onChange={handleChange}
+          placeholder="Enter postal code"
+          required
+        />
+      </div>
+    </div>
+
+    <div className="space-y-1">
+      <Label htmlFor="street">Street Address</Label>
+      <Textarea
+        id="street"
+        value={form.street}
+        onChange={handleChange}
+        placeholder="Enter Address"
+        required
+      />
+    </div>
+
+    <div className="space-y-1">
+      <Label htmlFor="detail">{"Address Detail (Optional)"}</Label>
+      <Input
+        id="detail"
+        value={form.detail || ""}
+        onChange={handleChange}
+        placeholder="Enter detail"
+      />
+    </div>
+
+    <div className="flex items-center space-x-2 pt-2">
+      <Checkbox
+        id="is_primary"
+        checked={form.is_primary}
+        onCheckedChange={(checked) => handleCheckboxChange(!!checked)}
+      />
+      <Label htmlFor="is_primary">Set as primary address</Label>
+    </div>
+  </div>
+);
+
 export default function AddNewAddressModal({
   open,
   onOpenChange,
@@ -55,11 +254,22 @@ export default function AddNewAddressModal({
 }: AddNewAddressModalProps) {
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const { addAddress, loading } = useAddressStore();
+  const {
+    provinces,
+    cities,
+    loadingProvinces,
+    loadingCities,
+    fetchProvinces,
+    fetchCities,
+  } = useLocationStore();
+
   const initialFormState: AddressFormData = {
     label: "",
     name: "",
     phone: "",
+    province_id: "",
     province: "",
+    city_id: "",
     city: "",
     district: "",
     street: "",
@@ -70,6 +280,12 @@ export default function AddNewAddressModal({
     longitude: null,
   };
   const [form, setForm] = useState<AddressFormData>(initialFormState);
+
+  useEffect(() => {
+    if (open) {
+      fetchProvinces();
+    }
+  }, [open, fetchProvinces]);
 
   const handleLocationSelect = (data: {
     lat: number;
@@ -108,123 +324,18 @@ export default function AddNewAddressModal({
     }
   };
 
-  const AddressFormContent = () => (
-    <div className="space-y-4">
-      <div className="h-[150px] w-full bg-gray-200 rounded-lg overflow-hidden">
-        <MapPicker onLocationSelect={handleLocationSelect} />
-      </div>
-
-      <div className="space-y-1">
-        <Label htmlFor="label">Label</Label>
-        <Input
-          id="label"
-          value={form.label}
-          onChange={handleChange}
-          placeholder="Enter label"
-          required
-        />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="name">Recipient Name</Label>
-          <Input
-            id="name"
-            value={form.name}
-            onChange={handleChange}
-            placeholder="Enter recipient's full name"
-            required
-          />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="phone">Phone Number</Label>
-          <Input
-            id="phone"
-            value={form.phone}
-            onChange={handleChange}
-            placeholder="Enter phone number"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="province">Province</Label>
-          <Input
-            id="province"
-            value={form.province}
-            onChange={handleChange}
-            placeholder="Enter province name"
-            required
-          />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="city">City</Label>
-          <Input
-            id="city"
-            value={form.city}
-            onChange={handleChange}
-            placeholder="Enter city"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="district">District</Label>
-          <Input
-            id="district"
-            value={form.district}
-            onChange={handleChange}
-            placeholder="Enter district"
-            required
-          />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="postal_code">Postal Code</Label>
-          <Input
-            id="postal_code"
-            value={form.postal_code}
-            onChange={handleChange}
-            placeholder="Enter postal code"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="space-y-1">
-        <Label htmlFor="street">Street Address</Label>
-        <Textarea
-          id="street"
-          value={form.street}
-          onChange={handleChange}
-          placeholder="Enter Address"
-          required
-        />
-      </div>
-
-      <div className="space-y-1">
-        <Label htmlFor="detail">{"Address Detail (Optional)"}</Label>
-        <Input
-          id="detail"
-          value={form.detail || ""}
-          onChange={handleChange}
-          placeholder="Enter detail"
-        />
-      </div>
-
-      <div className="flex items-center space-x-2 pt-2">
-        <Checkbox
-          id="is_primary"
-          checked={form.is_primary}
-          onCheckedChange={(checked) => handleCheckboxChange(!!checked)}
-        />
-        <Label htmlFor="is_primary">Set as primary address</Label>
-      </div>
-    </div>
-  );
+  const formProps = {
+    form,
+    setForm,
+    provinces,
+    cities,
+    loadingProvinces,
+    loadingCities,
+    fetchCities,
+    handleChange,
+    handleCheckboxChange,
+    handleLocationSelect,
+  };
 
   if (isDesktop) {
     return (
@@ -237,8 +348,8 @@ export default function AddNewAddressModal({
             </DialogDescription>
           </DialogHeader>
           <form id="address-form-desktop" onSubmit={handleSubmit}>
-            <div className="py-4 max-h-[60vh] pr-4">
-              <AddressFormContent />
+            <div className="py-4 h-fit  pr-4">
+              <AddressFormContent {...formProps} />
             </div>
           </form>
           <DialogFooter>
@@ -271,8 +382,8 @@ export default function AddNewAddressModal({
           onSubmit={handleSubmit}
           className="flex-1 overflow-auto"
         >
-          <div className="p-4 px-8 pt-0">
-            <AddressFormContent />
+          <div className="p-4 px-8 pt-0 max-h-[70vh] ">
+            <AddressFormContent {...formProps} />
           </div>
         </form>
         <DrawerFooter className="pt-2">
