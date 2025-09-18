@@ -5,6 +5,8 @@ import { ThemeProvider } from "next-themes";
 import ClientWrapper from "./client-wrapper";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import StoreInitializer from "@/components/StoreInitializer";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,6 +42,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${PoppinsFont.variable} antialiased`}
       >
+        <Script
+          id="midtrans-snap"
+          type="text/javascript"
+          src={process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL}
+          data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
+        />
+        <StoreInitializer />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <ClientWrapper>
             {children}

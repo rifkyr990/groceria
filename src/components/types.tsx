@@ -1,23 +1,69 @@
-export interface CartItemProps {
+export interface UserAddress {
+  id: number;
+  name: string;
+  phone: string;
+  label: string;
+  province_id?: string | null;
+  province: string;
+  city_id?: string | null;
+  city: string;
+  district: string;
+  subdistrict?: string | null;
+  postal_code: string;
+  street: string;
+  detail?: string | null;
+  is_primary: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+export interface Province {
+  province_id: string;
+  province: string;
+}
+
+export interface City {
+  city_id: string;
+  city_name: string;
+  type: string;
+  postal_code: string;
+}
+
+export interface ShippingOption {
+  id: number;
+  courier: string;
+  service: string;
+  cost: number;
+  estimated: string;
+}
+
+export interface PaymentMethod {
   id: string;
   name: string;
-  details: string;
+  description: string;
+}
+
+export interface CartItemProps {
+  id: number;
+  name: string;
+  description: string;
   price: number;
   image: string;
   quantity: number;
 }
 
 export interface CartItemComponentProps extends CartItemProps {
-  onIncrement: (id: string) => void;
-  onDecrement: (id: string) => void;
-  onRemove: (id: string) => void;
+  onIncrement: (id: number) => void;
+  onDecrement: (id: number) => void;
+  onRemove: (id: number) => void;
 }
 
 export interface CartListProps {
   items: CartItemProps[];
-  onDecrement: (id: string) => void;
-  onIncrement: (id: string) => void;
-  onRemove: (id: string) => void;
+  storeName?: string | null;
+  onDecrement: (id: number) => void;
+  onIncrement: (id: number) => void;
+  onRemove: (id: number) => void;
 }
 
 export interface PromoCode {
@@ -46,4 +92,35 @@ export interface PromoInputProps {
   onInputChange: (value: string) => void;
   onApply: () => void;
   onRemove: () => void;
+}
+
+export interface OrderItemDetail {
+  id: number;
+  quantity: number;
+  priceAtPurchase: string;
+  product: {
+    id: number;
+    name: string;
+    imageUrl: string;
+  };
+}
+
+export interface OrderDetail {
+  id: number;
+  createdAt: string;
+  totalPrice: string;
+  subtotal: number;
+  shippingCost: number;
+  discountAmount: number;
+  destinationAddress: string;
+  store: {
+    id: number;
+    name: string;
+  };
+  status: string;
+  payment: {
+    method: string;
+    status: string;
+  } | null;
+  items: OrderItemDetail[];
 }
