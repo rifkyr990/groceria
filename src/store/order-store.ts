@@ -8,6 +8,7 @@ interface OrderPayload {
   addressId: number;
   shippingCost: number;
   paymentMethodId: number;
+  promoCode?: string | null;
 }
 
 interface OrderState {

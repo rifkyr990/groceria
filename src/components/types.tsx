@@ -93,3 +93,34 @@ export interface PromoInputProps {
   onApply: () => void;
   onRemove: () => void;
 }
+
+export interface OrderItemDetail {
+  id: number;
+  quantity: number;
+  priceAtPurchase: string;
+  product: {
+    id: number;
+    name: string;
+    imageUrl: string;
+  };
+}
+
+export interface OrderDetail {
+  id: number;
+  createdAt: string;
+  totalPrice: string;
+  subtotal: number;
+  shippingCost: number;
+  discountAmount: number;
+  destinationAddress: string;
+  store: {
+    id: number;
+    name: string;
+  };
+  status: string;
+  payment: {
+    method: string;
+    status: string;
+  } | null;
+  items: OrderItemDetail[];
+}

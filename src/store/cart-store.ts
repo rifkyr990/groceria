@@ -1,7 +1,16 @@
 import { apiCall } from "@/helper/apiCall";
-import { mockPromoCodes } from "@/components/cart/dummy-data/Data-Promo";
+// import { mockPromoCodes } from "@/components/cart/dummy-data/Data-Promo";
 import { PromoCode } from "@/components/types";
 import { AxiosError } from "axios";
+
+const mockPromoCodes: PromoCode[] = [
+  {
+    code: "HEMAT10",
+    description: "Discount 10,000 for any purchase",
+    type: "fixed",
+    value: 10000,
+  },
+];
 import { create } from "zustand";
 import { useAuthStore } from "./auth-store";
 
