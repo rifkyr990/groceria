@@ -46,7 +46,6 @@ export default function DesktopPrdDetails({
   const filteredCategory = productsByLoc?.filter(
     (p) => p.category.category === selectedProductDetails?.category.category
   );
-  // console.log(filteredCategory);
 
   // increment/decrement purchasement handler
   const [value, setValue] = useState(1);

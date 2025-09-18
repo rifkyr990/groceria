@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Lock } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import { useAuthStore } from "@/store/auth-store";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function VerifyEmailPage() {
     const searchParams = useSearchParams();
@@ -14,6 +15,7 @@ export default function VerifyEmailPage() {
     const { verifyEmail, loading } = useAuthStore();
 
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -55,16 +57,18 @@ export default function VerifyEmailPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Password Baru
-                        </label>
-                        <input
-                            type="password"
+                        <PasswordInput
+                            label="Password Baru"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            className="mt-1 w-full rounded-lg border px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                            onChange={setPassword}
                             placeholder="Minimal 8 karakter"
+                        />
+
+                        <PasswordInput
+                            label="Konfirmasi Password"
+                            value={confirmPassword}
+                            onChange={setConfirmPassword}
+                            placeholder="Ulangi password baru"
                         />
                     </div>
 

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { apiCall } from "@/app/helper/apiCall";
+import { apiCall } from '@/helper/apiCall';
 import { useAuthStore } from "./auth-store";
 import { toast } from "react-toastify";
 
@@ -41,8 +41,7 @@ export const useUserStore = create<UserState>((set) => ({
                     Authorization: `Bearer ${token}`,
                 },
             });
-
-
+            
             const user = res.data.data;
             localStorage.setItem("user", JSON.stringify(user));
             useAuthStore.getState().setUserAndToken(user, token!);
@@ -117,7 +116,7 @@ export const useUserStore = create<UserState>((set) => ({
     resendVerificationEmail: async () => { 
         try {
             const { user, token } = useAuthStore.getState();
-            await apiCall.post("/api/user/resend-verification", { email: user.email }, {
+            await apiCall.post("/api/auth/resend-verification", { email: user.email }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success("Email verifikasi berhasil dikirim ulang!");
@@ -131,7 +130,7 @@ export const useUserStore = create<UserState>((set) => ({
         set({ loading: true, error: null });
         try {
             const token = useAuthStore.getState().token;
-            const res = await apiCall.put("/api/user/change-password", { oldPassword, newPassword }, {
+            await apiCall.put("/api/user/change-password", { oldPassword, newPassword }, {
                 headers: {
                     "Content-Type" : "application/json",
                     Authorization: `Bearer ${token}`,

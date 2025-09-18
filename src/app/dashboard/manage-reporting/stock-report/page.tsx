@@ -47,6 +47,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
+import { IStoreProps } from "@/types/store";
 
 const quantityColor = (value: number) => {
   if (value < 0) {
@@ -60,36 +61,55 @@ const summaryCard = [
     id: 1,
     name: "Total Addition",
     icon: <CircleArrowUp className="text-green-500" />,
-    border: "border-l  border-green-500",
-    total: 30000,
-    desc: "Last 12 months",
+    border: "border-l-green-500 border-4 border-y ",
+    total: <span className="text-green-500 text-4xl font-bold ">30.000</span>,
+    desc: "per month",
   },
   {
     id: 2,
     name: "Total Reduction",
-    icon: <CircleArrowDown />,
-    border: "border-l border-green-500",
-    total: 35000,
-    desc: "Last 12 months",
+    icon: <CircleArrowDown className="text-amber-500" />,
+    border: "border-l-amber-500 border-4",
+    total: <span className="text-amber-500 text-4xl font-bold ">33.000</span>,
+    desc: "per month",
   },
   {
     id: 3,
     name: "Total Latest Stock",
-    icon: <PackageCheck />,
-    border: "border-l border-green-500",
-    total: 30000,
+    icon: <PackageCheck className="text-purple-500" />,
+    border: "border-l-purple-500 border-4",
+    total: <span className="text-purple-500 text-4xl font-bold ">50</span>,
     desc: "per month",
   },
   {
     id: 4,
     name: "Total Out of Stock",
-    icon: <PackageX />,
-    border: "border-l border-green-500",
-    total: 10,
+    icon: <PackageX className="text-red-500" />,
+    border: "border-l-red-500 border-4",
+    total: <span className="text-red-500 text-4xl font-bold ">50</span>,
     desc: "per month",
   },
 ];
 export default function StockHistory() {
+  const [selectedStore, setSelectedStore] = useState("all");
+  const [storeList, setStoreList] = useState<IStoreProps[]>([]);
+  const [summary, setSummary] = useState({
+    totalAddition: 0,
+    totalReduction: 0,
+    totalLatestStock: 0,
+    totalOutOfStock: 0,
+  });
+
+  const getStoreList = async () => {
+    try {
+      const res = await apiCall.get("/api/store/all");
+      const result = res.data.data;
+      setStoreList(result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const [stockHistory, setStockHistory] = useState<IStockHistory[]>([]);
   const [open, setOpen] = useState(false);
   const [range, setRange] = useState<{
@@ -101,32 +121,73 @@ export default function StockHistory() {
   });
   const getStockHistory = async () => {
     try {
-      const res = await apiCall.get("/api/stock/stock-history");
+      let res;
+      console.log(selectedStore);
+      if (selectedStore === "all") {
+        res = await apiCall.get("/api/stock/stock-history");
+      } else {
+        res = await apiCall.get(
+          `/api/stock/stock-history/summary?storeId=${Number(selectedStore)}`
+        );
+      }
       const result = res.data.data;
       setStockHistory(result);
+      setSummary(summary);
     } catch (error) {
       console.log(error);
     }
   };
 
+  console.log(stockHistory);
+
+  useEffect(() => {
+    getStoreList();
+  }, []);
   useEffect(() => {
     getStockHistory();
-  }, []);
+  }, [selectedStore]);
   return (
     <DashboardLayout>
+      <section
+        id="store-selector"
+        className="flex items-center gap-5 mb-5 justify-end"
+      >
+        <div>
+          <Button>Sales Report</Button>
+        </div>
+        <div>
+          <Select
+            value={selectedStore}
+            onValueChange={(value) => setSelectedStore(value)}
+          >
+            <SelectTrigger className="bg-white">
+              <SelectValue placeholder="Store Name"></SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Store Name</SelectLabel>
+                <SelectItem value="all">All Stores</SelectItem>
+                {storeList.map((store, idx) => (
+                  <SelectItem key={idx} value={store.id.toString()}>
+                    {store.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+      </section>
       <section id="summary-card" className="grid grid-cols-4 mb-5 gap-5">
         {summaryCard.map((s, idx) => (
-          <Card key={idx} className={s.border}>
-            <CardHeader className="flex justify-between">
+          <Card key={idx} className={`${s.border}`}>
+            <CardHeader className="flex justify-between items-center">
               <CardTitle className="font-semibold text-lg">{s.name}</CardTitle>
               {s.icon}
             </CardHeader>
             <CardContent>
-              <p>
-                <span>{s.total}</span> Unit
-              </p>
+              <p className="text-center">{s.total}</p>
             </CardContent>
-            <CardFooter>{s.desc}</CardFooter>
+            <CardFooter className="text-gray-400">{s.desc}</CardFooter>
           </Card>
         ))}
       </section>
@@ -142,7 +203,7 @@ export default function StockHistory() {
                 Reiciendis, nulla?
               </CardDescription>
             </div>
-            <div>
+            {/* <div>
               <Select>
                 <SelectTrigger>
                   <SelectValue placeholder="Store Name"></SelectValue>
@@ -155,7 +216,7 @@ export default function StockHistory() {
                   </SelectGroup>
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
           </CardHeader>
           {/* Searchbar-filter-newprd */}
           <div className="flex max-md:flex-col justify-between gap-2 px-7">
