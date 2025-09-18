@@ -104,6 +104,14 @@ export default function SalesReport() {
     }
   };
 
+  const getOrderList = async () => {
+    try {
+      const res = await apiCall.get("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     getStoreList();
   }, []);
