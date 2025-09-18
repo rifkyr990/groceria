@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,11 @@ import useWilayah, { Wilayah } from "@/hooks/use-wilayah";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
+// import MapPickerInner secara dinamis
+const MapPicker = dynamic(() => import("@/components/MapPickerInner"), {
+  ssr: false,
+});
+
 interface AddressFormValues {
   name: string;
   phone: string;
@@ -28,6 +34,8 @@ interface AddressFormValues {
   detail: string;
   label: "RUMAH" | "KANTOR";
   is_primary: boolean;
+  latitude: number;
+  longitude: number;
 }
 
 export default function AddAddressModal() {
@@ -46,6 +54,8 @@ export default function AddAddressModal() {
         detail: "",
         label: "RUMAH",
         is_primary: false,
+        latitude: -6.2, // default Jakarta
+        longitude: 106.816666,
       },
     });
 
@@ -57,7 +67,9 @@ export default function AddAddressModal() {
     districtId: watch("district"),
   });
 
-  const selectedSub = subdistricts.find((s) => s.subdistrict_id === watch("subdistrict"));
+  const selectedSub = subdistricts.find(
+    (s) => s.subdistrict_id === watch("subdistrict")
+  );
   useEffect(() => {
     if (selectedSub?.zip_code) {
       setValue("postal_code", selectedSub.zip_code);
@@ -65,6 +77,36 @@ export default function AddAddressModal() {
       setValue("postal_code", "");
     }
   }, [selectedSub, setValue]);
+
+  useEffect(() => {
+    const provinceName = provinces.find((p) => p.province_id === watch("province"))?.province;
+    const cityName = cities.find((c) => c.city_id === watch("city"))?.city_name;
+    const districtName = districts.find((d) => d.district_id === watch("district"))?.district_name;
+    const subdistrictName = subdistricts.find((s) => s.subdistrict_id === watch("subdistrict"))?.subdistrict_name;
+
+    const fullAddress = [subdistrictName, districtName, cityName, provinceName, "Indonesia"]
+      .filter(Boolean)
+      .join(", ");
+
+    if (fullAddress) {
+      const fetchCoords = async () => {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}`
+          );
+          const data = await res.json();
+          if (data && data.length > 0) {
+            setValue("latitude", parseFloat(data[0].lat));
+            setValue("longitude", parseFloat(data[0].lon));
+          }
+        } catch (err) {
+          console.error("Gagal fetch koordinat:", err);
+        }
+      };
+      fetchCoords();
+    }
+  }, [watch("province"), watch("city"), watch("district"), watch("subdistrict")]);
+
 
   const onSubmit = async (data: AddressFormValues) => {
     const provinceName =
@@ -109,7 +151,7 @@ export default function AddAddressModal() {
       ))}
     </>
   );
-
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -210,7 +252,22 @@ export default function AddAddressModal() {
               className="w-full border rounded p-2"
             ></textarea>
           </div>
-
+          <div className="w-full max-w-md h-40 mx-auto my-4">
+            <MapPicker
+              disabled={false}
+              defaultLocation={{
+                lat: watch("latitude"),
+                long: watch("longitude"),
+                road: watch("street"),
+                city: watch("city"),
+                province: watch("province"),
+              }}
+              onLocationSelect={(data) => {
+                setValue("latitude", data.lat);
+                setValue("longitude", data.long);
+              }}
+            />
+          </div>
           <div>
             <Label className="mb-3">Label Alamat</Label>
             <div className="flex gap-6 mt-1">
@@ -229,7 +286,7 @@ export default function AddAddressModal() {
             <input type="checkbox" {...register("is_primary")} />
             <span>Jadikan alamat utama</span>
           </div>
-
+            
           <div className="flex justify-end gap-2 pt-4">
             <Button
               type="button"

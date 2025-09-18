@@ -33,7 +33,6 @@ export default function DesktopPrdDetails({
   const filteredCategory = productsByLoc?.filter(
     (p) => p.category.category === selectedProductDetails?.category.category
   );
-  // console.log(filteredCategory);
   const router = useRouter();
 
   // increment/decrement purchasement handler

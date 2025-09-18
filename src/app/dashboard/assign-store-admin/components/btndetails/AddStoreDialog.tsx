@@ -150,7 +150,7 @@ export default function AddStoreDialog() {
                         {/* Status & Admins */}
                         <div className="flex gap-x-2 mb-2 justify-between">
                             {/* Store Status */}
-                            {/* <div className="mb-2 w-full">
+                            <div className="mb-2 w-full">
                                 <label className="text-sm">Store Status</label>
                                 <Select
                                     value={storeStatus ? "active" : "inactive"}
@@ -172,10 +172,10 @@ export default function AddStoreDialog() {
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>
-                            </div> */}
+                            </div>
 
                             {/* Store Admins */}
-                            {/* <div className="mb-2 w-full">
+                            <div className="mb-2 w-full">
                                 <label className="text-sm">Store Admins</label>
                                 <Select
                                     onValueChange={(value) => {
@@ -216,7 +216,7 @@ export default function AddStoreDialog() {
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>
-                            </div> */}
+                            </div>
                         </div>
 
                         {/* Map Picker */}

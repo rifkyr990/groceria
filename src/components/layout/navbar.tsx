@@ -217,7 +217,7 @@ export default function Navbar() {
                     <Settings className="w-4 h-4" /> Pengaturan
                     </Link>
                     <button
-                    onClick={() => {
+                        onClick={() => {
                         logout();
                         setMobileOpen(false);
                     }}

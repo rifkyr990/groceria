@@ -45,6 +45,12 @@ const items = [
     url: "/dashboard/manage-store",
   },
   {
+    id: 8,
+    icon: <UserRoundPen className="size-10" />,
+    menu: "Assign Store Admin",
+    url: "/dashboard/assign-store-admin",
+  },
+  {
     id: 2,
     icon: <BadgeDollarSign />,
     menu: "Order",
