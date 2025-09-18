@@ -11,10 +11,9 @@ import { useProduct } from "@/store/useProduct";
 import { IProductProps } from "@/types/product";
 import { formatIDRCurrency, upperFirstCharacter } from "@/utils/format";
 import Autoplay from "embla-carousel-autoplay";
-import { Headset, MapPin, ShoppingCart, Store } from "lucide-react";
-import { handler } from "next/dist/build/templates/app-page";
+import { Headset, MapPin, ShoppingCart } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface IDesktopPrdDetails {
@@ -25,16 +24,29 @@ export default function DesktopPrdDetails({
   // detailsData,
   className,
 }: IDesktopPrdDetails) {
-  const { selectedProductDetails, productsByLoc, setSelectedProductDetails } =
-    useProduct();
-  console.log(selectedProductDetails);
-  // console.log(productsByLoc);
+  const {
+    selectedProductDetails,
+    productsByLoc,
+    getProductById,
+    setSelectedProductDetails,
+  } = useProduct();
+  // console.log(selectedProductDetails);
+
+  // case untuk fetch data ulang (bila ada perubahan data stock/keterangan lain di dashboard)
+  const router = useRouter();
+  const params = useParams();
+  const id = Number(params.id);
+
+  useEffect(() => {
+    if (id) {
+      getProductById(id);
+    }
+  }, [id, getProductById]);
 
   const filteredCategory = productsByLoc?.filter(
     (p) => p.category.category === selectedProductDetails?.category.category
   );
   // console.log(filteredCategory);
-  const router = useRouter();
 
   // increment/decrement purchasement handler
   const [value, setValue] = useState(1);
@@ -71,6 +83,7 @@ export default function DesktopPrdDetails({
       province: stock.store.province,
     };
   })[0];
+
   // console.log(storeIdentity);
   // Contact Handler
   // const adminContact =

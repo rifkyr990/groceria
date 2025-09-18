@@ -54,7 +54,7 @@ export default function EditProductCategory({
         `Anda yakin menghapus kategori ${cat}?,\nSemua produk akan berubah menjadi 'Others'`
       );
       if (!confirmDelete) return;
-      await apiCall.delete(`api/product/category`, { data: { cleanData } });
+      await apiCall.patch(`api/product/category`, { cleanData });
       alert(`Kategori ${cat} berhasil terhapus`);
       getCategory();
     } catch (error) {
@@ -64,16 +64,19 @@ export default function EditProductCategory({
   const editCategory = async () => {
     const newCat = categoryName.trim().toLowerCase();
     const oldCat = editCat?.category.trim().toLowerCase();
+    console.log(newCat, oldCat);
     if (!newCat) return alert("Harus ada isinya");
     try {
       const checkCat = arrCategories.some((cat) => cat === newCat);
+      console.log(checkCat);
       if (checkCat) return alert("Kategori sudah ada");
-      const res = await apiCall.patch("/api/product/category", {
+      const res = await apiCall.patch("/api/product/update-category", {
         data: { newCat, oldCat },
       });
       alert("Update Success");
       getCategory();
-      setOpen(false);
+      setCategoryName("");
+      setEditCat(null);
     } catch (error) {
       console.log(error);
     }

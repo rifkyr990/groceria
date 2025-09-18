@@ -31,6 +31,7 @@ import EditProductCategory from "../components/EditProductCategory";
 import { Switch } from "@/components/ui/switch";
 import EditProductDetails from "../components/EditProductDetails";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 export default function ProductList() {
   const { products, getProductList } = useProduct(
@@ -128,13 +129,13 @@ export default function ProductList() {
   const deleteSelectedProduct = async () => {
     try {
       const confirm = window.confirm(
-        `Apa Anda yakin ingin hapus ${selectedProduct.length} produk?`
+        `Apa Anda yakin ingin hapus ${selectedProduct.length} produk? Produk akan dihapus dari seluruh store`
       );
       if (!confirm) return;
-      const res = await apiCall.delete("/api/product", {
+      const res = await apiCall.patch("/api/product/soft-delete", {
         data: selectedProduct,
       });
-      alert("Delete Product Success");
+      toast.success("Delete Product Success");
       window.location.reload();
     } catch (error) {
       console.log(error);
@@ -309,7 +310,12 @@ export default function ProductList() {
                   </TableCell>
                   <TableCell className="text-center">
                     <div className="flex gap-x-2 justify-center items-center">
-                      <Button onClick={() => setEditDetails((prev) => !prev)}>
+                      <Button
+                        onClick={() => {
+                          setSelectedProductDetails(product); // simpan produk yang dipilih ke Zustand
+                          router.push(`/dashboard/manage-product/edit-product`); // pindah ke halaman edit
+                        }}
+                      >
                         Edit Product
                       </Button>
                       <Button

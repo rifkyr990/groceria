@@ -24,13 +24,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { apiCall } from "@/helper/apiCall";
 import { IStoreProps } from "@/types/store";
-import { MapPinPen, RotateCcw, Search } from "lucide-react";
+import { Edit, Search, Trash } from "lucide-react";
 import { useState } from "react";
-import { toast } from "react-toastify";
-import RelocateAdmin from "./btndetails/RelocateAdmin";
-import { IRelocateAdminData } from "@/types/relocate_admin";
+import NewStoreAdmin from "./btndetails/NewStoreAdmin";
+import { IUserProps } from "@/types/user";
+import { apiCall } from "@/helper/apiCall";
+import EditStoreAdmin from "./btndetails/EditStoreAdmin";
 
 interface IStoreAdminData {
   className?: string;
@@ -41,6 +41,9 @@ export default function StoreAdminData({
   className,
   storeAdmins,
 }: IStoreAdminData) {
+  const [openNewAdmin, setOpenNewAdmin] = useState(false);
+  const [openEditAdmin, setOpenEditAdmin] = useState(false);
+  const [selectedStoreAdmin, setSelectedStoreAdmin] = useState("");
   const storeAdminData = storeAdmins.flatMap((store) =>
     store.admins?.map((admin) => ({
       adminId: admin.id,
@@ -49,6 +52,7 @@ export default function StoreAdminData({
       storeName: store.name,
       adminRole: admin.role,
       storeId: store.id,
+      adminPhone: admin.phone,
     }))
   );
   const storeList = storeAdmins.map((store) => ({
@@ -78,36 +82,51 @@ export default function StoreAdminData({
   const totalPages = Math.ceil(filteredAdmin.length / usersPerPage);
 
   // revert store admin to cust
-  const handlerRevertAdmin = async (
-    id: string,
-    role: string,
-    store_id: number
-  ) => {
+  // const handlerRevertAdmin = async (
+  //   id: string,
+  //   role: string,
+  //   store_id: number
+  // ) => {
+  //   try {
+  //     const confirmAlert = confirm("Are you sure revert this store admin?");
+  //     if (!confirmAlert) return;
+  //     const res = await apiCall.patch(`/api/user/revert-admin/${id}`, {
+  //       role,
+  //       store_id,
+  //     });
+  //     if (!res) toast.error("Revert Store Admin Error");
+  //     toast.success("Revert Admin Success");
+  //     window.location.reload();
+  //     console.log(res.data.data);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+  // change store
+  // const [openStoreTf, setOpenStoreTf] = useState<{
+  //   adminData: IRelocateAdminData | null;
+  //   storeList: { id: number; name: string }[];
+  //   open: boolean;
+  // }>({
+  //   adminData: null,
+  //   storeList: storeList,
+  //   open: false,
+  // });
+
+  // delete admin by id (as a user)
+
+  const deleteStoreAdmin = async (id: string) => {
+    const confirm = window.confirm("Are you sure delete this store admin?");
+    if (!confirm) return;
     try {
-      const confirmAlert = confirm("Are you sure revert this store admin?");
-      if (!confirmAlert) return;
-      const res = await apiCall.patch(`/api/user/revert-admin/${id}`, {
-        role,
-        store_id,
-      });
-      if (!res) toast.error("Revert Store Admin Error");
-      toast.success("Revert Admin Success");
+      const user_id = id;
+      await apiCall.delete(`/api/user/${user_id}`);
+      alert("Delete store admin success");
       window.location.reload();
-      console.log(res.data.data);
     } catch (error) {
       console.log(error);
     }
   };
-  // change store
-  const [openStoreTf, setOpenStoreTf] = useState<{
-    adminData: IRelocateAdminData | null;
-    storeList: { id: number; name: string }[];
-    open: boolean;
-  }>({
-    adminData: null,
-    storeList: storeList,
-    open: false,
-  });
 
   return (
     <div>
@@ -118,6 +137,14 @@ export default function StoreAdminData({
               <h1 className="font-semibold text-xl">Store Admin</h1>
             </div>
             <div id="btn" className="flex gap-x-2">
+              <div id="new-sa">
+                <Button
+                  className="bg-blue-500 hover:bg-blue-600"
+                  onClick={() => setOpenNewAdmin(true)}
+                >
+                  New Store Admin
+                </Button>
+              </div>
               <div id="filter" className="w-full">
                 <Select
                   value={selectedStore ?? ""}
@@ -169,6 +196,7 @@ export default function StoreAdminData({
                 <TableHead className="text-center">First Name</TableHead>
                 <TableHead className="text-center">Last Name</TableHead>
                 <TableHead className="text-center">Store Name</TableHead>
+                <TableHead className="text-center">Phone</TableHead>
                 <TableHead className="text-center">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -178,35 +206,21 @@ export default function StoreAdminData({
                   <TableCell>{admin?.adminFirstName}</TableCell>
                   <TableCell>{admin?.adminLastName}</TableCell>
                   <TableCell>{admin?.storeName}</TableCell>
+                  <TableCell>{admin?.adminPhone}</TableCell>
                   <TableCell className="flex gap-x-2 items-center text-center justify-center">
                     <Button
-                      className="bg-blue-500 hover:bg-blue-600
-                  "
-                      onClick={() =>
-                        setOpenStoreTf({
-                          adminData: {
-                            adminId: admin?.adminId,
-                            storeId: admin?.storeId,
-                            storeName: admin?.storeName,
-                          },
-                          storeList: storeList,
-                          open: true,
-                        })
-                      }
+                      onClick={() => {
+                        setSelectedStoreAdmin(admin?.adminId ?? "");
+                        setOpenEditAdmin(true);
+                      }}
                     >
-                      <MapPinPen className="text-white" />
+                      <Edit />
                     </Button>
                     <Button
                       variant={"destructive"}
-                      onClick={() =>
-                        handlerRevertAdmin(
-                          admin?.adminId ?? "",
-                          admin?.adminRole ?? "CUSTOMER",
-                          admin?.storeId ?? 0
-                        )
-                      }
+                      onClick={() => deleteStoreAdmin(admin?.adminId ?? "")}
                     >
-                      <RotateCcw />
+                      <Trash />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -221,20 +235,21 @@ export default function StoreAdminData({
             totalPages={totalPages}
             onPageChange={setCurrentPage}
           />
-          {/* Dialog Change Store */}
-          <RelocateAdmin
-            open={openStoreTf.open}
-            setOpen={(val) =>
-              setOpenStoreTf((prev) => ({
-                ...prev,
-                open: val,
-              }))
-            }
-            adminData={openStoreTf.adminData}
-            storeList={storeList}
-          />
         </CardFooter>
       </Card>
+      {/* New Store Admin */}
+      <NewStoreAdmin
+        open={openNewAdmin}
+        setOpen={setOpenNewAdmin}
+        storeList={storeList}
+      />
+      {/* Edit Store Admin  */}
+      <EditStoreAdmin
+        open={openEditAdmin}
+        setOpen={setOpenEditAdmin}
+        selectedUser={selectedStoreAdmin}
+        storeList={storeList}
+      />
     </div>
   );
 }

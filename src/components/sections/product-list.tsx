@@ -37,7 +37,7 @@ export default function ProductList() {
         const url =
           province && city
             ? `/api/product?province=${encodeURIComponent(province)}&city=${encodeURIComponent(city)}${latitude && longitude ? `&lat=${latitude}&long=${longitude}` : ""}`
-            : `/api/product/all`;
+            : `/api/product/landing/all`;
 
         const res = await apiCall.get(url);
         const result = res.data.data;
@@ -177,7 +177,10 @@ export default function ProductList() {
                 </p>
 
                 <button
-                  onClick={() => handleAddToCart(product)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddToCart(product);
+                  }}
                   className="mt-5 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-xl transition"
                 >
                   <ShoppingCart size={18} />

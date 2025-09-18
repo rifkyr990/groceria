@@ -30,6 +30,8 @@ import { IStockProps } from "@/types/stock";
 import { Edit, PackageSearch, Search, Trash } from "lucide-react";
 import { useState } from "react";
 import EditStockProduct from "./EditStockPrd";
+import { formatDate, formatIntlDate } from "@/utils/format";
+import { apiCall } from "@/helper/apiCall";
 interface IProductStock {
   className?: string;
   stocks: IStockProps[];
@@ -49,9 +51,6 @@ export default function ProductStock({ className, stocks }: IProductStock) {
   const [editStock, setEditStock] = useState(false);
   const [selectedProductStock, setSelectedProductStock] =
     useState<IStockProps | null>(null);
-  const deleteSelectedStockProduct = (id: number) => {
-    console.log(id);
-  };
   return (
     <div className={`${className}`}>
       <Card>
@@ -117,7 +116,7 @@ export default function ProductStock({ className, stocks }: IProductStock) {
                 <TableHead className="text-center">Status</TableHead>
                 <TableHead className="text-center">Active/Inactive</TableHead>
                 <TableHead className="text-center">Updated at</TableHead>
-                <TableHead className="text-center">Action</TableHead>
+                <TableHead className="text-center">Update Stock</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -138,7 +137,7 @@ export default function ProductStock({ className, stocks }: IProductStock) {
                     {prd.product.is_active === true ? "Active" : "Inactive"}
                   </TableCell>
                   <TableCell className="text-center">
-                    {prd.updated_at.toLocaleString()}
+                    {formatDate(prd.updated_at)}
                   </TableCell>
                   <TableCell>
                     <div className="flex justify-center gap-x-2">
@@ -150,15 +149,14 @@ export default function ProductStock({ className, stocks }: IProductStock) {
                           setEditStock((prev) => !prev);
                         }}
                       >
-                        <PackageSearch />
+                        <PackageSearch /> Update
                       </Button>
-                      <Button
+                      {/* <Button
                         variant={"destructive"}
                         className="cursor-pointer"
-                        onClick={() => deleteSelectedStockProduct(prd.id)}
                       >
                         <Trash />
-                      </Button>
+                      </Button> */}
                     </div>
                   </TableCell>
                 </TableRow>

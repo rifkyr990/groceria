@@ -63,8 +63,6 @@ export default function StockHistory() {
     }
   };
 
-
-
   useEffect(() => {
     getStockHistory();
   }, []);
@@ -172,7 +170,8 @@ export default function StockHistory() {
                   </TableCell>
 
                   <TableCell className="text-center">
-                    {prd.created_by.first_name} {prd.created_by.last_name}
+                    {prd.created_by?.first_name ?? ""}{" "}
+                    {prd.created_by?.last_name ?? ""}
                   </TableCell>
                   <TableCell className="text-center max-w-[150px] whitespace-normal break-words">
                     {prd.reason}
