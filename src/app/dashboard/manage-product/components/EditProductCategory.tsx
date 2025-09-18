@@ -50,6 +50,8 @@ export default function EditProductCategory({
   const deleteCategory = async (cat: string) => {
     try {
       const cleanData = cat.trim().toLowerCase();
+      if (cleanData === "others")
+        return alert("Kategori Others tidak dapat dihapus");
       const confirmDelete = window.confirm(
         `Anda yakin menghapus kategori ${cat}?,\nSemua produk akan berubah menjadi 'Others'`
       );
@@ -138,7 +140,7 @@ export default function EditProductCategory({
             </div>
           </section>
           <section id="edit-category" className="mt-5">
-            <label>Category List</label>
+            <label>Active Product Category List</label>
             <Table>
               <TableHeader>
                 <TableRow>
