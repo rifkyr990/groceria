@@ -2,6 +2,28 @@
 import { MonthYearPicker } from "@/components/MonthYearPicker";
 import { Button } from "@/components/ui/button";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { apiCall } from "@/helper/apiCall";
+import { IStoreProps } from "@/types/store";
+import { formatIDRCurrency } from "@/utils/format";
+import {
+  BadgeDollarSign,
+  Clipboard,
+  RefreshCcw,
+  Search,
+  ShoppingBag,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import DashboardLayout from "../../components/DashboardLayout";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -11,51 +33,56 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { apiCall } from "@/helper/apiCall";
-import { IStockHistory } from "@/types/stock";
-import { IStoreProps } from "@/types/store";
-import { formatDate } from "@/utils/format";
-import {
-  CircleArrowDown,
-  CircleArrowUp,
-  PackageCheck,
-  PackageX,
-  Search,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import DashboardLayout from "../../components/DashboardLayout";
-import { useRouter } from "next/navigation";
 
-interface Summary {
-  totalAddition: number;
-  totalReduction: number;
-  totalLatestStock: number;
-  totalOutofStock: number;
-}
-const quantityColor = (value: number, type: string) => {
-  if (type === "OUT") {
-    return <p className="text-red-500">-{value}</p>;
-  }
-  return <p className="text-green-500">+{value}</p>;
-};
-
-export default function StockHistory() {
+const summaryCard = [
+  {
+    id: 1,
+    name: "Total Sales",
+    icon: <BadgeDollarSign className="text-green-500" />,
+    border: "border-l-green-500 border-4 border-y ",
+    total: (
+      <span className="text-green-500 text-4xl font-bold ">
+        {/* {summary.totalAddition} */} {formatIDRCurrency(50000)}
+      </span>
+    ),
+    desc: "per month",
+  },
+  {
+    id: 2,
+    name: "Total Sold Product",
+    icon: <ShoppingBag className="text-amber-500" />,
+    border: "border-l-amber-500 border-4",
+    total: <span className="text-amber-500 text-4xl font-bold ">50</span>,
+    desc: "products per month",
+  },
+  {
+    id: 3,
+    name: "Total Order",
+    icon: <Clipboard className="text-purple-500" />,
+    border: "border-l-purple-500 border-4",
+    total: <span className="text-purple-500 text-4xl font-bold ">100</span>,
+    desc: "orders per month",
+  },
+  {
+    id: 4,
+    name: "Total Refund",
+    icon: <RefreshCcw className="text-red-500" />,
+    border: "border-l-red-500 border-4",
+    total: (
+      <span className="text-red-500 text-4xl font-bold ">
+        {formatIDRCurrency(100000)}
+      </span>
+    ),
+    desc: "per month",
+  },
+];
+export default function SalesReport() {
   const router = useRouter();
   const [selectedStore, setSelectedStore] = useState("all");
   const [storeList, setStoreList] = useState<IStoreProps[]>([]);
@@ -66,62 +93,6 @@ export default function StockHistory() {
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
   });
-  const [summary, setSummary] = useState({
-    totalAddition: 0,
-    totalReduction: 0,
-    totalLatestStock: 0,
-    totalOutOfStock: 0,
-  });
-  const summaryCard = [
-    {
-      id: 1,
-      name: "Total Addition",
-      icon: <CircleArrowUp className="text-green-500" />,
-      border: "border-l-green-500 border-4 border-y ",
-      total: (
-        <span className="text-green-500 text-4xl font-bold ">
-          {summary.totalAddition}
-        </span>
-      ),
-      desc: "per month",
-    },
-    {
-      id: 2,
-      name: "Total Reduction",
-      icon: <CircleArrowDown className="text-amber-500" />,
-      border: "border-l-amber-500 border-4",
-      total: (
-        <span className="text-amber-500 text-4xl font-bold ">
-          {summary.totalReduction}
-        </span>
-      ),
-      desc: "per month",
-    },
-    {
-      id: 3,
-      name: "Total Latest Stock",
-      icon: <PackageCheck className="text-purple-500" />,
-      border: "border-l-purple-500 border-4",
-      total: (
-        <span className="text-purple-500 text-4xl font-bold ">
-          {summary.totalLatestStock}
-        </span>
-      ),
-      desc: "per month",
-    },
-    {
-      id: 4,
-      name: "Total Out of Stock Product",
-      icon: <PackageX className="text-red-500" />,
-      border: "border-l-red-500 border-4",
-      total: (
-        <span className="text-red-500 text-4xl font-bold ">
-          {summary.totalOutOfStock}
-        </span>
-      ),
-      desc: "per month",
-    },
-  ];
 
   const getStoreList = async () => {
     try {
@@ -133,44 +104,9 @@ export default function StockHistory() {
     }
   };
 
-  const [stockHistory, setStockHistory] = useState<IStockHistory[]>([]);
-  const [open, setOpen] = useState(false);
-
-  const getStockHistory = async () => {
-    const { month, year } = selectedDate;
-    try {
-      let res;
-      if (selectedStore === "all") {
-        res = await apiCall.get(
-          `/api/stock/stock-history/summary-all-store?month=${month}&year=${year}`
-        );
-      } else {
-        res = await apiCall.get(
-          `/api/stock/stock-history/summary?storeId=${Number(selectedStore)}&month=${month}&year=${year}`
-        );
-      }
-      const { stockHistory = [], summary = {} } = res.data.data ?? {};
-
-      setStockHistory(Array.isArray(stockHistory) ? stockHistory : []);
-      setSummary({
-        totalAddition: summary.totalAddition ?? 0,
-        totalReduction: summary.totalReduction ?? 0,
-        totalLatestStock: summary.totalLatestStock ?? 0,
-        totalOutOfStock: summary.totalOutOfStock ?? 0,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  // console.log(stockHistory);
-
   useEffect(() => {
     getStoreList();
   }, []);
-  useEffect(() => {
-    getStockHistory();
-  }, [selectedStore, selectedDate]);
   return (
     <DashboardLayout>
       <section
@@ -180,10 +116,10 @@ export default function StockHistory() {
         <div>
           <Button
             onClick={() =>
-              router.replace("/dashboard/manage-reporting/sales-report")
+              router.replace("/dashboard/manage-reporting/stock-report")
             }
           >
-            Sales Report
+            Stock Report
           </Button>
         </div>
         <div>
@@ -211,7 +147,7 @@ export default function StockHistory() {
           <MonthYearPicker value={selectedDate} onChange={setSelectedDate} />
         </div>
       </section>
-      <section id="summary-card" className="grid grid-cols-4 mb-5 gap-5">
+      <section id="summary-card" className="grid grid-cols-4 gap-6 mb-5">
         {summaryCard.map((s, idx) => (
           <Card key={idx} className={`${s.border}`}>
             <CardHeader className="flex justify-between items-center">
@@ -225,13 +161,11 @@ export default function StockHistory() {
           </Card>
         ))}
       </section>
-      <section id="summary-chart"></section>
-
       <section id="stock-history-table">
         <Card>
           <CardHeader className="flex justify-between items-center">
             <div>
-              <CardTitle>Product Stock History</CardTitle>
+              <CardTitle>Sales Report</CardTitle>
               <CardDescription>
                 Lorem ipsum dolor sit amet consectetur adipisicing elit.
                 Reiciendis, nulla?
@@ -245,8 +179,41 @@ export default function StockHistory() {
               <Input className="w-full" placeholder="Search product ..." />
             </div>
             <div className="flex justify-between gap-x-2">
-              <div id="btn-newprd">
-                <Button>New Product</Button>
+              <div id="filter-category">
+                <Select>
+                  <SelectTrigger className="bg-white">
+                    <SelectValue placeholder="Category"></SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Category</SelectLabel>
+                      <SelectItem value="all">All</SelectItem>
+                      {storeList.map((store, idx) => (
+                        <SelectItem key={idx} value={store.id.toString()}>
+                          {store.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div id="filter-product">
+                <Select>
+                  <SelectTrigger className="bg-white">
+                    <SelectValue placeholder="Product"></SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Product Name</SelectLabel>
+                      <SelectItem value="all">All</SelectItem>
+                      {storeList.map((store, idx) => (
+                        <SelectItem key={idx} value={store.id.toString()}>
+                          {store.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
@@ -254,19 +221,17 @@ export default function StockHistory() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Invoice</TableHead>
                   <TableHead>Product</TableHead>
-                  <TableHead className="text-center">Type</TableHead>
+                  <TableHead className="text-center">Category</TableHead>
                   <TableHead className="text-center">Quantity</TableHead>
-                  <TableHead className="text-center">Previous Stock</TableHead>
-                  <TableHead className="text-center">Actual Stock</TableHead>
-
-                  <TableHead className="text-center">Created at</TableHead>
+                  <TableHead className="text-center">Total Payment</TableHead>
                   <TableHead className="text-center">Store Name</TableHead>
-                  <TableHead className="text-center">Created by</TableHead>
-                  <TableHead className="text-center">Reason</TableHead>
+                  <TableHead className="text-center">Created at</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              {/* <TableBody>
                 {stockHistory.map((prd, idx) => (
                   <TableRow key={idx}>
                     <TableCell>{prd.productStock.product.name}</TableCell>
@@ -309,9 +274,9 @@ export default function StockHistory() {
                       </Button>
                     </div>
                   </TableCell> */}
-                  </TableRow>
+              {/* </TableRow>
                 ))}
-              </TableBody>
+              </TableBody> */}
             </Table>
           </CardContent>
         </Card>

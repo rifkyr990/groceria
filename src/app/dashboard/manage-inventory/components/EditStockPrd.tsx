@@ -46,14 +46,6 @@ export default function EditStockProduct({
     const store_id = selectedProduct?.store.id;
     const updated_stock = Number(formData.get("quantity") || 0);
     const prev_qty = selectedProduct?.stock_quantity ?? 0;
-    // if (
-    //   (updated_stock - prev_qty && stockType === "IN") ||
-    //   (updated_stock + prev_qty && stockType === "OUT")
-    // ) {
-    //   alert("Wrong Type Selection");
-    //   return;
-    // }
-
     if (stockType === "IN" && updated_stock < prev_qty) {
       alert("Wrong Change Type Selection");
       return;
@@ -134,7 +126,7 @@ export default function EditStockProduct({
                       <SelectLabel>Change Type</SelectLabel>
                       <SelectItem value="IN">Stock IN</SelectItem>
                       <SelectItem value="OUT">Stock OUT</SelectItem>
-                      <SelectItem value="ADJUSTMENT">Adjustment</SelectItem>
+                      {/* <SelectItem value="ADJUSTMENT">Adjustment</SelectItem> */}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
