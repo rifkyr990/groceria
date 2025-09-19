@@ -106,9 +106,6 @@ export const useCartStore = create<CartState>((set, get) => ({
             : item
         );
       } else {
-        // When adding a new item, we don't have a cartItem.id from DB yet.
-        // We use a temporary ID like Date.now() for React key prop stability.
-        // The real ID will be assigned when fetched from the backend after saving.
         const newItem = {
           ...product,
           id: Date.now(),
@@ -127,7 +124,6 @@ export const useCartStore = create<CartState>((set, get) => ({
         appliedPromo: isNewStore ? null : state.appliedPromo,
       };
 
-      // Immediately trigger a save after updating the state.
       setTimeout(() => {
         const { token } = useAuthStore.getState();
         if (token) {
@@ -143,7 +139,7 @@ export const useCartStore = create<CartState>((set, get) => ({
       const updatedItems = state.items.map((item) =>
         item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item
       );
-      // Trigger save
+
       setTimeout(() => {
         const { token } = useAuthStore.getState();
         if (token) get().saveCart(token);
@@ -158,7 +154,7 @@ export const useCartStore = create<CartState>((set, get) => ({
           ? { ...item, quantity: Math.max(1, item.quantity - 1) }
           : item
       );
-      // Trigger save
+
       setTimeout(() => {
         const { token } = useAuthStore.getState();
         if (token) get().saveCart(token);
