@@ -7,7 +7,7 @@ import { formatIDRCurrency } from "@/utils/format";
 export default function CartItem({
   id,
   name,
-  details,
+  description,
   price,
   image,
   quantity,
@@ -35,7 +35,7 @@ export default function CartItem({
                 {name}
               </h3>
               <p className="text-xs sm:text-sm text-text-muted mt-0.5 sm:mt-1 truncate">
-                {details}
+                {description}
               </p>
             </div>
             <p className="font-bold text-sm sm:text-base lg:text-lg text-text-dark whitespace-nowrap flex-shrink-0">

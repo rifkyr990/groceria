@@ -2,10 +2,10 @@ import { IoRemoveOutline, IoAddOutline } from "react-icons/io5";
 import { Button } from "@/components/ui/button";
 
 interface QuantityIncrementerProps {
-  id: string;
+  id: number;
   quantity: number;
-  onIncrement: (id: string) => void;
-  onDecrement: (id: string) => void;
+  onIncrement: (id: number) => void;
+  onDecrement: (id: number) => void;
 }
 
 export default function QuantityIncrementer({

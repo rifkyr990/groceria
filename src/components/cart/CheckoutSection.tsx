@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import OrderSummary from "./OrderSummary";
 import PromoInput from "./PromoInput";
 import { CheckoutSectionProps } from "@/components/types";
@@ -31,6 +32,11 @@ export default function CheckoutSection({
     return { subtotal, discountCut, total };
   }, [items, appliedPromo]);
 
+  const router = useRouter();
+  const handleCheckout = () => {
+    router.push("/checkout");
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <StepIndicator />
@@ -48,7 +54,7 @@ export default function CheckoutSection({
         onApply={onApplyPromo}
         onRemove={onRemovePromo}
       />
-      <CheckoutButton onCheckout={() => {}} total={total} />
+      <CheckoutButton mode="cart" onClick={handleCheckout} total={total} />
     </div>
   );
 }

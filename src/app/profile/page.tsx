@@ -1,21 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
 import ProfileForm from "./profile-form";
 import AddressForm from "./address-form";
 import PasswordForm from "./password-form";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
+import { useAuthStore } from "@/store/auth-store"; // pastikan ini mengandung { user, hydrate }
 
 export default function ProfilePage() {
-    const [activeTab, setActiveTab] = useState<
-        "profile" | "address" | "password"
-    >("profile");
+    const [activeTab, setActiveTab] = useState<"profile" | "address" | "password">("profile");
+    const { user, hydrate } = useAuthStore();
+    const router = useRouter();
+    const [checkingAuth, setCheckingAuth] = useState(true);
+
+    // useEffect(() => {
+    //     hydrate();
+    // }, [hydrate]);
+
+    // useEffect(() => {
+    //     // Cek status autentikasi
+    //     if (user === null) {
+    //         router.replace("/");
+    //     } else if (!user.is_verified) {
+    //         router.replace("/");
+    //     } else {
+    //         setCheckingAuth(false);
+    //     }
+    // }, [user, router]);
+
+    // if (checkingAuth) {
+    //     return null;
+    // }
 
     return (
         <div className="flex flex-col min-h-screen">
-            {/* Navbar full width dan tidak mengkerut */}
             <div className="w-full flex-shrink-0">
                 <Navbar />
             </div>
@@ -31,6 +52,7 @@ export default function ProfilePage() {
                     {activeTab === "password" && <PasswordForm />}
                 </main>
             </div>
+
             <div className="w-full flex-shrink-0">
                 <Footer />
             </div>

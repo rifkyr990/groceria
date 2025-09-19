@@ -2,8 +2,8 @@ import { IoTrashOutline } from "react-icons/io5";
 import { Button } from "@/components/ui/button";
 
 interface RemoveButtonProps {
-  id: string;
-  onRemove: (id: string) => void;
+  id: number;
+  onRemove: (id: number) => void;
 }
 
 export default function RemoveButton({ id, onRemove }: RemoveButtonProps) {

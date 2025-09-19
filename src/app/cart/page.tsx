@@ -1,72 +1,106 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import CartList from "@/components/cart/CartList";
 import CheckoutSection from "@/components/cart/CheckoutSection";
-import { mockCartItems } from "@/components/cart/dummy-data/Data-CartItem";
-import { mockPromoCodes } from "@/components/cart/dummy-data/Data-Promo";
-import { CartItemProps, PromoCode } from "@/components/types";
+import { useCartStore } from "@/store/cart-store";
+import { useAuthStore } from "@/store/auth-store";
+import { useRouter } from "next/navigation";
 
 export default function CartPage() {
-  const [items, setItems] = useState<CartItemProps[]>(mockCartItems);
-  const [promoCodes, setPromoCodes] = useState<PromoCode[]>(mockPromoCodes);
-  const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
-  const [promoInputText, setPromoInputText] = useState("");
+  const router = useRouter();
+
+  const {
+    items,
+    appliedPromo: appliedPromoCode,
+    incrementItem,
+    decrementItem,
+    removeItem,
+    promoCodes,
+    tryApplyPromoCode,
+    storeName,
+    removePromoCode,
+    fetchCart,
+    saveCart,
+  } = useCartStore();
+
+  const [promoInputText, setPromoInputText] = useState(appliedPromoCode || "");
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
 
-  const handleIncrement = (id: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
-  };
+  const { token, user, hydrate } = useAuthStore();
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  const handleDecrement = (id: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity - 1) }
-          : item
-      )
-    );
-  };
+  // Hydrate auth store di awal
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
 
-  const handleRemove = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-  };
+  // Cek apakah user belum login / belum verifikasi
+  useEffect(() => {
+    if (!token || !user || !user.is_verified) {
+      router.replace("/");
+    } else {
+      setCheckingAuth(false);
+    }
+  }, [token, user, router]);
+
+  // Ambil data cart
+  useEffect(() => {
+    if (token) {
+      fetchCart(token);
+    }
+  }, [token, fetchCart]);
+
+  useEffect(() => {
+    setPromoInputText(appliedPromoCode || "");
+  }, [appliedPromoCode]);
+
+  const isInitialMount = useRef(true);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    const debounceTimer = setTimeout(() => {
+      if (token) {
+        console.log("User stopped making changes. Saving cart...");
+        saveCart(token);
+      }
+    }, 1000);
+
+    return () => {
+      clearTimeout(debounceTimer);
+    };
+  }, [items, saveCart, token]);
+
+  const appliedPromo = appliedPromoCode
+    ? promoCodes.find((p) => p.code === appliedPromoCode) || null
+    : null;
 
   const handleApplyPromo = () => {
-    const code = promoInputText.trim();
-    if (!code) return;
-
-    const found = promoCodes.find(
-      (p) => p.code.toLowerCase() === code.toLowerCase()
-    );
-    if (found) {
-      setAppliedPromo(found);
-      setPromoStatus("idle");
-    } else {
-      setAppliedPromo(null);
+    const success = tryApplyPromoCode(promoInputText);
+    if (!success) {
       setPromoStatus("invalid");
     }
   };
 
+  const handleRemovePromo = () => {
+    removePromoCode();
+    setPromoInputText("");
+    setPromoStatus("idle");
+  };
+
   const handlePromoInputChange = (value: string) => {
     setPromoInputText(value);
-    if (appliedPromo && value !== appliedPromo.code) {
-      setAppliedPromo(null);
-    }
     if (promoStatus === "invalid") {
       setPromoStatus("idle");
     }
   };
 
-  const handleRemovePromo = () => {
-    setAppliedPromo(null);
-    setPromoInputText("");
-    setPromoStatus("idle");
-  };
+  // Jangan render apapun sebelum pengecekan auth selesai
+  if (checkingAuth) return null;
 
   return (
     <main className="min-h-screen bg-[#F3F4F6] p-4 sm:p-6 md:p-8 lg:p-12">
@@ -75,9 +109,10 @@ export default function CartPage() {
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <CartList
               items={items}
-              onDecrement={handleDecrement}
-              onIncrement={handleIncrement}
-              onRemove={handleRemove}
+              onDecrement={decrementItem}
+              onIncrement={incrementItem}
+              onRemove={removeItem}
+              storeName={storeName}
             />
           </div>
 
