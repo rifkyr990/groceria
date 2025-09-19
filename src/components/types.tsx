@@ -69,7 +69,7 @@ export interface CartListProps {
 export interface PromoCode {
   code: string;
   description: string;
-  type: "percentage" | "fixed";
+  type: "percentage" | "fixed" | "free_shipping";
   value: number;
 }
 
@@ -78,7 +78,6 @@ export interface CheckoutSectionProps {
   appliedPromo: PromoCode | null;
   promoInputText: string;
   promoStatus: "idle" | "invalid";
-  promoCodes: PromoCode[];
   onApplyPromo: () => void;
   onRemovePromo: () => void;
   onPromoInputChange: (value: string) => void;
@@ -88,7 +87,6 @@ export interface PromoInputProps {
   inputText: string;
   status: "idle" | "invalid";
   appliedPromo: PromoCode | null;
-  promoCodes: PromoCode[];
   onInputChange: (value: string) => void;
   onApply: () => void;
   onRemove: () => void;

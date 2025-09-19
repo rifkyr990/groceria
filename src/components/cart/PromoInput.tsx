@@ -41,9 +41,7 @@ export default function PromoInput({
   }, [open, appliedPromo, status]);
 
   const isInvalid = status === "invalid";
-  const isValidAndApplied =
-    !!appliedPromo &&
-    inputText.toLowerCase() === appliedPromo.code.toLowerCase();
+  const isValidAndApplied = !!appliedPromo;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

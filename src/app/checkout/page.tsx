@@ -85,8 +85,7 @@ export default function CheckoutPage() {
 
   const {
     items,
-    appliedPromo: appliedPromoCode,
-    promoCodes,
+    appliedPromo,
     storeName,
     tryApplyPromoCode,
     removePromoCode,
@@ -117,18 +116,16 @@ export default function CheckoutPage() {
   }, [selectedAddressId, fetchOptions]);
 
   useEffect(() => {
-    setPromoInputText(appliedPromoCode || "");
-  }, [appliedPromoCode]);
+    setPromoInputText(appliedPromo?.code || "");
+  }, [appliedPromo]);
 
-  const [promoInputText, setPromoInputText] = useState(appliedPromoCode || "");
+  const [promoInputText, setPromoInputText] = useState(
+    appliedPromo?.code || ""
+  );
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
 
-  const appliedPromo = appliedPromoCode
-    ? promoCodes.find((p) => p.code === appliedPromoCode) || null
-    : null;
-
-  const handleApplyPromo = () => {
-    const success = tryApplyPromoCode(promoInputText);
+  const handleApplyPromo = async () => {
+    const success = await tryApplyPromoCode(promoInputText);
     if (!success) {
       setPromoStatus("invalid");
     }
@@ -145,12 +142,19 @@ export default function CheckoutPage() {
       (sum, item) => sum + Number(item.price) * item.quantity,
       0
     );
-    const discountCut = appliedPromo
-      ? appliedPromo.type === "percentage"
-        ? Math.round((subtotal * appliedPromo.value) / 100)
-        : appliedPromo.value
-      : 0;
-    const total = Math.max(0, subtotal - discountCut + Number(shippingCost));
+
+    const isFreeShipping = appliedPromo?.type === "free_shipping";
+
+    const discountCut =
+      appliedPromo && appliedPromo.type !== "free_shipping"
+        ? appliedPromo.type === "percentage"
+          ? Math.round((subtotal * appliedPromo.value) / 100)
+          : appliedPromo.value
+        : 0;
+
+    const finalShippingCost = isFreeShipping ? 0 : Number(shippingCost);
+
+    const total = Math.max(0, subtotal - discountCut + finalShippingCost);
     return { total };
   }, [items, appliedPromo, shippingCost]);
 
@@ -189,7 +193,7 @@ export default function CheckoutPage() {
       addressId: selectedAddressId,
       shippingCost: selectedShipping.cost, // This is now a string
       paymentMethodId,
-      promoCode: appliedPromoCode,
+      promoCode: appliedPromo?.code,
     };
 
     const orderResult = await placeOrder(orderPayload);
@@ -287,7 +291,6 @@ export default function CheckoutPage() {
                   inputText={promoInputText}
                   status={promoStatus}
                   appliedPromo={appliedPromo}
-                  promoCodes={promoCodes}
                   onInputChange={handlePromoInputChange}
                   onApply={handleApplyPromo}
                   onRemove={handleRemovePromo}

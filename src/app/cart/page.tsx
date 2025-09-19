@@ -11,18 +11,17 @@ import Footer from "@/components/layout/footer";
 export default function CartPage() {
   const {
     items,
-    appliedPromo: appliedPromoCode,
+    appliedPromo,
     incrementItem,
     decrementItem,
     removeItem,
-    promoCodes,
     tryApplyPromoCode,
     storeName,
     removePromoCode,
     fetchCart,
     saveCart,
   } = useCartStore();
-  const [promoInputText, setPromoInputText] = useState(appliedPromoCode || "");
+  const [promoInputText, setPromoInputText] = useState(appliedPromo?.code || "");
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
   const { token } = useAuthStore.getState();
 
@@ -31,8 +30,8 @@ export default function CartPage() {
   }, [token, fetchCart]);
 
   useEffect(() => {
-    setPromoInputText(appliedPromoCode || "");
-  }, [appliedPromoCode]);
+    setPromoInputText(appliedPromo?.code || "");
+  }, [appliedPromo]);
 
   const isInitialMount = useRef(true);
 
@@ -54,16 +53,13 @@ export default function CartPage() {
     };
   }, [items, saveCart, token]);
 
-  const appliedPromo = appliedPromoCode
-    ? promoCodes.find((p) => p.code === appliedPromoCode) || null
-    : null;
-
-  const handleApplyPromo = () => {
-    const success = tryApplyPromoCode(promoInputText);
+  const handleApplyPromo = async () => {
+    const success = await tryApplyPromoCode(promoInputText);
     if (!success) {
       setPromoStatus("invalid");
     }
   };
+
   const handleRemovePromo = () => {
     removePromoCode();
     setPromoInputText("");
@@ -97,15 +93,14 @@ export default function CartPage() {
 
             <div className="space-y-4 sm:space-y-6 lg:sticky lg:top-6 lg:h-fit">
               <CheckoutSection
-                items={items}
-                appliedPromo={appliedPromo}
-                promoInputText={promoInputText}
-                promoStatus={promoStatus}
-                promoCodes={promoCodes}
-                onApplyPromo={handleApplyPromo}
-                onRemovePromo={handleRemovePromo}
-                onPromoInputChange={handlePromoInputChange}
-              />
+              items={items}
+              appliedPromo={appliedPromo}
+              promoInputText={promoInputText}
+              promoStatus={promoStatus}
+              onApplyPromo={handleApplyPromo}
+              onRemovePromo={handleRemovePromo}
+              onPromoInputChange={handlePromoInputChange}
+            />
             </div>
           </div>
         </section>
