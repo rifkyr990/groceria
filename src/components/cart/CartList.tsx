@@ -4,6 +4,8 @@ import { IoStorefrontOutline } from "react-icons/io5";
 import CartItem from "./CartItem";
 import { CartItemProps, CartListProps } from "../types";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function CartList({
   items,
@@ -18,12 +20,13 @@ export default function CartList({
         <h1 className="text-2xl sm:text-3xl font-bold text-text-dark">
           Your Cart
         </h1>
-        <a
-          href="#"
-          className="text-sm font-semibold text-primary-green-600 hover:text-primary-green-700 hover:underline self-start sm:self-auto"
+        <Link
+          href="/"
+          className="text-sm text-gray-500 hover:underline inline-flex items-center self-start sm:self-auto"
         >
+          <ArrowLeft className="w-4 h-4 mr-2" />
           Continue Shopping
-        </a>
+        </Link>
       </div>
 
       <Card className="shadow-lg shadow-gray-200/50 border-0">

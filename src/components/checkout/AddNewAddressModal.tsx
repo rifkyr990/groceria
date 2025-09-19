@@ -78,6 +78,7 @@ interface AddressFormContentProps {
     city: string;
     province: string;
   }) => void;
+  disabled: boolean;
 }
 
 const AddressFormContent = ({
@@ -91,10 +92,11 @@ const AddressFormContent = ({
   handleChange,
   handleCheckboxChange,
   handleLocationSelect,
+  disabled,
 }: AddressFormContentProps) => (
   <div className="space-y-4">
     <div className="h-[150px] w-full bg-gray-200 rounded-lg overflow-hidden">
-      <MapPicker onLocationSelect={handleLocationSelect} />
+      <MapPicker onLocationSelect={handleLocationSelect} disabled={disabled} />
     </div>
 
     <div className="space-y-1">
@@ -335,6 +337,7 @@ export default function AddNewAddressModal({
     handleChange,
     handleCheckboxChange,
     handleLocationSelect,
+    disabled: loading,
   };
 
   if (isDesktop) {

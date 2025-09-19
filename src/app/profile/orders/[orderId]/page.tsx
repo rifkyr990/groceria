@@ -450,19 +450,13 @@ export default function OrderDetailPage() {
         {showPaymentDetails && <UploadProofCard orderId={order.id} />}
 
         <div className="text-center mt-6">
-          {cameFromCheckout ? (
+          {cameFromCheckout && (
             <Link
               href="/"
               className="text-sm text-gray-500 hover:underline inline-flex items-center"
             >
               <ArrowLeft className="w-4 h-4 mr-2" /> Continue Shopping
             </Link>
-          ) : (
-            <Button asChild variant="link" className="text-gray-600">
-              <Link href="/profile/orders">
-                <ArrowLeft className="w-4 h-4 mr-2" /> Back to My Orders
-              </Link>
-            </Button>
           )}
         </div>
       </div>

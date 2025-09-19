@@ -13,7 +13,7 @@ const mockPromoCodes: PromoCode[] = [
 ];
 import { create } from "zustand";
 import { useAuthStore } from "./auth-store";
-
+import { toast } from "react-toastify";
 interface CartItem {
   id: number;
   productId: number;
@@ -57,8 +57,9 @@ interface CartState {
   error: string | null;
 
   addItem: (
-    product: Omit<CartItem, "quantity">,
+    product: Omit<CartItem, "quantity" | "id"> & { id: number },
     storeId: number,
+    storeName: string,
     quantity?: number
   ) => void;
   incrementItem: (cartItemId: number) => void;
@@ -83,52 +84,98 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   promoCodes: mockPromoCodes, // mock data
 
-  addItem: (product, storeId, quantity = 1) =>
+  addItem: (product, storeId, storeName, quantity = 1) =>
     set((state) => {
       const isNewStore = state.storeId !== null && state.storeId !== storeId;
 
+      if (isNewStore) {
+        toast.info(`Cart cleared. Now shopping at ${storeName}.`);
+      }
+
       const initialItems = isNewStore ? [] : state.items;
 
-      const existing = initialItems.find((item) => item.id === product.id);
+      const existing = initialItems.find(
+        (item) => item.productId === product.id
+      );
 
       let updatedItems;
       if (existing) {
         updatedItems = initialItems.map((item) =>
-          item.id === product.id
+          item.productId === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       } else {
-        updatedItems = [...initialItems, { ...product, quantity }];
+        // When adding a new item, we don't have a cartItem.id from DB yet.
+        // We use a temporary ID like Date.now() for React key prop stability.
+        // The real ID will be assigned when fetched from the backend after saving.
+        const newItem = {
+          ...product,
+          id: Date.now(),
+          productId: product.id,
+          quantity,
+        };
+        updatedItems = [...initialItems, newItem];
       }
 
-      return {
+      toast.success(`${product.name} added to cart`);
+
+      const newState = {
         storeId,
+        storeName,
         items: updatedItems,
         appliedPromo: isNewStore ? null : state.appliedPromo,
       };
+
+      // Immediately trigger a save after updating the state.
+      setTimeout(() => {
+        const { token } = useAuthStore.getState();
+        if (token) {
+          get().saveCart(token);
+        }
+      }, 0);
+
+      return newState;
     }),
 
   incrementItem: (cartItemId) =>
-    set((state) => ({
-      items: state.items.map((item) =>
+    set((state) => {
+      const updatedItems = state.items.map((item) =>
         item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item
-      ),
-    })),
+      );
+      // Trigger save
+      setTimeout(() => {
+        const { token } = useAuthStore.getState();
+        if (token) get().saveCart(token);
+      }, 0);
+      return { items: updatedItems };
+    }),
 
   decrementItem: (cartItemId) =>
-    set((state) => ({
-      items: state.items.map((item) =>
+    set((state) => {
+      const updatedItems = state.items.map((item) =>
         item.id === cartItemId
           ? { ...item, quantity: Math.max(1, item.quantity - 1) }
           : item
-      ),
-    })),
+      );
+      // Trigger save
+      setTimeout(() => {
+        const { token } = useAuthStore.getState();
+        if (token) get().saveCart(token);
+      }, 0);
+      return { items: updatedItems };
+    }),
 
   removeItem: (cartItemId) =>
-    set((state) => ({
-      items: state.items.filter((item) => item.id !== cartItemId),
-    })),
+    set((state) => {
+      const updatedItems = state.items.filter((item) => item.id !== cartItemId);
+      // Trigger save
+      setTimeout(() => {
+        const { token } = useAuthStore.getState();
+        if (token) get().saveCart(token);
+      }, 0);
+      return { items: updatedItems };
+    }),
 
   tryApplyPromoCode: (code) => {
     const { promoCodes } = get();
