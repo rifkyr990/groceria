@@ -23,11 +23,11 @@ async function getAddressFromCoords(lat: number, long: number) {
     `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${long}`
   );
   const data = await res.json();
-  const addr = data.address;
+  const addr = data.address ?? {};
   console.log(data);
 
   return {
-    fullAddress: data.display_name,
+    fullAddress: data.display_name || "",
     road: addr.road || addr.neighbourhood || addr.suburb || "",
     // city: addr.city || addr.town || addr.village || addr.municipality || "",
     city: addr.county || addr.city || addr.town || addr.city_district || "",
@@ -41,6 +41,7 @@ async function getAddressFromCoords(lat: number, long: number) {
 function LocationMarker({
   position,
   onSelect,
+  disabled,
 }: {
   position: [number, number] | null;
   onSelect: (data: {
@@ -50,11 +51,13 @@ function LocationMarker({
     city: string;
     province: string;
   }) => void;
+  disabled: boolean;
 }) {
   // const [markerPos, setMarkerPos] = useState<[number, number] | null>(null);
 
   useMapEvents({
     async click(e) {
+      if (disabled) return;
       const pos: [number, number] = [e.latlng.lat, e.latlng.lng];
       // setMarkerPos(pos);
       const addr = await getAddressFromCoords(pos[0], pos[1]);
@@ -68,7 +71,7 @@ function LocationMarker({
     },
   });
 
-  return position ? <Marker position={position} /> : null;
+  return position && <Marker position={position} />;
 }
 
 // Tombol GPS di atas map
@@ -121,6 +124,8 @@ function UseMyLocationButton({
 
 export default function MapPicker({
   onLocationSelect,
+  defaultLocation,
+  disabled,
 }: {
   onLocationSelect: (data: {
     lat: number;
@@ -129,9 +134,19 @@ export default function MapPicker({
     city: string;
     province: string;
   }) => void;
+  defaultLocation?: {
+    lat: number;
+    long: number;
+    road?: string;
+    city: string;
+    province: string;
+  };
+  disabled: boolean;
 }) {
   const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
-  const [markerPos, setMarkerPos] = useState<[number, number] | null>(null);
+  const [markerPos, setMarkerPos] = useState<[number, number] | null>(
+    defaultLocation ? [defaultLocation.lat, defaultLocation.long] : null
+  );
 
   const handleSelect = (data: {
     lat: number;
@@ -153,22 +168,33 @@ export default function MapPicker({
   }, [mapRef.current]);
 
   return (
-    <div className="relative w-full h-[300px] rounded-md overflow-hidden">
+    <div className="relative w-full h-[200px] rounded-md overflow-hidden">
       <MapContainer
-        center={[-6.2, 106.8]}
+        center={
+          defaultLocation
+            ? [defaultLocation.lat, defaultLocation.long]
+            : [-6.2, 106.8]
+        }
+        dragging={disabled}
+        doubleClickZoom={disabled}
+        zoomControl={disabled}
         zoom={13}
-        scrollWheelZoom
-        style={{ width: "100%", height: "50%" }}
+        scrollWheelZoom={disabled}
+        style={{ width: "100%", height: "60%" }}
         ref={mapRef}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <LocationMarker position={markerPos} onSelect={handleSelect} />
+        <LocationMarker
+          disabled={disabled}
+          position={markerPos}
+          onSelect={handleSelect}
+        />
       </MapContainer>
 
-      {mapInstance && (
+      {mapInstance && !disabled && (
         <UseMyLocationButton
           onLocationSelect={handleSelect}
           map={mapInstance}

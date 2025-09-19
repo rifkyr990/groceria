@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { useAuthStore } from "@/store/auth-store";
 

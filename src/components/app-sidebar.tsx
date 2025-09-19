@@ -18,7 +18,6 @@ import {
   BadgeDollarSign,
   BadgePercent,
   ChartLine,
-  ChevronDown,
   ChevronRight,
   Package,
   Store,
@@ -43,6 +42,12 @@ const items = [
     icon: <Store className="size-10" />,
     menu: "Store ",
     url: "/dashboard/manage-store",
+  },
+  {
+    id: 8,
+    icon: <UserRoundPen className="size-10" />,
+    menu: "Assign Store Admin",
+    url: "/dashboard/assign-store-admin",
   },
   {
     id: 2,
@@ -81,6 +86,18 @@ const items = [
     icon: <Archive className="size-10" />,
     menu: "Inventory ",
     url: "/dashboard/manage-inventory",
+    // subMenu: [
+    //   {
+    //     id: 1,
+    //     subMenu: "Stock List",
+    //     url: "/dashboard/manage-inventory/prd-stock-list",
+    //   },
+    //   {
+    //     id: 2,
+    //     subMenu: "Stock History",
+    //     url: "/dashboard/manage-inventory/prd-stock-history",
+    //   },
+    // ],
   },
   {
     id: 6,
@@ -101,7 +118,7 @@ const items = [
       {
         id: 2,
         subMenu: "Stock Report",
-        url: "#",
+        url: "/dashboard/manage-reporting/stock-report",
       },
     ],
   },
