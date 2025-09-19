@@ -18,7 +18,7 @@ interface CartItem {
   id: number;
   productId: number;
   name: string;
-  price: number;
+  price: string;
   quantity: number;
   description: string;
   image: string;
@@ -31,7 +31,7 @@ interface ApiCartItem {
     id: number;
     name: string;
     description: string;
-    price: number;
+    price: string;
     imageUrl: string;
   };
 }
@@ -189,7 +189,7 @@ export const useCartStore = create<CartState>((set, get) => ({
           productId: item.product.id,
           name: item.product.name,
           description: item.product.description,
-          price: Number(item.product.price),
+          price: item.product.price, // Now a string from API
           quantity: item.quantity,
           image: item.product.imageUrl,
         })),

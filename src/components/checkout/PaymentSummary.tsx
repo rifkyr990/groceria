@@ -8,7 +8,7 @@ import { CartItemProps, PromoCode } from "../types";
 interface PaymentSummaryProps {
   items: CartItemProps[];
   appliedPromo: PromoCode | null;
-  shippingCost: number;
+  shippingCost: string;
 }
 
 export default function PaymentSummary({
@@ -18,7 +18,7 @@ export default function PaymentSummary({
 }: PaymentSummaryProps) {
   const { subtotal, discountCut, total } = useMemo(() => {
     const subtotal = items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+      (sum, item) => sum + Number(item.price) * item.quantity,
       0
     );
     const discountCut = appliedPromo
@@ -26,7 +26,7 @@ export default function PaymentSummary({
         ? Math.round((subtotal * appliedPromo.value) / 100)
         : appliedPromo.value
       : 0;
-    const total = Math.max(0, subtotal - discountCut + shippingCost);
+    const total = Math.max(0, subtotal - discountCut + Number(shippingCost));
     return { subtotal, discountCut, total };
   }, [items, appliedPromo, shippingCost]);
 

@@ -33,7 +33,7 @@ export interface ShippingOption {
   id: number;
   courier: string;
   service: string;
-  cost: number;
+  cost: string;
   estimated: string;
 }
 
@@ -47,7 +47,7 @@ export interface CartItemProps {
   id: number;
   name: string;
   description: string;
-  price: number;
+  price: string;
   image: string;
   quantity: number;
 }
@@ -109,9 +109,9 @@ export interface OrderDetail {
   id: number;
   createdAt: string;
   totalPrice: string;
-  subtotal: number;
-  shippingCost: number;
-  discountAmount: number;
+  subtotal: string;
+  shippingCost: string;
+  discountAmount: string;
   destinationAddress: string;
   store: {
     id: number;

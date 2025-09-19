@@ -417,20 +417,20 @@ export default function OrderDetailPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Subtotal</span>
                   <span className="font-medium text-gray-700">
-                    {formatIDRCurrency(order.subtotal)}
+                    {formatIDRCurrency(Number(order.subtotal))}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Shipping</span>
                   <span className="font-medium text-gray-700">
-                    {formatIDRCurrency(order.shippingCost)}
+                    {formatIDRCurrency(Number(order.shippingCost))}
                   </span>
                 </div>
-                {order.discountAmount > 0 && (
+                {Number(order.discountAmount) > 0 && (
                   <div className="flex justify-between text-sm text-primary-green-600">
                     <span className="font-semibold">Discount</span>
                     <span className="font-semibold">
-                      -{formatIDRCurrency(order.discountAmount)}
+                      -{formatIDRCurrency(Number(order.discountAmount))}
                     </span>
                   </div>
                 )}

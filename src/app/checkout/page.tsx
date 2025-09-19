@@ -74,7 +74,7 @@ export default function CheckoutPage() {
     useState<PaymentMethod | null>(MockPaymentMethods[0]);
 
   const shippingCost = useMemo(
-    () => selectedShipping?.cost || 0,
+    () => selectedShipping?.cost || "0",
     [selectedShipping]
   );
 
@@ -137,7 +137,7 @@ export default function CheckoutPage() {
 
   const { total } = useMemo(() => {
     const subtotal = items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+      (sum, item) => sum + Number(item.price) * item.quantity,
       0
     );
     const discountCut = appliedPromo
@@ -145,7 +145,7 @@ export default function CheckoutPage() {
         ? Math.round((subtotal * appliedPromo.value) / 100)
         : appliedPromo.value
       : 0;
-    const total = Math.max(0, subtotal - discountCut + shippingCost);
+    const total = Math.max(0, subtotal - discountCut + Number(shippingCost));
     return { total };
   }, [items, appliedPromo, shippingCost]);
 
@@ -182,7 +182,7 @@ export default function CheckoutPage() {
 
     const orderPayload = {
       addressId: selectedAddressId,
-      shippingCost: selectedShipping.cost,
+      shippingCost: selectedShipping.cost, // This is now a string
       paymentMethodId,
       promoCode: appliedPromoCode,
     };
@@ -285,7 +285,7 @@ export default function CheckoutPage() {
                 <CheckoutButton
                   mode="checkout"
                   onClick={handlePlaceOrder}
-                  total={total}
+                  total={total.toString()}
                   disabled={isPlacingOrder}
                 />
               </div>
@@ -309,7 +309,7 @@ export default function CheckoutPage() {
         <CheckoutButton
           mode="checkout"
           onClick={handlePlaceOrder}
-          total={total}
+          total={total.toString()}
           disabled={isPlacingOrder}
         />
       </div>
