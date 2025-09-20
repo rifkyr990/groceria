@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import CartList from "@/components/cart/CartList";
 import CheckoutSection from "@/components/cart/CheckoutSection";
 import { useCartStore } from "@/store/cart-store";
 import { useAuthStore } from "@/store/auth-store";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
+import { Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function CartPage() {
   const {
@@ -20,13 +23,31 @@ export default function CartPage() {
     removePromoCode,
     fetchCart,
     saveCart,
+    loading,
   } = useCartStore();
-  const [promoInputText, setPromoInputText] = useState(appliedPromo?.code || "");
+  const [promoInputText, setPromoInputText] = useState(
+    appliedPromo?.code || ""
+  );
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
-  const { token } = useAuthStore.getState();
+  const { token, user } = useAuthStore();
+  const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    fetchCart(token);
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isClient && !token) {
+      toast.warn("You must be logged in to view your cart.");
+      router.replace("/login");
+    }
+  }, [isClient, token, router]);
+
+  useEffect(() => {
+    if (token) {
+      fetchCart(token);
+    }
   }, [token, fetchCart]);
 
   useEffect(() => {
@@ -73,6 +94,14 @@ export default function CartPage() {
     }
   };
 
+  if (!token) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="w-full flex-shrink-0">
@@ -93,14 +122,14 @@ export default function CartPage() {
 
             <div className="space-y-4 sm:space-y-6 lg:sticky lg:top-6 lg:h-fit">
               <CheckoutSection
-              items={items}
-              appliedPromo={appliedPromo}
-              promoInputText={promoInputText}
-              promoStatus={promoStatus}
-              onApplyPromo={handleApplyPromo}
-              onRemovePromo={handleRemovePromo}
-              onPromoInputChange={handlePromoInputChange}
-            />
+                items={items}
+                appliedPromo={appliedPromo}
+                promoInputText={promoInputText}
+                promoStatus={promoStatus}
+                onApplyPromo={handleApplyPromo}
+                onRemovePromo={handleRemovePromo}
+                onPromoInputChange={handlePromoInputChange}
+              />
             </div>
           </div>
         </section>

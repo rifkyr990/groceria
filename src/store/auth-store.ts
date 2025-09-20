@@ -58,7 +58,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", token);
 
-      // Fetch the user's cart after successful login
       useCartStore.getState().fetchCart(token);
 
       return true;
@@ -72,10 +71,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
-    useCartStore.getState().clearCart();
-    set({ user: null, token: null });
+    const resetCart = useCartStore.getState().resetCart;
+    resetCart();
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("applied_promo");
+    sessionStorage.removeItem("token");
+
+    set({ user: null, token: null });
   },
 
   hydrate: () => {
@@ -84,11 +87,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     const token =
       localStorage.getItem("token") || sessionStorage.getItem("token");
     const user = localStorage.getItem("user");
-    if (token) {
-      set({ token, user: user ? JSON.parse(user) : null });
+    if (token && user) {
+      set({ token, user: JSON.parse(user) });
+    } else {
+      set({ user: null, token: null });
     }
   },
-
   loginWithGoogle: async (idToken) => {
     set({ loading: true, error: null });
     try {

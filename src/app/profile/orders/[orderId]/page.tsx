@@ -10,6 +10,8 @@ import { useOrderDetailStore } from "@/store/order-detail-store";
 import { useUploadProofStore } from "@/store/upload-proof-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth-store";
 import {
   AlertCircle,
   ArrowLeft,
@@ -26,6 +28,7 @@ import { AiOutlineShoppingCart } from "react-icons/ai";
 import { FiCheckCircle, FiCreditCard } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "react-toastify";
 
 const StatusBadge = ({ status }: { status: string }) => {
   const statusConfig = useMemo(
@@ -213,15 +216,38 @@ const CountdownTimer = ({ expiryDate }: { expiryDate: string }) => {
 export default function OrderDetailPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const orderId = Number(params.orderId);
   const { order, loading, error, fetchOrder } = useOrderDetailStore();
+  const { token, user } = useAuthStore();
   const cameFromCheckout = searchParams.get("from") === "checkout";
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    if (orderId && !isNaN(orderId)) {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isClient && !token) {
+      toast.warn("You must be logged in to view your orders.");
+      router.replace("/login");
+    }
+  }, [isClient, token, router]);
+
+  useEffect(() => {
+    if (orderId && !isNaN(orderId) && token) {
       fetchOrder(orderId);
     }
-  }, [orderId, fetchOrder]);
+  }, [orderId, fetchOrder, token]);
+
+  // If not loading and still no token, the redirect is in progress.
+  if (!token) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   if (loading) {
     return (

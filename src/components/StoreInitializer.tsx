@@ -12,9 +12,12 @@ export default function StoreInitializer() {
       useCartStore.getState().hydratePromo();
 
       const token = useAuthStore.getState().token;
-
       if (token) {
+        // If a user is logged in, fetch their cart from the database.
         useCartStore.getState().fetchCart(token);
+      } else {
+        // If no user is logged in, ensure the cart is empty as a failsafe.
+        useCartStore.getState().resetCart();
       }
     };
     initialize();

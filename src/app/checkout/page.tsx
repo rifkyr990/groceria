@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
 import { useOrderStore } from "@/store/order-store";
 import { useAddressStore } from "@/store/address-store";
@@ -92,7 +93,19 @@ export default function CheckoutPage() {
     fetchCart,
   } = useCartStore();
 
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isClient && !token) {
+      toast.warn("You must be logged in to view the checkout page.");
+      router.replace("/login");
+    }
+  }, [isClient, token, router]);
 
   useEffect(() => {
     if (token) {
@@ -245,6 +258,15 @@ export default function CheckoutPage() {
       router.push(`/profile/orders/${newOrderId}?from=checkout`);
     }
   };
+
+  // If not loading and still no token, the redirect is in progress.
+  if (!token) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <>

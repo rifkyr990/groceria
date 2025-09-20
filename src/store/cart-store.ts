@@ -64,6 +64,7 @@ interface CartState {
 
   removePromoCode: () => void;
   clearCart: () => void;
+  resetCart: () => void;
 
   fetchCart: (token: string | null) => Promise<void>;
   saveCart: (token: string | null, itemsOverride?: CartItem[]) => Promise<void>;
@@ -176,7 +177,9 @@ export const useCartStore = create<CartState>((set, get) => {
 
     incrementItem: (cartItemId) => {
       const { productsByLoc } = useProduct.getState();
-      const itemToIncrement = get().items.find((item) => item.id === cartItemId);
+      const itemToIncrement = get().items.find(
+        (item) => item.id === cartItemId
+      );
 
       if (!itemToIncrement) return;
 
@@ -224,7 +227,7 @@ export const useCartStore = create<CartState>((set, get) => {
       );
 
       if (!itemsOverride) {
-        set({ loading: true, error: null });
+        set({ loading: false, error: null });
       }
 
       try {
@@ -268,6 +271,18 @@ export const useCartStore = create<CartState>((set, get) => {
     removePromoCode: () => {
       localStorage.removeItem("applied_promo");
       set({ appliedPromo: null });
+    },
+
+    resetCart: () => {
+      localStorage.removeItem("applied_promo");
+      set({
+        items: [],
+        storeId: null,
+        storeName: null,
+        appliedPromo: null,
+        loading: false,
+        error: null,
+      });
     },
 
     clearCart: () => {
