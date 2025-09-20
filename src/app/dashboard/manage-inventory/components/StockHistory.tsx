@@ -26,18 +26,25 @@ import {
 import {
   Table,
   TableBody,
+  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronDown, Search } from "lucide-react";
-import { useState } from "react";
+import { apiCall } from "@/helper/apiCall";
+import { IStockHistory } from "@/types/stock";
+import { formatDate } from "@/utils/format";
+import { ChevronDown, Edit, Search, Trash } from "lucide-react";
+import { useEffect, useState } from "react";
 
-interface IStockHistory {
-  className?: string;
-}
-
-export default function StockHistory({ className }: IStockHistory) {
+const quantityColor = (value: number) => {
+  if (value < 0) {
+    return <p className="text-red-500">{value}</p>;
+  }
+  return <p className="text-green-500">+{value}</p>;
+};
+export default function StockHistory() {
+  const [stockHistory, setStockHistory] = useState<IStockHistory[]>([]);
   const [open, setOpen] = useState(false);
   const [range, setRange] = useState<{
     from: Date | undefined;
@@ -46,8 +53,21 @@ export default function StockHistory({ className }: IStockHistory) {
     from: undefined,
     to: undefined,
   });
+  const getStockHistory = async () => {
+    try {
+      const res = await apiCall.get("/api/stock/stock-history");
+      const result = res.data.data;
+      setStockHistory(result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getStockHistory();
+  }, []);
   return (
-    <div className={`${className}`}>
+    <div>
       <Card>
         <CardHeader className="flex justify-between items-center">
           <div>
@@ -118,28 +138,46 @@ export default function StockHistory({ className }: IStockHistory) {
                 <TableHead>Product</TableHead>
                 <TableHead className="text-center">Type</TableHead>
                 <TableHead className="text-center">Quantity</TableHead>
-                <TableHead className="text-center">Reason</TableHead>
+                <TableHead className="text-center">Previous Stock</TableHead>
+                <TableHead className="text-center">Actual Stock</TableHead>
+
                 <TableHead className="text-center">Created at</TableHead>
                 <TableHead className="text-center">Store Name</TableHead>
                 <TableHead className="text-center">PIC</TableHead>
+                <TableHead className="text-center">Reason</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {/* {dummyPrd.map((prd, idx) => (
+              {stockHistory.map((prd, idx) => (
                 <TableRow key={idx}>
-                  <TableCell>{prd.name}</TableCell>
+                  <TableCell>{prd.productStock.product.name}</TableCell>
+                  <TableCell className="text-center">{prd.type}</TableCell>
                   <TableCell className="text-center">
-                    {prd.currentStock}
-                  </TableCell>
-                  <TableCell className="text-center">{prd.minStock}</TableCell>
-                  <TableCell className="text-center">{prd.storeName}</TableCell>
-                  <TableCell className="text-center">
-                    {stockStatus(prd.currentStock, prd.minStock)}
+                    {quantityColor(prd.quantity)}
                   </TableCell>
                   <TableCell className="text-center">
-                    20 September 2022
+                    {prd.prev_stock}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">
+                    {prd.updated_stock}
+                  </TableCell>
+
+                  <TableCell className="text-center">
+                    {formatDate(prd.created_at)}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {prd.productStock.store.name}
+                  </TableCell>
+
+                  <TableCell className="text-center">
+                    {prd.created_by?.first_name ?? ""}{" "}
+                    {prd.created_by?.last_name ?? ""}
+                  </TableCell>
+                  <TableCell className="text-center max-w-[150px] whitespace-normal break-words">
+                    {prd.reason}
+                  </TableCell>
+
+                  {/* <TableCell>
                     <div className="flex justify-center gap-x-2">
                       <Button variant={"outline"} className="cursor-pointer">
                         <Edit />
@@ -151,9 +189,9 @@ export default function StockHistory({ className }: IStockHistory) {
                         <Trash />
                       </Button>
                     </div>
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
-              ))} */}
+              ))}
             </TableBody>
           </Table>
         </CardContent>

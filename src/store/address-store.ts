@@ -68,6 +68,7 @@ export const useAddressStore = create<AddressState>((set, get) => ({
       const payload = {
         ...data
       };
+
       await apiCall.post("/api/address", payload);
       await get().fetchAddress();
       return true;

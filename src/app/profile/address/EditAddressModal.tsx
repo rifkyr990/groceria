@@ -61,24 +61,25 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
     }
   }, [selectedSub, setValue]);
 
-  useEffect(() => {
-    if (address) {
-      // cari province_id berdasarkan nama
-      const provinceId = provinces.find((p) => p.province === address.province)?.province_id || "";
-      const cityId = cities.find((c) => c.city_name === address.city)?.city_id || "";
-      const districtId = districts.find((d) => d.district_name === address.district)?.district_id || "";
-      const subdistrictId = subdistricts.find((s) => s.subdistrict_name === address.subdistrict)?.subdistrict_id || "";
+  // ✅ Jalankan reset satu kali saat modal dibuka
+  const mapToWilayahId = () => {
+    const provinceId =
+      provinces.find((p) => p.province === address.province)?.province_id || "";
+    const cityId =
+      cities.find((c) => c.city_name === address.city)?.city_id || "";
+    const districtId =
+      districts.find((d) => d.district_name === address.district)?.district_id || "";
+    const subdistrictId =
+      subdistricts.find((s) => s.subdistrict_name === address.subdistrict)?.subdistrict_id || "";
 
-      reset({
-        ...address,
-        province: provinceId,
-        city: cityId,
-        district: districtId,
-        subdistrict: subdistrictId,
-      });
-    }
-  }, [address, provinces, cities, districts, subdistricts, reset]);
-
+    reset({
+      ...address,
+      province: provinceId,
+      city: cityId,
+      district: districtId,
+      subdistrict: subdistrictId,
+    });
+  };
 
   const onSubmit = async (data: AddressFormValues) => {
     const provinceName =
@@ -86,8 +87,7 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
     const cityName =
       cities.find((c) => c.city_id === data.city)?.city_name || "";
     const districtName =
-      districts.find((d) => d.district_id === data.district)?.district_name ||
-      "";
+      districts.find((d) => d.district_id === data.district)?.district_name || "";
     const subdistrictName =
       subdistricts.find((s) => s.subdistrict_id === data.subdistrict)
         ?.subdistrict_name || "";
@@ -125,7 +125,15 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
   );
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (isOpen) {
+          mapToWilayahId(); // ✅ Reset form hanya saat modal dibuka
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button className="bg-blue-600 text-white">Edit</Button>
       </DialogTrigger>

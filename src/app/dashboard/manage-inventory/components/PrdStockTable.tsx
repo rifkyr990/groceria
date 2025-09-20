@@ -1,3 +1,4 @@
+"use client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,37 +26,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Edit, Search, Trash } from "lucide-react";
+import { IStockProps } from "@/types/stock";
+import { Edit, PackageSearch, Search, Trash } from "lucide-react";
+import { useState } from "react";
+import EditStockProduct from "./EditStockPrd";
+import { formatDate, formatIntlDate } from "@/utils/format";
+import { apiCall } from "@/helper/apiCall";
 interface IProductStock {
   className?: string;
+  stocks: IStockProps[];
 }
-const dummyPrd = [
-  {
-    id: 1,
-    name: "Sepatu Sandal Ori",
-    currentStock: 20,
-    minStock: 10,
-    storeName: "Padil Store",
-  },
-  {
-    id: 2,
-    name: "Sayur Bayam",
-    currentStock: 1,
-    minStock: 5,
-    storeName: "Padil Store",
-  },
-];
+
 const stockStatus = (current: number, minStock: number) => {
   if (current > minStock) {
     return <Badge className="bg-green-500">Normal</Badge>;
-  } else if (current < minStock && current !== 0) {
+  } else if (current <= minStock && current !== 0) {
     return <Badge className="bg-yellow-400">Low Stock</Badge>;
-  } else {
+  } else if (current === 0) {
     return <Badge className="bg-red-500">Out of Stock</Badge>;
   }
 };
 
-export default function ProductStock({ className }: IProductStock) {
+export default function ProductStock({ className, stocks }: IProductStock) {
+  const [editStock, setEditStock] = useState(false);
+  const [selectedProductStock, setSelectedProductStock] =
+    useState<IStockProps | null>(null);
   return (
     <div className={`${className}`}>
       <Card>
@@ -119,36 +114,49 @@ export default function ProductStock({ className }: IProductStock) {
                 <TableHead className="text-center">Min Stock</TableHead>
                 <TableHead className="text-center">Store Name</TableHead>
                 <TableHead className="text-center">Status</TableHead>
+                <TableHead className="text-center">Active/Inactive</TableHead>
                 <TableHead className="text-center">Updated at</TableHead>
-                <TableHead className="text-center">Action</TableHead>
+                <TableHead className="text-center">Update Stock</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {dummyPrd.map((prd, idx) => (
+              {stocks.map((prd, idx) => (
                 <TableRow key={idx}>
-                  <TableCell>{prd.name}</TableCell>
+                  <TableCell>{prd.product.name}</TableCell>
                   <TableCell className="text-center">
-                    {prd.currentStock}
+                    {prd.stock_quantity}
                   </TableCell>
-                  <TableCell className="text-center">{prd.minStock}</TableCell>
-                  <TableCell className="text-center">{prd.storeName}</TableCell>
+                  <TableCell className="text-center">{prd.min_stock}</TableCell>
                   <TableCell className="text-center">
-                    {stockStatus(prd.currentStock, prd.minStock)}
+                    {prd.store.name}
                   </TableCell>
                   <TableCell className="text-center">
-                    20 September 2022
+                    {stockStatus(prd.stock_quantity, prd.min_stock)}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {prd.product.is_active === true ? "Active" : "Inactive"}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {formatDate(prd.updated_at)}
                   </TableCell>
                   <TableCell>
                     <div className="flex justify-center gap-x-2">
-                      <Button variant={"outline"} className="cursor-pointer">
-                        <Edit />
-                      </Button>
                       <Button
+                        variant={"outline"}
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setSelectedProductStock(prd);
+                          setEditStock((prev) => !prev);
+                        }}
+                      >
+                        <PackageSearch /> Update
+                      </Button>
+                      {/* <Button
                         variant={"destructive"}
                         className="cursor-pointer"
                       >
                         <Trash />
-                      </Button>
+                      </Button> */}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -157,6 +165,12 @@ export default function ProductStock({ className }: IProductStock) {
           </Table>
         </CardContent>
       </Card>
+      {/* Edit Stock Dialog */}
+      <EditStockProduct
+        open={editStock}
+        setOpen={setEditStock}
+        selectedProduct={selectedProductStock}
+      />
     </div>
   );
 }

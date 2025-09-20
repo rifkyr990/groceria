@@ -137,7 +137,7 @@ export default function UserDetailsDialog({
         {/* Footer */}
         <DialogFooter>
           {/* Store Selection for Assign Admin */}
-          {!openStoreSelect ? (
+          {/* {!openStoreSelect ? (
             <>
               {users.is_verified === false && (
                 <Button>
@@ -195,7 +195,7 @@ export default function UserDetailsDialog({
                 </div>
               </div>
             </div>
-          )}
+          )} */}
         </DialogFooter>
       </DialogContent>
     </Dialog>

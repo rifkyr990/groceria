@@ -1,7 +1,6 @@
 "use client";
 import { IUserProps } from "@/types/user";
 import DashboardLayout from "../components/DashboardLayout";
-import StoreData from "./components/StoreData";
 import { useEffect, useState } from "react";
 import { apiCall } from "@/helper/apiCall";
 import { IStoreProps } from "@/types/store";
@@ -65,10 +64,25 @@ export default function AccountPage() {
         getStoreAdmins();
     }, []);
 
+    // ✅ Tambahkan allStoreAdmins dari users
+    const allStoreAdmins = users
+    .filter((user) => user.role === "STORE_ADMIN")
+    .map((user) => ({
+        id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        role: user.role ?? "STORE_ADMIN",
+        store_id: user.store_id ?? null,
+    }));
+
     return (
         <DashboardLayout>
             <div className="flex flex-col gap-4 ">
-                <StoreAdminData storeAdmins={storeAdmins} className="w-full" />
+                <StoreAdminData
+                    storeAdmins={storeAdmins}
+                    allStoreAdmins={allStoreAdmins}
+                    className="w-full"
+                />
             </div>
         </DashboardLayout>
     );

@@ -2,6 +2,11 @@
 @import "tw-animate-css";
 @custom-variant dark (&: is(.dark *));
 
+
+html {
+  scrollbar-gutter: stable;
+}
+
 @theme {
   --color-blue-green: #219ebc;
   --color-prussian-blue: #023047;

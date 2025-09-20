@@ -16,24 +16,22 @@ export default function ProfilePage() {
     const router = useRouter();
     const [checkingAuth, setCheckingAuth] = useState(true);
 
-    // useEffect(() => {
-    //     hydrate();
-    // }, [hydrate]);
+    useEffect(() => {
+        hydrate();
+    }, [hydrate]);
 
-    // useEffect(() => {
-    //     // Cek status autentikasi
-    //     if (user === null) {
-    //         router.replace("/");
-    //     } else if (!user.is_verified) {
-    //         router.replace("/");
-    //     } else {
-    //         setCheckingAuth(false);
-    //     }
-    // }, [user, router]);
+    useEffect(() => {
+        // Cek status autentikasi
+        if (user === null) {
+            router.replace("/");
+        } else {
+            setCheckingAuth(false);
+        }
+    }, [user, router]);
 
-    // if (checkingAuth) {
-    //     return null;
-    // }
+    if (checkingAuth) {
+        return null;
+    }
 
     return (
         <div className="flex flex-col min-h-screen">

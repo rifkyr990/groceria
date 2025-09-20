@@ -23,4 +23,5 @@ export interface IUserProps {
   image_url: string;
   bio: string;
   date_of_birth: Date;
+  store_id: number;
 }

@@ -5,6 +5,8 @@ import CartList from "@/components/cart/CartList";
 import CheckoutSection from "@/components/cart/CheckoutSection";
 import { useCartStore } from "@/store/cart-store";
 import { useAuthStore } from "@/store/auth-store";
+import Navbar from "@/components/layout/navbar";
+import Footer from "@/components/layout/footer";
 import { useRouter } from "next/navigation";
 
 export default function CartPage() {
@@ -12,19 +14,17 @@ export default function CartPage() {
 
   const {
     items,
-    appliedPromo: appliedPromoCode,
+    appliedPromo,
     incrementItem,
     decrementItem,
     removeItem,
-    promoCodes,
     tryApplyPromoCode,
     storeName,
     removePromoCode,
     fetchCart,
     saveCart,
   } = useCartStore();
-
-  const [promoInputText, setPromoInputText] = useState(appliedPromoCode || "");
+  const [promoInputText, setPromoInputText] = useState(appliedPromo?.code || "");
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
 
   const { token, user, hydrate } = useAuthStore();
@@ -52,8 +52,8 @@ export default function CartPage() {
   }, [token, fetchCart]);
 
   useEffect(() => {
-    setPromoInputText(appliedPromoCode || "");
-  }, [appliedPromoCode]);
+    setPromoInputText(appliedPromo?.code || "");
+  }, [appliedPromo]);
 
   const isInitialMount = useRef(true);
 
@@ -75,12 +75,8 @@ export default function CartPage() {
     };
   }, [items, saveCart, token]);
 
-  const appliedPromo = appliedPromoCode
-    ? promoCodes.find((p) => p.code === appliedPromoCode) || null
-    : null;
-
-  const handleApplyPromo = () => {
-    const success = tryApplyPromoCode(promoInputText);
+  const handleApplyPromo = async () => {
+    const success = await tryApplyPromoCode(promoInputText);
     if (!success) {
       setPromoStatus("invalid");
     }
@@ -103,33 +99,38 @@ export default function CartPage() {
   if (checkingAuth) return null;
 
   return (
-    <main className="min-h-screen bg-[#F3F4F6] p-4 sm:p-6 md:p-8 lg:p-12">
-      <section className="max-w-6xl mx-auto">
-        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-10">
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            <CartList
-              items={items}
-              onDecrement={decrementItem}
-              onIncrement={incrementItem}
-              onRemove={removeItem}
-              storeName={storeName}
-            />
-          </div>
+    <div className="flex flex-col min-h-screen">
+      <div className="w-full flex-shrink-0">
+        <Navbar />
+      </div>
+      <main className="flex-1 bg-[#F3F4F6] p-4 sm:p-6 md:p-8 lg:p-12">
+        <section className="max-w-6xl mx-auto">
+          <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-10">
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+              <CartList
+                items={items}
+                onDecrement={decrementItem}
+                onIncrement={incrementItem}
+                onRemove={removeItem}
+                storeName={storeName}
+              />
+            </div>
 
-          <div className="space-y-4 sm:space-y-6 lg:sticky lg:top-6 lg:h-fit">
-            <CheckoutSection
+            <div className="space-y-4 sm:space-y-6 lg:sticky lg:top-6 lg:h-fit">
+              <CheckoutSection
               items={items}
               appliedPromo={appliedPromo}
               promoInputText={promoInputText}
               promoStatus={promoStatus}
-              promoCodes={promoCodes}
               onApplyPromo={handleApplyPromo}
               onRemovePromo={handleRemovePromo}
               onPromoInputChange={handlePromoInputChange}
             />
+            </div>
           </div>
-        </div>
-      </section>
-    </main>
+        </section>
+      </main>
+      <Footer />
+    </div>
   );
 }

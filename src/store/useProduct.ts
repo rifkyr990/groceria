@@ -10,6 +10,7 @@ type ProductStore = {
   setSelectedProductDetails: (product: IProductProps) => void;
   productsByLoc: IProductProps[];
   setProductsByLoc: (data: IProductProps[]) => void;
+  getProductById: (id: number) => Promise<void>;
 };
 
 export const useProduct = create<ProductStore>()(
@@ -28,6 +29,14 @@ export const useProduct = create<ProductStore>()(
       },
       setSelectedProductDetails: (product) =>
         set({ selectedProductDetails: product }),
+      getProductById: async (id: number) => {
+        try {
+          const res = await apiCall.get(`/api/product/detail/${id}`);
+          set({ selectedProductDetails: res.data.data });
+        } catch (error) {
+          console.error("Gagal fetch product by id:", error);
+        }
+      },
       setProductsByLoc: (data: IProductProps[]) => set({ productsByLoc: data }),
     }),
 

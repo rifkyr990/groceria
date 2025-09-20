@@ -8,6 +8,7 @@ export interface IProductProps {
     store: IStoreProps[];
     product_id: number;
     stock_quantity: number;
+    min_stock: number;
   }[];
   images: {
     id: number;

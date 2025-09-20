@@ -43,7 +43,8 @@ export default function OrderReview({
                 {itemToShow.name}
               </p>
               <p className="text-xs text-gray-500">
-                {formatIDRCurrency(itemToShow.price)} x {itemToShow.quantity}
+                {formatIDRCurrency(Number(itemToShow.price))} x{" "}
+                {itemToShow.quantity}
               </p>
             </div>
             {items.length > 1 && (
@@ -62,7 +63,8 @@ export default function OrderReview({
           <div className="flex items-center gap-2">
             {selectedShipping ? (
               <span className="text-sm font-medium text-primary-green-600">
-                {selectedShipping.courier} ({formatIDRCurrency(selectedShipping.cost)})
+                {selectedShipping.courier} (
+                {formatIDRCurrency(Number(selectedShipping.cost))})
               </span>
             ) : (
               <span className="text-sm text-gray-500">Select</span>

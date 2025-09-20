@@ -76,7 +76,7 @@ export default function AccountPage() {
           />
           <StoreAdminData storeAdmins={storeAdmins} className="w-full" />
         </div>
-        <StoreData className=" mb-8" stores={stores} />
+        {/* <StoreData className=" mb-8" stores={stores} /> */}
       </div>
     </DashboardLayout>
   );

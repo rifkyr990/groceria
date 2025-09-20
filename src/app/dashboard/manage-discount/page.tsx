@@ -1,11 +1,72 @@
+"use client";
+import { Button } from "@/components/ui/button";
+import { apiCall } from "@/helper/apiCall";
+import { Download, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 import DashboardLayout from "../components/DashboardLayout";
+import DiscountHistory from "./components/DiscountHistory";
+import SummaryDiscountCard from "./components/SummaryDiscountCard";
+import CreateNewDiscount from "./components/CreateNewDisc";
+import { useDiscountStore } from "@/store/useDiscount";
 
 export default function DiscountPage() {
+  // const [discountData, setDiscountData] = useState([]);
+  const [createDiscount, setCreateDiscount] = useState(false);
+  const setDiscounts = useDiscountStore((state) => state.setDiscounts);
+
+  const getAllDiscount = async () => {
+    try {
+      const res = await apiCall.get("/api/discount/all");
+      const data = res.data.data;
+      // console.log(data);
+      // setDiscountData(data);
+      setDiscounts(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getAllDiscount();
+  }, []);
   return (
     <DashboardLayout>
-      <section>
-        <h1>Discount Page</h1>
+      <section className="py-5">
+        <section className="bg-white w-full  rounded-md shadow-sm p-5">
+          <section id="header" className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold">
+                Discount Management Page
+              </h1>
+              <p>
+                Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+                Numquam, dolore.
+              </p>
+            </div>
+            <div id="btn" className="flex gap-x-2">
+              {/* <Button>
+                <Download /> Export History
+              </Button> */}
+              <Button
+                onClick={() => setCreateDiscount((prev) => !prev)}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Plus /> Create New Discount
+              </Button>
+            </div>
+          </section>
+          <SummaryDiscountCard />
+          <DiscountHistory />
+        </section>
       </section>
+      {/* Create New Discount */}
+      <CreateNewDiscount
+        open={createDiscount}
+        setOpen={setCreateDiscount}
+        onCreate={(newDiscount) =>
+          setDiscounts((prev) => [newDiscount, ...prev])
+        }
+      />
     </DashboardLayout>
   );
 }
