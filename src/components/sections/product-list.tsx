@@ -30,7 +30,7 @@ export default function ProductList() {
   const [categories, setCategories] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const { setSelectedProductDetails, setProductsByLoc } = useProduct();
-  const { addItem } = useCartStore();
+  const { addItem, items: cartItems } = useCartStore();
   const { user } = useAuthStore();
 
   const productsPerPage = 8;
@@ -143,6 +143,13 @@ export default function ProductList() {
       {/* Product Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 my-5">
         {currentProducts.map((product) => {
+          const itemInCart = cartItems.find(
+            (item) => item.productId === product.id
+          );
+          const quantityInCart = itemInCart?.quantity || 0;
+          const stock = product.stocks?.[0]?.stock_quantity ?? 0;
+          const isOutOfStock = stock === 0 || quantityInCart >= stock;
+
           return (
             <div
               key={product.id}
@@ -176,13 +183,15 @@ export default function ProductList() {
                 </p>
 
                 <button
-                  disabled={!user || !user.is_verified}
+                  disabled={!user || !user.is_verified || isOutOfStock}
                   title={
                     !user
                       ? "Please log in to add items"
                       : !user.is_verified
                         ? "Please verify your email to shop"
-                        : ""
+                        : isOutOfStock
+                          ? "Out of stock"
+                          : ""
                   }
                   onClick={(e) => {
                     e.stopPropagation();
@@ -199,12 +208,14 @@ export default function ProductList() {
                       name: product.name,
                       price: String(product.price),
                       description: product.description || "",
-                      image: product.images?.[0]?.image_url || "/fallback.png",
+                      image:
+                        product.images?.[0]?.image_url || "/fallback.png",
                     };
                     addItem(
                       productForCart,
                       product.stocks[0].store.id,
                       product.stocks[0].store.name,
+                      stock,
                       1 // Add 1 item by default from product card
                     );
                   }}

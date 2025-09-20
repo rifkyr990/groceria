@@ -37,6 +37,8 @@ interface ApiError {
   error: string;
 }
 
+import { useProduct } from "./useProduct";
+
 interface CartState {
   storeId: number | null;
   storeName: string | null;
@@ -53,6 +55,7 @@ interface CartState {
     product: Omit<CartItem, "quantity" | "id"> & { id: number },
     storeId: number,
     storeName: string,
+    availableStock: number,
     quantity?: number
   ) => void;
   incrementItem: (cartItemId: number) => void;
@@ -99,7 +102,7 @@ export const useCartStore = create<CartState>((set, get) => {
     loading: false,
     error: null,
 
-    addItem: (product, storeId, storeName, quantity = 1) => {
+    addItem: (product, storeId, storeName, availableStock, quantity = 1) => {
       const { user } = useAuthStore.getState();
 
       if (!user) {
@@ -124,6 +127,15 @@ export const useCartStore = create<CartState>((set, get) => {
         const existing = initialItems.find(
           (item) => item.productId === product.id
         );
+
+        const currentQuantityInCart = existing ? existing.quantity : 0;
+
+        if (currentQuantityInCart + quantity > availableStock) {
+          toast.warn(
+            `You can't add more of this item. Only ${availableStock} available.`
+          );
+          return state; // Abort update
+        }
 
         let updatedItems;
         if (existing) {
@@ -163,6 +175,21 @@ export const useCartStore = create<CartState>((set, get) => {
     },
 
     incrementItem: (cartItemId) => {
+      const { productsByLoc } = useProduct.getState();
+      const itemToIncrement = get().items.find((item) => item.id === cartItemId);
+
+      if (!itemToIncrement) return;
+
+      const productInfo = productsByLoc.find(
+        (p) => p.id === itemToIncrement.productId
+      );
+      const availableStock = productInfo?.stocks[0]?.stock_quantity ?? 0;
+
+      if (itemToIncrement.quantity >= availableStock) {
+        toast.warn("No more stock available for this item.");
+        return; // Abort update
+      }
+
       const updatedItems = get().items.map((item) =>
         item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item
       );

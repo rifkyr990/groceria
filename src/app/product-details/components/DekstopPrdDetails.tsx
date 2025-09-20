@@ -33,7 +33,7 @@ export default function DesktopPrdDetails({
     getProductById,
     setSelectedProductDetails,
   } = useProduct();
-  const { addItem } = useCartStore();
+  const { addItem, items: cartItems } = useCartStore();
   const { user } = useAuthStore();
 
   // case untuk fetch data ulang (bila ada perubahan data stock/keterangan lain di dashboard)
@@ -60,6 +60,11 @@ export default function DesktopPrdDetails({
       setValue((prev) => prev - 1);
     }
   };
+
+  const itemInCart = cartItems.find(
+    (item) => item.productId === selectedProductDetails?.id
+  );
+  const quantityInCart = itemInCart?.quantity || 0;
 
   // prd preview handler
   const [preview, setPreview] = useState("");
@@ -181,7 +186,9 @@ export default function DesktopPrdDetails({
                   className="cursor-pointer select-none bg-emerald-500 hover:bg-emerald-600"
                   id="increment"
                   onClick={() => handlerValue("inc")}
-                  disabled={value === stock || isOutOfStock}
+                  disabled={
+                    value + quantityInCart >= (stock ?? 0) || isOutOfStock
+                  }
                 >
                   +
                 </Button>
@@ -195,18 +202,24 @@ export default function DesktopPrdDetails({
             <div id="add-cart">
               <Button
                 className="bg-green-600 hover:bg-green-700 cursor-pointer"
-                disabled={isOutOfStock || !user || !user.is_verified}
+                disabled={
+                  isOutOfStock ||
+                  !user ||
+                  !user.is_verified ||
+                  quantityInCart >= (stock ?? 0)
+                }
                 title={
                   !user
                     ? "Please log in to add items"
                     : !user.is_verified
                       ? "Please verify your email to shop"
-                      : isOutOfStock
+                      : isOutOfStock || quantityInCart >= (stock ?? 0)
                         ? "Out of stock"
                         : ""
                 }
                 onClick={() => {
-                  if (!selectedProductDetails || !storeIdentity) return;
+                  if (!selectedProductDetails || !storeIdentity || !stock)
+                    return;
                   const productForCart = {
                     id: selectedProductDetails.id,
                     productId: selectedProductDetails.id,
@@ -221,6 +234,7 @@ export default function DesktopPrdDetails({
                     productForCart,
                     selectedProductDetails.stocks[0].store.id,
                     storeIdentity.name,
+                    stock,
                     value
                   );
                 }}
