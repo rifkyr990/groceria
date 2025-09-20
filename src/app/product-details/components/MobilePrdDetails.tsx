@@ -13,6 +13,7 @@ import { ChevronDown, Headset, Phone, ShoppingCart, Store } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Autoplay from "embla-carousel-autoplay";
+import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
@@ -39,6 +40,7 @@ export default function MobilePrdDetails({
   const { selectedProductDetails, setSelectedProductDetails, productsByLoc } =
     useProduct();
   const { addItem } = useCartStore();
+  const { user } = useAuthStore();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -159,14 +161,23 @@ export default function MobilePrdDetails({
             <div id="cart">
               <Button
                 className="w-full h-9 bg-green-600 hover:bg-green-700"
-                disabled={isOutOfStock}
+                disabled={isOutOfStock || !user || !user.is_verified}
+                title={
+                  !user
+                    ? "Please log in to add items"
+                    : !user.is_verified
+                      ? "Please verify your email to shop"
+                      : isOutOfStock
+                        ? "Out of stock"
+                        : ""
+                }
                 onClick={() => {
                   if (!selectedProductDetails || !storeIdentity) return;
                   const productForCart = {
                     id: selectedProductDetails.id,
                     productId: selectedProductDetails.id,
                     name: selectedProductDetails.name,
-                    price: selectedProductDetails.price,
+                    price: String(selectedProductDetails.price),
                     description: selectedProductDetails.description || "",
                     image:
                       selectedProductDetails.images?.[0]?.image_url ||

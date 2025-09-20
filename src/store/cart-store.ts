@@ -99,7 +99,19 @@ export const useCartStore = create<CartState>((set, get) => {
     loading: false,
     error: null,
 
-    addItem: (product, storeId, storeName, quantity = 1) =>
+    addItem: (product, storeId, storeName, quantity = 1) => {
+      const { user } = useAuthStore.getState();
+
+      if (!user) {
+        toast.error("Please log in to add items to your cart.");
+        return;
+      }
+
+      if (!user.is_verified) {
+        toast.warn("Please verify your email to start shopping.");
+        return;
+      }
+
       set((state) => {
         const isNewStore = state.storeId !== null && state.storeId !== storeId;
 
@@ -147,7 +159,8 @@ export const useCartStore = create<CartState>((set, get) => {
         }, 0);
 
         return newState;
-      }),
+      });
+    },
 
     incrementItem: (cartItemId) => {
       const updatedItems = get().items.map((item) =>

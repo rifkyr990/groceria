@@ -15,6 +15,7 @@ import { Headset, MapPin, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 import { toast } from "react-toastify";
 
@@ -33,6 +34,7 @@ export default function DesktopPrdDetails({
     setSelectedProductDetails,
   } = useProduct();
   const { addItem } = useCartStore();
+  const { user } = useAuthStore();
 
   // case untuk fetch data ulang (bila ada perubahan data stock/keterangan lain di dashboard)
   const router = useRouter();
@@ -193,14 +195,23 @@ export default function DesktopPrdDetails({
             <div id="add-cart">
               <Button
                 className="bg-green-600 hover:bg-green-700 cursor-pointer"
-                disabled={isOutOfStock}
+                disabled={isOutOfStock || !user || !user.is_verified}
+                title={
+                  !user
+                    ? "Please log in to add items"
+                    : !user.is_verified
+                      ? "Please verify your email to shop"
+                      : isOutOfStock
+                        ? "Out of stock"
+                        : ""
+                }
                 onClick={() => {
                   if (!selectedProductDetails || !storeIdentity) return;
                   const productForCart = {
                     id: selectedProductDetails.id,
                     productId: selectedProductDetails.id,
                     name: selectedProductDetails.name,
-                    price: selectedProductDetails.price,
+                    price: String(selectedProductDetails.price),
                     description: selectedProductDetails.description || "",
                     image:
                       selectedProductDetails.images?.[0]?.image_url ||

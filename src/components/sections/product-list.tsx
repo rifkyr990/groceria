@@ -8,6 +8,7 @@ import { ShoppingCart, Store } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 
 // interface Product {
@@ -30,6 +31,7 @@ export default function ProductList() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const { setSelectedProductDetails, setProductsByLoc } = useProduct();
   const { addItem } = useCartStore();
+  const { user } = useAuthStore();
 
   const productsPerPage = 8;
 
@@ -170,10 +172,18 @@ export default function ProductList() {
                 </h3>
                 <p className="text-green-600 font-bold mt-1">
                   {/* Rp {product.price.toLocaleString()} */}
-                  {formatIDRCurrency(Math.trunc(product.price))}
+                  {formatIDRCurrency(Number(product.price))}
                 </p>
 
                 <button
+                  disabled={!user || !user.is_verified}
+                  title={
+                    !user
+                      ? "Please log in to add items"
+                      : !user.is_verified
+                        ? "Please verify your email to shop"
+                        : ""
+                  }
                   onClick={(e) => {
                     e.stopPropagation();
                     if (
@@ -187,10 +197,9 @@ export default function ProductList() {
                       id: product.id,
                       productId: product.id,
                       name: product.name,
-                      price: product.price,
+                      price: String(product.price),
                       description: product.description || "",
-                      image:
-                        product.images?.[0]?.image_url || "/fallback.png",
+                      image: product.images?.[0]?.image_url || "/fallback.png",
                     };
                     addItem(
                       productForCart,
@@ -199,7 +208,7 @@ export default function ProductList() {
                       1 // Add 1 item by default from product card
                     );
                   }}
-                  className="mt-5 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-xl transition"
+                  className="mt-5 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-xl transition disabled:bg-green-600/40 disabled:cursor-not-allowed"
                 >
                   <ShoppingCart size={18} />
                   <span className="text-sm font-medium">Tambah Keranjang</span>
