@@ -1,7 +1,7 @@
 import { create } from "zustand";
+import { apiCall } from '@/helper/apiCall';
 import { useAuthStore } from "./auth-store";
 import { toast } from "react-toastify";
-import { apiCall } from "@/helper/apiCall";
 
 interface UserProfile {
   id: string;
@@ -36,18 +36,18 @@ export const useUserStore = create<UserState>((set) => ({
   updateProfile: async (formData) => {
     set({ loading: true, error: null });
 
-    try {
-      const token = useAuthStore.getState().token;
-      const res = await apiCall.put("/api/user/profile", formData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const user = res.data.data;
-      localStorage.setItem("user", JSON.stringify(user));
-      useAuthStore.getState().setUserAndToken(user, token!);
+        try {
+            const token = useAuthStore.getState().token;
+            const res = await apiCall.put("/api/user/profile", formData, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            
+            const user = res.data.data;
+            localStorage.setItem("user", JSON.stringify(user));
+            useAuthStore.getState().setUserAndToken(user, token!);
 
       set({ loading: false });
 
@@ -116,38 +116,29 @@ export const useUserStore = create<UserState>((set) => ({
     }
   },
 
-  resendVerificationEmail: async () => {
-    try {
-      const { user, token } = useAuthStore.getState();
-      await apiCall.post(
-        "/api/user/resend-verification",
-        { email: user.email },
-        {
-          headers: { Authorization: `Bearer ${token}` },
+    resendVerificationEmail: async () => { 
+        try {
+            const { user, token } = useAuthStore.getState();
+            await apiCall.post("/api/auth/resend-verification", { email: user.email }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success("Email verifikasi berhasil dikirim ulang!");
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || "Gagal kirim email verifikasi");
         }
-      );
-      toast.success("Email verifikasi berhasil dikirim ulang!");
-    } catch (error: any) {
-      toast.error(
-        error.response?.data?.message || "Gagal kirim email verifikasi"
-      );
-    }
-  },
+    },
 
-  changePassword: async (oldPassword: string, newPassword: string) => {
-    set({ loading: true, error: null });
-    try {
-      const token = useAuthStore.getState().token;
-      const res = await apiCall.put(
-        "/api/user/change-password",
-        { oldPassword, newPassword },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+
+    changePassword: async (oldPassword: string, newPassword: string) => {
+        set({ loading: true, error: null });
+        try {
+            const token = useAuthStore.getState().token;
+            await apiCall.put("/api/user/change-password", { oldPassword, newPassword }, {
+                headers: {
+                    "Content-Type" : "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
       set({ loading: false });
       return true;

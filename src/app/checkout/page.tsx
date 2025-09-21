@@ -52,16 +52,8 @@ const checkoutStep = [
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const {
-    placeOrder,
-    getMidtransToken,
-    loading: isPlacingOrder,
-  } = useOrderStore();
-  const {
-    addresses,
-    loading: addressesLoading,
-    fetchAddresses,
-  } = useAddressStore();
+  const { placeOrder, getMidtransToken, loading: isPlacingOrder } = useOrderStore();
+  const { addresses, loading: addressesLoading, fetchAddress,} = useAddressStore();
   const {
     fetchOptions,
     options: shippingOptions,
@@ -97,9 +89,9 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (token) {
       fetchCart(token);
-      fetchAddresses();
+      fetchAddress();
     }
-  }, [token, fetchCart, fetchAddresses]);
+  }, [token, fetchCart, fetchAddress]);
 
   useEffect(() => {
     if (selectedAddressId) {

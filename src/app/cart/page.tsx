@@ -7,8 +7,11 @@ import { useCartStore } from "@/store/cart-store";
 import { useAuthStore } from "@/store/auth-store";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
+import { useRouter } from "next/navigation";
 
 export default function CartPage() {
+  const router = useRouter();
+
   const {
     items,
     appliedPromo,
@@ -23,10 +26,29 @@ export default function CartPage() {
   } = useCartStore();
   const [promoInputText, setPromoInputText] = useState(appliedPromo?.code || "");
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
-  const { token } = useAuthStore.getState();
 
+  const { token, user, hydrate } = useAuthStore();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Hydrate auth store di awal
   useEffect(() => {
-    fetchCart(token);
+    hydrate();
+  }, [hydrate]);
+
+  // Cek apakah user belum login / belum verifikasi
+  useEffect(() => {
+    if (!token || !user || !user.is_verified) {
+      router.replace("/");
+    } else {
+      setCheckingAuth(false);
+    }
+  }, [token, user, router]);
+
+  // Ambil data cart
+  useEffect(() => {
+    if (token) {
+      fetchCart(token);
+    }
   }, [token, fetchCart]);
 
   useEffect(() => {
@@ -72,6 +94,9 @@ export default function CartPage() {
       setPromoStatus("idle");
     }
   };
+
+  // Jangan render apapun sebelum pengecekan auth selesai
+  if (checkingAuth) return null;
 
   return (
     <div className="flex flex-col min-h-screen">

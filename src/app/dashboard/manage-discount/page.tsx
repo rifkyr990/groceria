@@ -1,18 +1,25 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { apiCall } from "@/helper/apiCall";
-import { Download, Plus } from "lucide-react";
+import { useAuthStore } from "@/store/auth-store";
+import { useDiscountStore } from "@/store/useDiscount";
+import { useStore } from "@/store/useStore";
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import DashboardLayout from "../components/DashboardLayout";
+import CreateNewDiscount from "./components/CreateNewDisc";
 import DiscountHistory from "./components/DiscountHistory";
 import SummaryDiscountCard from "./components/SummaryDiscountCard";
-import CreateNewDiscount from "./components/CreateNewDisc";
-import { useDiscountStore } from "@/store/useDiscount";
 
 export default function DiscountPage() {
   // const [discountData, setDiscountData] = useState([]);
+  const { selectedStore, setSelectedStore } = useStore();
+  const { user } = useAuthStore();
   const [createDiscount, setCreateDiscount] = useState(false);
   const setDiscounts = useDiscountStore((state) => state.setDiscounts);
+  // filter
+  const [discountType, setDiscountType] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getAllDiscount = async () => {
     try {
@@ -28,6 +35,9 @@ export default function DiscountPage() {
 
   useEffect(() => {
     getAllDiscount();
+    if ((user.role === "STORE_ADMIN" || "SUPER_ADMIN") && user.store_id) {
+      setSelectedStore(user.store_id.toString());
+    }
   }, []);
   return (
     <DashboardLayout>
@@ -55,8 +65,16 @@ export default function DiscountPage() {
               </Button>
             </div>
           </section>
-          <SummaryDiscountCard />
-          <DiscountHistory />
+          <SummaryDiscountCard
+            discountType={discountType}
+            searchQuery={searchQuery}
+          />
+          <DiscountHistory
+            discountType={discountType}
+            setDiscountType={setDiscountType}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
         </section>
       </section>
       {/* Create New Discount */}

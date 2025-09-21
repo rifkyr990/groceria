@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { apiCall } from "@/helper/apiCall";
+import { useAuthStore } from "@/store/auth-store";
+import { useStore } from "@/store/useStore";
 import { IProductProps } from "@/types/product";
 import { IStoreProps } from "@/types/store";
 import { formatIntlDate } from "@/utils/format";
@@ -44,11 +46,12 @@ export default function CreateNewDiscount({
   setOpen,
   onCreate,
 }: ICreateNewDiscount) {
-  // Store & Product List
-  const [storeList, setStoreList] = useState<IStoreProps[]>([]);
-  const [selectedStore, setSelectedStore] = useState("");
   const [productByStore, setProductByStore] = useState<IProductProps[]>([]);
   const [selectedProduct, setSelectedProduct] = useState("");
+  // get User Data
+  const { selectedStore, setSelectedStore, fetchAllStores, storesData } =
+    useStore();
+  const user = useAuthStore((state) => state.user);
 
   // Discount Info
   const [discountCode, setDiscountCode] = useState("");
@@ -65,15 +68,7 @@ export default function CreateNewDiscount({
 
   // GET Store List
   useEffect(() => {
-    const fetchStores = async () => {
-      try {
-        const res = await apiCall.get("/api/store/all");
-        setStoreList(res.data.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchStores();
+    fetchAllStores();
   }, []);
 
   // GET Products by Store
@@ -160,12 +155,16 @@ export default function CreateNewDiscount({
           <div>
             <DialogTitle>Create New Discount</DialogTitle>
           </div>
-          <Select value={selectedStore} onValueChange={setSelectedStore}>
+          <Select
+            value={selectedStore}
+            onValueChange={setSelectedStore}
+            disabled={user.role === "STORE_ADMIN"}
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select Store" />
             </SelectTrigger>
             <SelectContent>
-              {storeList.map((store) => (
+              {storesData.map((store) => (
                 <SelectItem key={store.id} value={store.id.toString()}>
                   {store.name}
                 </SelectItem>

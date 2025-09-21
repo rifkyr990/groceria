@@ -24,6 +24,9 @@ import {
 import { IProductProps } from "@/types/product";
 import { formatIDRCurrency, upperFirstCharacter } from "@/utils/format";
 import { apiCall } from "@/helper/apiCall";
+import { useAuthStore } from "@/store/auth-store";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 interface CategoryWithProducts {
   category: string;
@@ -31,6 +34,17 @@ interface CategoryWithProducts {
 }
 
 export default function NewProduct() {
+  const router = useRouter();
+  // check role, kalau store admin, lempar ke order page
+  useEffect(() => {
+    const jsonData = JSON.parse(localStorage.getItem("user")!);
+    if (!jsonData) return;
+    if (jsonData.role === "STORE_ADMIN") {
+      toast.error("You are not allowed to access this page");
+      router.replace("/dashboard/manage-product/product-list");
+      return;
+    }
+  }, [router]);
   const [images, setImages] = useState<(File | null)[]>([
     null,
     null,

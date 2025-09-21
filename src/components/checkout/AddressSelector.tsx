@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { MapPin, Plus, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import AddNewAddressModal from "./AddNewAddressModal";
+import AddAddressModal from "@/app/profile/address/AddAddressModal";
 import { UserAddress } from "../types";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -23,16 +23,15 @@ export default function AddressSelector({
   selectedAddressId,
   setSelectedAddressId,
 }: AddressSelectorProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!selectedAddressId && addresses.length > 0) {
       const primaryAddress = addresses.find((addr) => addr.is_primary);
-      setSelectedAddressId(
-        primaryAddress ? primaryAddress.id : addresses[0].id
-      );
+      setSelectedAddressId(primaryAddress ? primaryAddress.id : addresses[0].id);
     }
   }, [addresses, selectedAddressId, setSelectedAddressId]);
+
 
   return (
     <>
@@ -46,15 +45,7 @@ export default function AddressSelector({
               Delivery Address
             </CardTitle>
           </div>
-          <Button
-            onClick={() => setIsModalOpen(true)}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-1"
-          >
-            <Plus className="w-4 h-4" />
-            <span>New</span>
-          </Button>
+          <AddAddressModal />
         </CardHeader>
 
         <CardContent className="p-4">
@@ -74,6 +65,7 @@ export default function AddressSelector({
               value={selectedAddressId?.toString()}
               onValueChange={(value) => setSelectedAddressId(Number(value))}
             >
+
               <div className="space-y-3">
                 {addresses.map((address) => (
                   <Label
@@ -119,14 +111,6 @@ export default function AddressSelector({
           )}
         </CardContent>
       </Card>
-
-      <AddNewAddressModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        onSuccess={() => {
-          setIsModalOpen(false);
-        }}
-      />
     </>
   );
 }

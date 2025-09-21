@@ -45,6 +45,7 @@ interface IStoreAdminData {
 export default function StoreAdminData({
   className,
   storeAdmins,
+  // allStoreAdmins,
 }: IStoreAdminData) {
   const storeAdminData = [
     ...(storeAdmins?.withStore?.flatMap(
@@ -76,8 +77,8 @@ export default function StoreAdminData({
     })) ?? [];
   // search query - search bar
   const [searchQuery, setSearchQuery] = useState("");
-  // filter store
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
+
   const filteredAdmin = storeAdminData.filter((admin) => {
     const matchesSearch =
       admin?.adminFirstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -96,11 +97,11 @@ export default function StoreAdminData({
   const currentUsers = filteredAdmin.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredAdmin.length / usersPerPage);
 
-  // revert store admin to cust
+  // revert store admin to customer
   const handlerRevertAdmin = async (
     id: string,
     role: string,
-    store_id: number
+    store_id: number | null
   ) => {
     try {
       const confirmAlert = confirm("Are you sure revert this store admin?");
@@ -112,12 +113,12 @@ export default function StoreAdminData({
       if (!res) toast.error("Revert Store Admin Error");
       toast.success("Revert Admin Success");
       window.location.reload();
-      console.log(res.data.data);
     } catch (error) {
       console.log(error);
     }
   };
-  // change store
+
+  // open modal for changing store
   const [openStoreTf, setOpenStoreTf] = useState<{
     adminData: IRelocateAdminData | null;
     storeList: { id: number; name: string }[];
@@ -130,59 +131,53 @@ export default function StoreAdminData({
 
   return (
     <div>
-      <Card className={`${className} `}>
-        <CardHeader className="flex flex-col max-lg:flex-col  ">
-          <div className=" flex w-full">
-            <div id="title" className="w-full">
-              <h1 className="font-semibold text-xl">Store Admin</h1>
-            </div>
-            <div id="btn" className="flex gap-x-2">
-              <div id="filter" className="w-full">
-                <Select
-                  value={selectedStore ?? ""}
-                  onValueChange={(value) => {
-                    if (value === "all") {
-                      setSelectedStore("");
-                    } else {
-                      setSelectedStore(value);
-                    }
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Store Name" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Stores</SelectLabel>
-                      <SelectItem value="all">ALL STORES</SelectItem>
-                      {storeList.map((store) => (
-                        <SelectItem key={store.id} value={store.name}>
-                          {store.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
+      <Card className={`${className}`}>
+        <CardHeader className="flex flex-col">
+          <div className="flex w-full justify-between items-center">
+            <h1 className="font-semibold text-xl">Store Admin</h1>
+            <div className="flex gap-x-2">
+              <Select
+                value={selectedStore ?? ""}
+                onValueChange={(value) => {
+                  if (value === "all") {
+                    setSelectedStore("");
+                  } else {
+                    setSelectedStore(value);
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Store Name" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Stores</SelectLabel>
+                    <SelectItem value="all">ALL STORES</SelectItem>
+                    <SelectItem value="NO STORE">NO STORE</SelectItem>
+                    {storeList.map((store) => (
+                      <SelectItem key={store.id} value={store.name}>
+                        {store.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-          <div className="flex max-lg:flex-col gap-x-2 w-full "></div>
-          <div id="searcbar" className="relative w-full">
+
+          <div id="searcbar" className="relative w-full mt-4">
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by name"
               className="text-xs w-full"
-            ></Input>
+            />
             <Search className="absolute size-4 top-2.5 right-2 text-gray-400" />
           </div>
         </CardHeader>
-        <CardContent
-          className=" p-4
-        "
-        >
-          {/* Desktop Version - Table */}
-          <Table className="">
+
+        <CardContent className="p-4">
+          <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="text-center">First Name</TableHead>
@@ -196,11 +191,16 @@ export default function StoreAdminData({
                 <TableRow key={idx}>
                   <TableCell>{admin?.adminFirstName}</TableCell>
                   <TableCell>{admin?.adminLastName}</TableCell>
-                  <TableCell>{admin?.storeName}</TableCell>
+                  <TableCell
+                    className={
+                      admin.storeName === "NO STORE" ? "text-red-500" : ""
+                    }
+                  >
+                    {admin.storeName}
+                  </TableCell>
                   <TableCell className="flex gap-x-2 items-center text-center justify-center">
                     <Button
-                      className="bg-blue-500 hover:bg-blue-600
-                  "
+                      className="bg-blue-500 hover:bg-blue-600"
                       onClick={() =>
                         setOpenStoreTf({
                           adminData: {
@@ -233,14 +233,13 @@ export default function StoreAdminData({
             </TableBody>
           </Table>
         </CardContent>
-        <CardFooter className="max-lg:hidden">
-          {/* Pagination */}
+
+        <CardFooter>
           <PaginationControls
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
           />
-          {/* Dialog Change Store */}
           <RelocateAdmin
             open={openStoreTf.open}
             setOpen={(val) =>
