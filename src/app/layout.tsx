@@ -47,6 +47,7 @@ export default function RootLayout({
           type="text/javascript"
           src={process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL}
           data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
+          strategy="beforeInteractive"
         />
         <StoreInitializer />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>

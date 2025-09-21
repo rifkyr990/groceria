@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { apiCall } from "@/helper/apiCall";
 import { IStoreProps } from "@/types/store";
-import { formatIDRCurrency } from "@/utils/format";
+import { formatIDRCurrency, upperFirstCharacter } from "@/utils/format";
 import {
   BadgeDollarSign,
   Clipboard,
@@ -35,57 +35,29 @@ import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
+  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { unique } from "next/dist/build/utils";
+interface Summary {
+  totalSales: number;
+  totalQuantity: number;
+  totalOrder: number;
+  totalRefund: number;
+}
 
-const summaryCard = [
-  {
-    id: 1,
-    name: "Total Sales",
-    icon: <BadgeDollarSign className="text-green-500" />,
-    border: "border-l-green-500 border-4 border-y ",
-    total: (
-      <span className="text-green-500 text-4xl font-bold ">
-        {/* {summary.totalAddition} */} {formatIDRCurrency(50000)}
-      </span>
-    ),
-    desc: "per month",
-  },
-  {
-    id: 2,
-    name: "Total Sold Product",
-    icon: <ShoppingBag className="text-amber-500" />,
-    border: "border-l-amber-500 border-4",
-    total: <span className="text-amber-500 text-4xl font-bold ">50</span>,
-    desc: "products per month",
-  },
-  {
-    id: 3,
-    name: "Total Order",
-    icon: <Clipboard className="text-purple-500" />,
-    border: "border-l-purple-500 border-4",
-    total: <span className="text-purple-500 text-4xl font-bold ">100</span>,
-    desc: "orders per month",
-  },
-  {
-    id: 4,
-    name: "Total Refund",
-    icon: <RefreshCcw className="text-red-500" />,
-    border: "border-l-red-500 border-4",
-    total: (
-      <span className="text-red-500 text-4xl font-bold ">
-        {formatIDRCurrency(100000)}
-      </span>
-    ),
-    desc: "per month",
-  },
-];
 export default function SalesReport() {
   const router = useRouter();
+  const [allOrder, setAllOrder] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedProduct, setSelectedProduct] = useState("all");
+  const [categories, setCategories] = useState<string[]>([]);
+  const [products, setProducts] = useState<string[]>([]);
   const [selectedStore, setSelectedStore] = useState("all");
   const [storeList, setStoreList] = useState<IStoreProps[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState<{
     month: number;
     year: number;
@@ -93,6 +65,13 @@ export default function SalesReport() {
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
   });
+  const [summary, setSummary] = useState<Summary>({
+    totalSales: 0,
+    totalQuantity: 0,
+    totalOrder: 0,
+    totalRefund: 0,
+  });
+  const [orders, setOrders] = useState<any[]>([]);
 
   const getStoreList = async () => {
     try {
@@ -104,9 +83,54 @@ export default function SalesReport() {
     }
   };
 
+  // console.log(selectedDate);
+  // console.log(selectedStore);
   const getOrderList = async () => {
+    const { month, year } = selectedDate;
     try {
-      const res = await apiCall.get("/");
+      let res;
+      if (selectedStore === "all") {
+        res = await apiCall.get(
+          `/api/report/orders?month=${month}&year=${year}`
+        );
+      } else {
+        res = await apiCall.get(
+          `/api/report/orders/by-store?storeId=${Number(selectedStore)}&month=${month}&year=${year}`
+        );
+      }
+
+      const result = res.data.data ?? [];
+
+      // kalau backend return array langsung
+      if (Array.isArray(result)) {
+        setOrders(result);
+        setSummary({
+          totalSales: result.reduce((a, b) => a + (b.totalSales ?? 0), 0),
+          totalQuantity: result.reduce((a, b) => a + (b.quantity ?? 0), 0),
+          totalOrder: result.length,
+          totalRefund: 0,
+        });
+      } else {
+        // kalau backend diubah pakai { orders, summary }
+        setOrders(result.orders ?? []);
+        setSummary({
+          totalSales: result.summary?.totalSales ?? 0,
+          totalQuantity: result.summary?.totalQuantity ?? 0,
+          totalOrder: result.summary?.totalOrder ?? 0,
+          totalRefund: result.summary?.totalRefund ?? 0,
+        });
+      }
+
+      // ambil daftar unik category & product
+      const uniqueCategories = Array.from(
+        new Set((result.orders ?? result).map((d: any) => d.category))
+      );
+      const uniqueProducts = Array.from(
+        new Set((result.orders ?? result).map((d: any) => d.product))
+      );
+
+      setCategories(uniqueCategories);
+      setProducts(uniqueProducts);
     } catch (error) {
       console.log(error);
     }
@@ -115,6 +139,80 @@ export default function SalesReport() {
   useEffect(() => {
     getStoreList();
   }, []);
+  // Filter berdasarkan store dan bulan/tahun
+  const filteredData = orders.filter((item) => {
+    const storeMatch =
+      selectedStore === "all" || item.storeId === Number(selectedStore);
+    const dateMatch =
+      item.month === selectedDate.month && item.year === selectedDate.year;
+    return storeMatch && dateMatch;
+  });
+
+  const summaryCard = [
+    {
+      id: 1,
+      name: "Total Sales",
+      icon: <BadgeDollarSign className="text-green-500" />,
+      border: "border-l-green-500 border-4 border-y ",
+      total: (
+        <span className="text-green-500 text-4xl font-bold ">
+          {formatIDRCurrency(summary.totalSales)}
+        </span>
+      ),
+      desc: "this month",
+    },
+    {
+      id: 2,
+      name: "Total Sold Product",
+      icon: <ShoppingBag className="text-amber-500" />,
+      border: "border-l-amber-500 border-4",
+      total: (
+        <span className="text-amber-500 text-4xl font-bold ">
+          {summary.totalQuantity}
+        </span>
+      ),
+      desc: "products this month",
+    },
+    // {
+    //   id: 3,
+    //   name: "Total Order",
+    //   icon: <Clipboard className="text-purple-500" />,
+    //   border: "border-l-purple-500 border-4",
+    //   total: (
+    //     <span className="text-purple-500 text-4xl font-bold ">
+    //       {summary.totalOrder}
+    //     </span>
+    //   ),
+    //   desc: "orders this month",
+    // },
+    // {
+    //   id: 4,
+    //   name: "Total Refund",
+    //   icon: <RefreshCcw className="text-red-500" />,
+    //   border: "border-l-red-500 border-4",
+    //   total: (
+    //     <span className="text-red-500 text-4xl font-bold ">
+    //       {formatIDRCurrency(0)}
+    //     </span>
+    //   ),
+    //   desc: "per month",
+    // },
+  ];
+
+  // filter orders sesuai category, product, search
+  const filteredOrders = orders.filter((o) => {
+    const matchCategory =
+      selectedCategory === "all" || o.category === selectedCategory;
+    const matchProduct =
+      selectedProduct === "all" || o.product === selectedProduct;
+    const matchSearch = o.product
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    return matchCategory && matchProduct && matchSearch;
+  });
+  useEffect(() => {
+    getOrderList();
+  }, [selectedDate, selectedStore]);
   return (
     <DashboardLayout>
       <section
@@ -141,7 +239,7 @@ export default function SalesReport() {
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Store Name</SelectLabel>
-                <SelectItem value="all">All Stores</SelectItem>
+                <SelectItem value="all">All Store</SelectItem>
                 {storeList.map((store, idx) => (
                   <SelectItem key={idx} value={store.id.toString()}>
                     {store.name}
@@ -184,11 +282,19 @@ export default function SalesReport() {
           <div className="flex max-md:flex-col justify-between gap-2 px-7">
             <div id="search-bar" className="w-full relative">
               <Search className="absolute top-2 right-2 size-5 text-gray-400" />
-              <Input className="w-full" placeholder="Search product ..." />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+                placeholder="Search product ..."
+              />
             </div>
             <div className="flex justify-between gap-x-2">
               <div id="filter-category">
-                <Select>
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
+                >
                   <SelectTrigger className="bg-white">
                     <SelectValue placeholder="Category"></SelectValue>
                   </SelectTrigger>
@@ -196,9 +302,9 @@ export default function SalesReport() {
                     <SelectGroup>
                       <SelectLabel>Category</SelectLabel>
                       <SelectItem value="all">All</SelectItem>
-                      {storeList.map((store, idx) => (
-                        <SelectItem key={idx} value={store.id.toString()}>
-                          {store.name}
+                      {categories.map((cat, idx) => (
+                        <SelectItem key={idx} value={cat}>
+                          {cat}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -206,17 +312,20 @@ export default function SalesReport() {
                 </Select>
               </div>
               <div id="filter-product">
-                <Select>
+                <Select
+                  value={selectedProduct}
+                  onValueChange={setSelectedProduct}
+                >
                   <SelectTrigger className="bg-white">
-                    <SelectValue placeholder="Product"></SelectValue>
+                    <SelectValue placeholder="Choose Product"></SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Product Name</SelectLabel>
-                      <SelectItem value="all">All</SelectItem>
-                      {storeList.map((store, idx) => (
-                        <SelectItem key={idx} value={store.id.toString()}>
-                          {store.name}
+                      <SelectItem value="all">All Product </SelectItem>
+                      {products.map((prd, idx) => (
+                        <SelectItem key={idx} value={prd}>
+                          {prd}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -229,62 +338,28 @@ export default function SalesReport() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Invoice</TableHead>
                   <TableHead>Product</TableHead>
                   <TableHead className="text-center">Category</TableHead>
                   <TableHead className="text-center">Quantity</TableHead>
-                  <TableHead className="text-center">Total Payment</TableHead>
-                  <TableHead className="text-center">Store Name</TableHead>
-                  <TableHead className="text-center">Created at</TableHead>
-                  <TableHead className="text-center">Status</TableHead>
+                  <TableHead className="text-center">Total Sales</TableHead>
                 </TableRow>
               </TableHeader>
-              {/* <TableBody>
-                {stockHistory.map((prd, idx) => (
+              <TableBody>
+                {filteredOrders.map((prd, idx) => (
                   <TableRow key={idx}>
-                    <TableCell>{prd.productStock.product.name}</TableCell>
-                    <TableCell className="text-center">{prd.type}</TableCell>
+                    <TableCell>{prd.product}</TableCell>
                     <TableCell className="text-center">
-                      {quantityColor(prd.quantity, prd.type)}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {prd.prev_stock}
+                      {upperFirstCharacter(prd.category)}
                     </TableCell>
                     <TableCell className="text-center">
-                      {prd.updated_stock}
-                    </TableCell>
-
-                    <TableCell className="text-center">
-                      {formatDate(prd.created_at)}
+                      {prd.quantity}
                     </TableCell>
                     <TableCell className="text-center">
-                      {prd.productStock.store.name}
+                      {formatIDRCurrency(prd.totalSales)}
                     </TableCell>
-
-                    <TableCell className="text-center">
-                      {prd.created_by?.first_name ?? "John"}{" "}
-                      {prd.created_by?.last_name ?? "Doe"}
-                    </TableCell>
-                    <TableCell className="text-center max-w-[150px] whitespace-normal break-words">
-                      {prd.reason}
-                    </TableCell>
-
-                    {/* <TableCell>
-                    <div className="flex justify-center gap-x-2">
-                      <Button variant={"outline"} className="cursor-pointer">
-                        <Edit />
-                      </Button>
-                      <Button
-                        variant={"destructive"}
-                        className="cursor-pointer"
-                      >
-                        <Trash />
-                      </Button>
-                    </div>
-                  </TableCell> */}
-              {/* </TableRow>
+                  </TableRow>
                 ))}
-              </TableBody> */}
+              </TableBody>
             </Table>
           </CardContent>
         </Card>

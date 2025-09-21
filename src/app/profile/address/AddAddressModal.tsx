@@ -54,7 +54,7 @@ export default function AddAddressModal() {
         detail: "",
         label: "RUMAH",
         is_primary: false,
-        latitude: -6.2, // default Jakarta
+        latitude: -6.2,
         longitude: 106.816666,
       },
     });
@@ -109,32 +109,35 @@ export default function AddAddressModal() {
 
 
   const onSubmit = async (data: AddressFormValues) => {
-    const provinceName =
-      provinces.find((p) => p.province_id === data.province)?.province || "";
-    const cityName =
-      cities.find((c) => c.city_id === data.city)?.city_name || "";
-    const districtName =
-      districts.find((d) => d.district_id === data.district)?.district_name ||
-      "";
-    const subdistrictName =
-      subdistricts.find((s) => s.subdistrict_id === data.subdistrict)
-        ?.subdistrict_name || "";
+  const provinceName =
+    provinces.find((p) => p.province_id === data.province)?.province || "";
+  const cityName =
+    cities.find((c) => c.city_id === data.city)?.city_name || "";
+  const districtName =
+    districts.find((d) => d.district_id === data.district)?.district_name || "";
+  const subdistrictName =
+    subdistricts.find((s) => s.subdistrict_id === data.subdistrict)?.subdistrict_name || "";
 
-    const payload = {
-      ...data,
-      province: provinceName,
-      city: cityName,
-      district: districtName,
-      subdistrict: subdistrictName,
-    };
-
-    const success = await addAddress(payload);
-    if (success) {
-      toast.success("Alamat berhasil ditambahkan!");
-      setOpen(false);
-      reset();
-    }
+  const payload = {
+    ...data,
+    province: provinceName,
+    city: cityName,
+    district: districtName,
+    subdistrict: subdistrictName,
+    province_id: data.province,
+    city_id: data.city,
+    district_id: data.district,
+    subdistrict_id: data.subdistrict,
   };
+
+  const success = await addAddress(payload);
+  if (success) {
+    toast.success("Alamat berhasil ditambahkan!");
+    setOpen(false);
+    reset();
+  }
+};
+
 
   const renderOptions = (
     items: Wilayah[],

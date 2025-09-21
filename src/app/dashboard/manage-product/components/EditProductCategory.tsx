@@ -33,6 +33,14 @@ export default function EditProductCategory({
   open,
   setOpen,
 }: IEditProductCat) {
+  const [role, setRole] = useState("");
+  useEffect(() => {
+    const jsonData = JSON.parse(localStorage.getItem("user")!);
+    if (!jsonData) return;
+    if (jsonData.role === "STORE_ADMIN") {
+      setRole(jsonData.role);
+    }
+  }, []);
   const [categories, setCategories] = useState<CategoryWithProducts[]>([]);
   const [editCat, setEditCat] = useState<CategoryWithProducts | null>(null);
   const [categoryName, setCategoryName] = useState("");
@@ -115,11 +123,13 @@ export default function EditProductCategory({
                 placeholder="Input new category "
                 value={categoryName}
                 onChange={(e) => setCategoryName(e.target.value)}
+                disabled={role ? true : false}
               />
               {!editCat ? (
                 <Button
                   className="bg-blue-500 hover:bg-blue-600"
                   onClick={newCategory}
+                  disabled={role ? true : false}
                 >
                   Create
                 </Button>
@@ -160,6 +170,7 @@ export default function EditProductCategory({
                     </TableCell>
                     <TableCell className="flex items-center gap-x-2 justify-center">
                       <Button
+                        disabled={role ? true : false}
                         onClick={() => {
                           setCategoryName(cat.category);
                           setEditCat(cat);
@@ -170,6 +181,7 @@ export default function EditProductCategory({
                       <Button
                         variant={"destructive"}
                         onClick={() => deleteCategory(cat.category)}
+                        disabled={role ? true : false}
                       >
                         <Trash />
                       </Button>

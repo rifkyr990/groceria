@@ -34,6 +34,15 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 export default function ProductList() {
+  // check role
+  const [role, setRole] = useState("");
+  useEffect(() => {
+    const jsonData = JSON.parse(localStorage.getItem("user")!);
+    if (!jsonData) return;
+    if (jsonData.role === "STORE_ADMIN") {
+      setRole(jsonData.role);
+    }
+  }, []);
   const { products, getProductList } = useProduct(
     useShallow((state) => ({
       products: state.products,
@@ -148,6 +157,7 @@ export default function ProductList() {
   useEffect(() => {
     console.log(selectedProduct);
   }, [selectedProduct]); // debugging selected
+
   return (
     <DashboardLayout>
       <section className="bg-white p-5 rounded-md  shadow-sm">
@@ -170,9 +180,11 @@ export default function ProductList() {
           </div>
           <div className="flex gap-x-3 items-center">
             <div id="newprdbtn">
-              <Link href="/dashboard/manage-product/new-product">
-                <Button>+ Add New Product</Button>
-              </Link>
+              <Button disabled={role ? true : false}>
+                <Link href="/dashboard/manage-product/new-product">
+                  + Add New Product
+                </Link>
+              </Button>
             </div>
             <div id="edit-category">
               <Button
@@ -240,6 +252,7 @@ export default function ProductList() {
                 <TableHead>
                   <Checkbox
                     className="rounded-full"
+                    disabled={role ? true : false}
                     checked={selectedProduct.length === filteredProduct.length}
                     onCheckedChange={(checked) => {
                       if (checked) {
@@ -264,6 +277,7 @@ export default function ProductList() {
                   <TableCell>
                     <Checkbox
                       className="rounded-full"
+                      disabled={role ? true : false}
                       checked={selectedProduct.includes(product.id)}
                       onCheckedChange={() => toggleSelectedProduct(product.id)}
                     />
@@ -302,6 +316,7 @@ export default function ProductList() {
                   </TableCell>
                   <TableCell className="text-center">
                     <Switch
+                      disabled={role ? true : false}
                       checked={product.is_active}
                       onCheckedChange={(checked) =>
                         toggleActiveStatus(product.id, checked)
@@ -311,6 +326,7 @@ export default function ProductList() {
                   <TableCell className="text-center">
                     <div className="flex gap-x-2 justify-center items-center">
                       <Button
+                        disabled={role ? true : false}
                         onClick={() => {
                           setSelectedProductDetails(product); // simpan produk yang dipilih ke Zustand
                           router.push(`/dashboard/manage-product/edit-product`); // pindah ke halaman edit

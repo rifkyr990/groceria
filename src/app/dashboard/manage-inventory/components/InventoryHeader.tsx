@@ -5,12 +5,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useStore } from "@/store/useStore";
 import { IStockProps } from "@/types/stock";
 import { PackageCheck, TrendingDown, X } from "lucide-react";
 interface IInventoryHeader {
   stocks: IStockProps[];
 }
 export default function InventoryHeader({ stocks }: IInventoryHeader) {
+  const { selectedStore, setSelectedStore } = useStore();
+  const filteredStocks =
+    selectedStore === "all"
+      ? stocks
+      : stocks.filter((s) => s.store.id.toString() === selectedStore);
+
   const cardHeader = [
     {
       id: 1,
@@ -18,7 +25,8 @@ export default function InventoryHeader({ stocks }: IInventoryHeader) {
       icon: (
         <PackageCheck className="bg-green-500 text-white rounded-full p-2 size-10" />
       ),
-      qty: stocks.filter((e) => e.product.is_active === true).length,
+      // qty: stocks.filter((e) => e.product.is_active === true).length,
+      qty: filteredStocks.filter((e) => e.product.is_active === true).length,
     },
     {
       id: 2,
@@ -26,13 +34,13 @@ export default function InventoryHeader({ stocks }: IInventoryHeader) {
       icon: (
         <TrendingDown className="bg-yellow-400 text-white rounded-full p-2 size-10" />
       ),
-      qty: stocks.filter((e) => e.stock_quantity <= e.min_stock).length,
+      qty: filteredStocks.filter((e) => e.stock_quantity <= e.min_stock).length,
     },
     {
       id: 3,
       name: "Total Out of Stock Product",
       icon: <X className="bg-red-500 text-white rounded-full p-2 size-10" />,
-      qty: stocks.filter((e) => e.stock_quantity === 0).length,
+      qty: filteredStocks.filter((e) => e.stock_quantity === 0).length,
     },
   ];
   return (

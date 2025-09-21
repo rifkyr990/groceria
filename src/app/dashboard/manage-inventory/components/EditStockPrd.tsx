@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { apiCall } from "@/helper/apiCall";
+import { useAuthStore } from "@/store/auth-store";
 import { IStockProps } from "@/types/stock";
 import { useEffect, useState } from "react";
 interface IEditStockProduct {
@@ -36,7 +37,10 @@ export default function EditStockProduct({
   // console.log(selectedProduct);
   const [stockProductDetail, setStockProductDetail] = useState(selectedProduct);
   const [stockType, setStockType] = useState("");
-  const [minStock, setMinStock] = useState(selectedProduct?.min_stock);
+  const [minStock, setMinStock] = useState<number>(
+    selectedProduct?.min_stock ?? 0
+  );
+  const user_id = useAuthStore((state) => state.user).id;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -68,6 +72,7 @@ export default function EditStockProduct({
     }
 
     const payload = {
+      user_id,
       product_id,
       store_id,
       type: stockType,
@@ -88,8 +93,8 @@ export default function EditStockProduct({
 
   useEffect(() => {
     setStockProductDetail(selectedProduct);
-    setMinStock(selectedProduct?.min_stock);
-  }, [selectedProduct, minStock]);
+    setMinStock(selectedProduct?.min_stock ?? 0);
+  }, [selectedProduct]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -140,9 +145,9 @@ export default function EditStockProduct({
               <div className="w-full">
                 <label>Minimum Stock (pcs)</label>
                 <Input
-                  type="number"
+                  // type="number"
                   placeholder="00"
-                  name="min_stock"
+                  // name="min_stock"
                   value={minStock}
                   onChange={(e) => setMinStock(Number(e.target.value))}
                 />

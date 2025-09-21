@@ -1,26 +1,20 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import {
-  Bell,
-  ChevronDown,
-  Menu,
-  MessageCircleMore,
-  MessagesSquare,
-  Search,
-  Sun,
-} from "lucide-react";
-import Image from "next/image";
-import { useState } from "react";
-import DropDownProfile from "./DropDownProfile";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Bell, ChevronDown, Search, Sun } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import DropDownProfile from "./DropDownProfile";
+import { useUserStore } from "@/store/user-store";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function DashboardNavbar() {
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
-
+  const { user } = useAuthStore();
   return (
     <nav className="flex justify-between items-center h-10 p-10 max-sm:px-4 bg-white ">
       <div className="flex items-center">
@@ -54,8 +48,16 @@ export default function DashboardNavbar() {
           <div className="w-1 h-8 bg-blue-500 max-md:hidden"></div>
           <div className="flex items-center lg:gap-x-2 max-lg:bg-gray-200 max-lg:p-1 max-lg:rounded-full ">
             <div className="flex flex-col ">
-              <p className="font-semibold max-lg:hidden">John Doe</p>
-              <p className="max-lg:hidden">Super Admin</p>
+              <p className="font-semibold max-lg:hidden">
+                {user.first_name} {user.last_name}
+              </p>
+              <p className="max-lg:hidden">
+                {user.role === "SUPER_ADMIN"
+                  ? "Super Admin"
+                  : user.role === "STORE_ADMIN"
+                    ? "Store Admin"
+                    : ""}
+              </p>
             </div>
             <DropdownMenu onOpenChange={setIsDropDownOpen}>
               <DropdownMenuTrigger asChild className="cursor-pointer">

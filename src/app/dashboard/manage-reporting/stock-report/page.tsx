@@ -28,8 +28,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { apiCall } from "@/helper/apiCall";
+import { useStore } from "@/store/useStore";
 import { IStockHistory } from "@/types/stock";
-import { IStoreProps } from "@/types/store";
+import { IAdminStoreData, IStoreProps } from "@/types/store";
 import { formatDate } from "@/utils/format";
 import {
   CircleArrowDown,
@@ -38,16 +39,17 @@ import {
   PackageX,
   Search,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
-import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth-store";
 
-interface Summary {
-  totalAddition: number;
-  totalReduction: number;
-  totalLatestStock: number;
-  totalOutofStock: number;
-}
+// interface Summary {
+//   totalAddition: number;
+//   totalReduction: number;
+//   totalLatestStock: number;
+//   totalOutofStock: number;
+// }
 const quantityColor = (value: number, type: string) => {
   if (type === "OUT") {
     return <p className="text-red-500">-{value}</p>;
@@ -56,9 +58,37 @@ const quantityColor = (value: number, type: string) => {
 };
 
 export default function StockHistory() {
+  // get store admin id
+  useEffect(() => {
+    const jsonData = JSON.parse(localStorage.getItem("user")!);
+    if (jsonData?.role === "STORE_ADMIN") {
+      const storeIdStr = jsonData.store_id?.toString();
+      if (storeIdStr) {
+        setSelectedStore(storeIdStr);
+        useStore.getState().setSelectedStore(storeIdStr);
+      }
+    }
+  }, []);
+
+  const user = useAuthStore((state) => state.user);
+  const { selectedStore, setSelectedStore } = useStore();
   const router = useRouter();
-  const [selectedStore, setSelectedStore] = useState("all");
+  // const [selectedStore, setSelectedStore] = useState("all");
+  // useEffect(() => {
+  //   if (user?.role === "STORE_ADMIN" && user.store?.id) {
+  //     const id = user.store.id.toString();
+  //     setSelectedStore(id);
+  //   }
+  // }, [user]);
   const [storeList, setStoreList] = useState<IStoreProps[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [stockHistory, setStockHistory] = useState<IStockHistory[]>([]);
+  const filteredHistory = stockHistory.filter((prd) =>
+    prd.productStock.product.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
   const [selectedDate, setSelectedDate] = useState<{
     month: number;
     year: number;
@@ -83,7 +113,6 @@ export default function StockHistory() {
           {summary.totalAddition}
         </span>
       ),
-      desc: "per month",
     },
     {
       id: 2,
@@ -95,7 +124,6 @@ export default function StockHistory() {
           {summary.totalReduction}
         </span>
       ),
-      desc: "per month",
     },
     {
       id: 3,
@@ -107,7 +135,6 @@ export default function StockHistory() {
           {summary.totalLatestStock}
         </span>
       ),
-      desc: "per month",
     },
     {
       id: 4,
@@ -119,7 +146,6 @@ export default function StockHistory() {
           {summary.totalOutOfStock}
         </span>
       ),
-      desc: "per month",
     },
   ];
 
@@ -133,7 +159,6 @@ export default function StockHistory() {
     }
   };
 
-  const [stockHistory, setStockHistory] = useState<IStockHistory[]>([]);
   const [open, setOpen] = useState(false);
 
   const getStockHistory = async () => {
@@ -187,9 +212,11 @@ export default function StockHistory() {
           </Button>
         </div>
         <div>
+          {}
           <Select
             value={selectedStore}
             onValueChange={(value) => setSelectedStore(value)}
+            disabled={user?.role === "STORE_ADMIN"}
           >
             <SelectTrigger className="bg-white">
               <SelectValue placeholder="Store Name"></SelectValue>
@@ -221,7 +248,7 @@ export default function StockHistory() {
             <CardContent>
               <p className="text-center">{s.total}</p>
             </CardContent>
-            <CardFooter className="text-gray-400">{s.desc}</CardFooter>
+            <CardFooter className="text-gray-400">This month</CardFooter>
           </Card>
         ))}
       </section>
@@ -242,7 +269,12 @@ export default function StockHistory() {
           <div className="flex max-md:flex-col justify-between gap-2 px-7">
             <div id="search-bar" className="w-full relative">
               <Search className="absolute top-2 right-2 size-5 text-gray-400" />
-              <Input className="w-full" placeholder="Search product ..." />
+              <Input
+                className="w-full"
+                placeholder="Search product ..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
             <div className="flex justify-between gap-x-2">
               <div id="btn-newprd">
@@ -267,7 +299,7 @@ export default function StockHistory() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {stockHistory.map((prd, idx) => (
+                {filteredHistory.map((prd, idx) => (
                   <TableRow key={idx}>
                     <TableCell>{prd.productStock.product.name}</TableCell>
                     <TableCell className="text-center">{prd.type}</TableCell>

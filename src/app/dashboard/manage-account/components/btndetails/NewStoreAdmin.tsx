@@ -34,6 +34,7 @@ export default function NewStoreAdmin({
     undefined
   );
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const payload = {
       first_name: formData.get("first_name"),
@@ -46,6 +47,7 @@ export default function NewStoreAdmin({
     try {
       const res = await apiCall.post("/api/store/new-store-admin", payload);
       alert("Create new store admin success");
+      window.location.reload();
     } catch (error) {
       console.log(error);
     }

@@ -30,10 +30,11 @@ export interface City {
 }
 
 export interface ShippingOption {
-  id: number;
+  id: string;
   courier: string;
   service: string;
   cost: string;
+  code: string;
   estimated: string;
 }
 

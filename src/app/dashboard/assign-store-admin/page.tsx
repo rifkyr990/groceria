@@ -1,6 +1,7 @@
 "use client";
 import { IUserProps } from "@/types/user";
 import DashboardLayout from "../components/DashboardLayout";
+import StoreData from "./components/StoreData";
 import { useEffect, useState } from "react";
 import { apiCall } from "@/helper/apiCall";
 import { IStoreProps } from "@/types/store";
@@ -8,82 +9,73 @@ import StoreAdminData from "./components/StoreAdminTable";
 import { useRouter } from "next/navigation";
 
 export default function AccountPage() {
-    const [users, setUsers] = useState<IUserProps[]>([]);
-    const [storeAdmins, setStoreAdmins] = useState<IStoreProps[]>([]);
-    const [stores, setStores] = useState<IStoreProps[]>([]);
-    const router = useRouter();
+  const [users, setUsers] = useState<IUserProps[]>([]);
+  const [storeAdmins, setStoreAdmins] = useState<{
+    withStore: IStoreProps[];
+    withoutStore: IUserProps[];
+  }>({
+    withStore: [],
+    withoutStore: [],
+  });
+  const [stores, setStores] = useState<IStoreProps[]>([]);
+  const router = useRouter();
 
-    const getUsersData = async () => {
-        try {
-            const res = await apiCall.get("/api/user/all");
-            const data = res.data.data;
-            setUsers(data);
-        } catch (error: any) {
-            if (error.response?.status === 403) {
-                router.push("/error/forbidden");
-            } else {
-                console.log(error);
-                alert("Error mengambil user data");
-            }
-        }
-    };
+  const getUsersData = async () => {
+    try {
+      const res = await apiCall.get("/api/user/all");
+      const data = res.data.data;
+      setUsers(data);
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        router.push("/error/forbidden");
+      } else {
+        console.log(error);
+        alert("Error mengambil user data");
+      }
+    }
+  };
 
-    const getStoreAdmins = async () => {
-        try {
-            const res = await apiCall.get("/api/store/store-admins");
-            const data = res.data.data;
-            setStoreAdmins(data);
-        } catch (error: any) {
-            if (error.response?.status === 403) {
-                router.push("/error/forbidden");
-            } else {
-                console.log(error);
-                alert("Error mengambil store admins");
-            }
-        }
-    };
+  const getStoreAdmins = async () => {
+    try {
+      const res = await apiCall.get("/api/store/store-admins");
+      const data = res.data.data;
+      setStoreAdmins(data);
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        router.push("/error/forbidden");
+      } else {
+        console.log(error);
+        alert("Error mengambil store admins");
+      }
+    }
+  };
 
-    const getStoresData = async () => {
-        try {
-            const res = await apiCall.get("/api/store/all");
-            const data = res.data.data;
-            setStores(data);
-        } catch (error: any) {
-            if (error.response?.status === 403) {
-                router.push("/forbidden");
-            } else {
-                console.log(error);
-                alert("Error mengambil store data");
-            }
-        }
-    };
+  const getStoresData = async () => {
+    try {
+      const res = await apiCall.get("/api/store/all");
+      const data = res.data.data;
+      setStores(data);
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        router.push("/forbidden");
+      } else {
+        console.log(error);
+        alert("Error mengambil store data");
+      }
+    }
+  };
 
-    useEffect(() => {
-        getUsersData();
-        getStoresData();
-        getStoreAdmins();
-    }, []);
+  useEffect(() => {
+    getUsersData();
+    getStoresData();
+    getStoreAdmins();
+  }, []);
 
-    // ✅ Tambahkan allStoreAdmins dari users
-    const allStoreAdmins = users
-    .filter((user) => user.role === "STORE_ADMIN")
-    .map((user) => ({
-        id: user.id,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        role: user.role ?? "STORE_ADMIN",
-        store_id: user.store_id ?? null,
-    }));
-
-    return (
-        <DashboardLayout>
-            <div className="flex flex-col gap-4 ">
-                <StoreAdminData
-                    storeAdmins={storeAdmins}
-                    allStoreAdmins={allStoreAdmins}
-                    className="w-full"
-                />
-            </div>
-        </DashboardLayout>
-    );
+  return (
+    <DashboardLayout>
+      <div className="flex flex-col gap-4 ">
+        <StoreAdminData storeAdmins={storeAdmins} className="w-full" />
+      </div>
+    </DashboardLayout>
+  );
 }

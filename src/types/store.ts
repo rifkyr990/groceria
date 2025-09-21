@@ -15,3 +15,8 @@ export interface IStoreProps {
   storeLat?: number;
   storeLong?: number;
 }
+
+export interface IAdminStoreData {
+  role: string;
+  store_id: number;
+}

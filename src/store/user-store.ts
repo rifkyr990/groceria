@@ -36,18 +36,18 @@ export const useUserStore = create<UserState>((set) => ({
   updateProfile: async (formData) => {
     set({ loading: true, error: null });
 
-        try {
-            const token = useAuthStore.getState().token;
-            const res = await apiCall.put("/api/user/profile", formData, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            
-            const user = res.data.data;
-            localStorage.setItem("user", JSON.stringify(user));
-            useAuthStore.getState().setUserAndToken(user, token!);
+    try {
+      const token = useAuthStore.getState().token;
+      const res = await apiCall.put("/api/user/profile", formData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const user = res.data.data;
+      localStorage.setItem("user", JSON.stringify(user));
+      useAuthStore.getState().setUserAndToken(user, token!);
 
       set({ loading: false });
 
