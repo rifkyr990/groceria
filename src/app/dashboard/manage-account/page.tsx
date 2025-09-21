@@ -1,18 +1,30 @@
 "use client";
-import { IUserProps } from "@/types/user";
-import DashboardLayout from "../components/DashboardLayout";
-import UsersTableCard from "./components/CustomerTable";
-import StoreData from "./components/StoreData";
-import { useEffect, useState } from "react";
 import { apiCall } from "@/helper/apiCall";
 import { IStoreProps } from "@/types/store";
-import StoreAdminData from "./components/StoreAdminTable";
+import { IUserProps } from "@/types/user";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import DashboardLayout from "../components/DashboardLayout";
 import CustomerTable from "./components/CustomerTable";
-
+import StoreAdminData from "./components/StoreAdminTable";
+interface IStoreAdminData {
+  storeAdmins: {
+    withStore: IStoreProps[];
+    withoutStore: IUserProps[];
+  };
+}
 export default function AccountPage() {
+  const router = useRouter();
   const [users, setUsers] = useState<IUserProps[]>([]);
   const [customers, setCustomers] = useState<IUserProps[]>([]);
-  const [storeAdmins, setStoreAdmins] = useState<IStoreProps[]>([]);
+  const [storeAdmins, setStoreAdmins] = useState<{
+    withStore: IStoreProps[];
+    withoutStore: IUserProps[];
+  }>({
+    withStore: [],
+    withoutStore: [],
+  });
   const [stores, setStores] = useState<IStoreProps[]>([]);
 
   const getUsersData = async () => {
@@ -65,6 +77,16 @@ export default function AccountPage() {
     getCustomersData();
     getStoreAdmins();
   }, []);
+  // cek role, kalau tidak bisa berikan alert
+  useEffect(() => {
+    const jsonData = JSON.parse(localStorage.getItem("user")!);
+    if (!jsonData) return;
+    if (jsonData.role === "STORE_ADMIN") {
+      toast.error("You are not allowed to access this page");
+      router.replace("/dashboard/manage-order");
+      return;
+    }
+  }, [router]);
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-4 ">

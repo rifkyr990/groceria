@@ -113,7 +113,7 @@ const items = [
       {
         id: 1,
         subMenu: "Sales Report",
-        url: "#",
+        url: "/dashboard/manage-reporting/sales-report",
       },
       {
         id: 2,

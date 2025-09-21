@@ -1,14 +1,23 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/auth-store";
+import LoadingScreen from "@/components/LoadingScreen";
 
-export default function ClientWrapper({ children }: { children: React.ReactNode }) {
-    const hydrate = useAuthStore((state) => state.hydrate);
+export default function ClientWrapper({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const hydrate = useAuthStore((state) => state.hydrate);
+  const [hydrated, setHydrated] = useState(false); // arco
 
-    useEffect(() => {
-        hydrate();
-    }, [hydrate]);
+  useEffect(() => {
+    hydrate();
+    setHydrated(true); //arco
+  }, [hydrate]);
 
-    return <>{children}</>;
+  if (!hydrated) return <LoadingScreen />;
+
+  return <>{children}</>;
 }

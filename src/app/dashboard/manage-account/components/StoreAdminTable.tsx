@@ -34,7 +34,10 @@ import EditStoreAdmin from "./btndetails/EditStoreAdmin";
 
 interface IStoreAdminData {
   className?: string;
-  storeAdmins: IStoreProps[];
+  storeAdmins: {
+    withStore: IStoreProps[];
+    withoutStore: IUserProps[];
+  };
 }
 
 export default function StoreAdminData({
@@ -44,21 +47,34 @@ export default function StoreAdminData({
   const [openNewAdmin, setOpenNewAdmin] = useState(false);
   const [openEditAdmin, setOpenEditAdmin] = useState(false);
   const [selectedStoreAdmin, setSelectedStoreAdmin] = useState("");
-  const storeAdminData = storeAdmins.flatMap((store) =>
-    store.admins?.map((admin) => ({
+  const storeAdminData = [
+    ...(storeAdmins?.withStore?.flatMap(
+      (store) =>
+        store.admins?.map((admin) => ({
+          adminId: admin.id,
+          adminFirstName: admin.first_name,
+          adminLastName: admin.last_name,
+          storeName: store.name,
+          adminRole: admin.role,
+          storeId: store.id,
+          adminPhone: admin.phone,
+        })) ?? []
+    ) ?? []),
+    ...(storeAdmins?.withoutStore?.map((admin) => ({
       adminId: admin.id,
       adminFirstName: admin.first_name,
       adminLastName: admin.last_name,
-      storeName: store.name,
+      storeName: "No Store",
       adminRole: admin.role,
-      storeId: store.id,
+      storeId: null,
       adminPhone: admin.phone,
-    }))
-  );
-  const storeList = storeAdmins.map((store) => ({
-    id: store.id,
-    name: store.name,
-  }));
+    })) ?? []),
+  ];
+  const storeList =
+    storeAdmins?.withStore?.map((store) => ({
+      id: store.id,
+      name: store.name,
+    })) ?? [];
   // search query - search bar
   const [searchQuery, setSearchQuery] = useState("");
   // filter store
@@ -163,6 +179,7 @@ export default function StoreAdminData({
                     <SelectGroup>
                       <SelectLabel>Stores</SelectLabel>
                       <SelectItem value="all">ALL STORES</SelectItem>
+                      <SelectItem value="No Store">No Store</SelectItem>
                       {storeList.map((store) => (
                         <SelectItem key={store.id} value={store.name}>
                           {store.name}
@@ -205,7 +222,9 @@ export default function StoreAdminData({
                 <TableRow key={idx}>
                   <TableCell>{admin?.adminFirstName}</TableCell>
                   <TableCell>{admin?.adminLastName}</TableCell>
-                  <TableCell>{admin?.storeName}</TableCell>
+                  <TableCell>
+                    {admin?.storeName ? admin.storeName : <p>No Store</p>}
+                  </TableCell>
                   <TableCell>{admin?.adminPhone}</TableCell>
                   <TableCell className="flex gap-x-2 items-center text-center justify-center">
                     <Button
