@@ -17,11 +17,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { apiCall } from "@/helper/apiCall";
+import { useAuthStore } from "@/store/auth-store";
 import { useDiscountStore } from "@/store/useDiscount";
-import { IDiscountProps } from "@/types/discount";
-import { formatDate } from "@/utils/format";
-import { Eye, Search, Trash } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useStore } from "@/store/useStore";
+import { Search, Trash } from "lucide-react";
+import { useEffect } from "react";
 import { toast } from "react-toastify";
 
 const discountStatusbyDate = (start_date: Date, end_date: Date) => {
@@ -38,6 +38,9 @@ const discountStatusbyDate = (start_date: Date, end_date: Date) => {
   return null;
 };
 export default function DiscountHistory() {
+  const { storesData, fetchAllStores, selectedStore, setSelectedStore } =
+    useStore();
+  const { user } = useAuthStore();
   const discounts = useDiscountStore((state) => state.discounts);
   const removeDiscount = useDiscountStore((state) => state.removeDiscount);
   const deleteDiscount = async (id: number) => {
@@ -52,9 +55,9 @@ export default function DiscountHistory() {
     }
   };
 
-  // useEffect(() => {
-  //   setDiscounts(data);
-  // }, [data]);
+  useEffect(() => {
+    fetchAllStores();
+  }, []);
 
   return (
     <section className="p-4 mt-5">
@@ -65,14 +68,19 @@ export default function DiscountHistory() {
           <Search className="absolute text-gray-300 top-1.5 right-2 size-5" />
         </div>
         {/* Filter Store */}
-        <Select>
+        <Select
+          value={selectedStore}
+          onValueChange={(value) => setSelectedStore(value)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Select Store" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="a">A</SelectItem>
-            <SelectItem value="b">B</SelectItem>
-            <SelectItem value="c">C</SelectItem>
+            {storesData.map((store, idx) => (
+              <SelectItem key={idx} value={store.id.toString()}>
+                {store.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         {/* Filter Types */}
@@ -81,6 +89,7 @@ export default function DiscountHistory() {
             <SelectValue placeholder="Discount Types" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">All</SelectItem>
             <SelectItem value="MANUAL">Manual per Product</SelectItem>
             <SelectItem value="MIN_PURCH">Minimum Total Payment</SelectItem>
             <SelectItem value="B1G1">Buy One Get One</SelectItem>
@@ -91,7 +100,7 @@ export default function DiscountHistory() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-center">Discount Name</TableHead>
+              <TableHead className="text-center">Product Name</TableHead>
               <TableHead className="text-center">Code</TableHead>
               <TableHead className="text-center">Type</TableHead>
               <TableHead className="text-center">Total Usage</TableHead>
@@ -104,7 +113,7 @@ export default function DiscountHistory() {
           <TableBody>
             {discounts.map((d) => (
               <TableRow key={d.id}>
-                <TableCell className="text-center">{d.name}</TableCell>
+                <TableCell className="text-center">{d.product.name}</TableCell>
                 <TableCell className="text-center">{d.code}</TableCell>
                 <TableCell className="text-center">{d.type}</TableCell>
                 <TableCell className="text-center">

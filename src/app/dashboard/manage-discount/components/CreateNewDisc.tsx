@@ -124,6 +124,8 @@ export default function CreateNewDiscount({
 
     if (discType === "MIN_PURCHASE") {
       payload.minPurch = Number(minPurch);
+      payload.valueType = valueType;
+      payload.discAmount = Number(discAmount);
     }
 
     console.log("Payload to submit:", payload);
@@ -260,6 +262,31 @@ export default function CreateNewDiscount({
                 value={minPurch}
                 onChange={(e) => setMinPurch(e.target.value)}
               />
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label>Value Type</label>
+                  <Select
+                    value={valueType.toUpperCase()}
+                    onValueChange={setValueType}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Value Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PERCENTAGE">Percentage (%)</SelectItem>
+                      <SelectItem value="NOMINAL">Nominal (Rp)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <label>Amount</label>
+                  <Input
+                    type="number"
+                    value={discAmount}
+                    onChange={(e) => setDiscAmount(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
           )}
 

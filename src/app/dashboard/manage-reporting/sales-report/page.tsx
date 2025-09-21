@@ -2,28 +2,6 @@
 import { MonthYearPicker } from "@/components/MonthYearPicker";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { apiCall } from "@/helper/apiCall";
-import { IStoreProps } from "@/types/store";
-import { formatIDRCurrency, upperFirstCharacter } from "@/utils/format";
-import {
-  BadgeDollarSign,
-  Clipboard,
-  RefreshCcw,
-  Search,
-  ShoppingBag,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import DashboardLayout from "../../components/DashboardLayout";
-import {
   Card,
   CardContent,
   CardDescription,
@@ -33,6 +11,15 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -40,7 +27,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { unique } from "next/dist/build/utils";
+import { apiCall } from "@/helper/apiCall";
+import { IStoreProps } from "@/types/store";
+import { formatIDRCurrency, upperFirstCharacter } from "@/utils/format";
+import { BadgeDollarSign, Search, ShoppingBag } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import DashboardLayout from "../../components/DashboardLayout";
+import { useStore } from "@/store/useStore";
+import { useAuthStore } from "@/store/auth-store";
 interface Summary {
   totalSales: number;
   totalQuantity: number;
@@ -49,13 +44,26 @@ interface Summary {
 }
 
 export default function SalesReport() {
+  const [selectedStore, setSelectedStore] = useState();
+  // get store admin id
+  useEffect(() => {
+    const jsonData = JSON.parse(localStorage.getItem("user")!);
+    if (jsonData?.role === "STORE_ADMIN") {
+      const storeIdStr = jsonData.store_id?.toString();
+      if (storeIdStr) {
+        setSelectedStore(storeIdStr);
+        useStore.getState().setSelectedStore(storeIdStr);
+      }
+    }
+  }, []);
+  // get login user
+  const user = useAuthStore((state) => state.user);
   const router = useRouter();
-  const [allOrder, setAllOrder] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedProduct, setSelectedProduct] = useState("all");
   const [categories, setCategories] = useState<string[]>([]);
   const [products, setProducts] = useState<string[]>([]);
-  const [selectedStore, setSelectedStore] = useState("all");
+
   const [storeList, setStoreList] = useState<IStoreProps[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState<{
@@ -83,8 +91,6 @@ export default function SalesReport() {
     }
   };
 
-  // console.log(selectedDate);
-  // console.log(selectedStore);
   const getOrderList = async () => {
     const { month, year } = selectedDate;
     try {
@@ -101,33 +107,34 @@ export default function SalesReport() {
 
       const result = res.data.data ?? [];
 
-      // kalau backend return array langsung
-      if (Array.isArray(result)) {
-        setOrders(result);
-        setSummary({
-          totalSales: result.reduce((a, b) => a + (b.totalSales ?? 0), 0),
-          totalQuantity: result.reduce((a, b) => a + (b.quantity ?? 0), 0),
-          totalOrder: result.length,
-          totalRefund: 0,
-        });
-      } else {
-        // kalau backend diubah pakai { orders, summary }
-        setOrders(result.orders ?? []);
-        setSummary({
-          totalSales: result.summary?.totalSales ?? 0,
-          totalQuantity: result.summary?.totalQuantity ?? 0,
-          totalOrder: result.summary?.totalOrder ?? 0,
-          totalRefund: result.summary?.totalRefund ?? 0,
-        });
-      }
+      const ordersData = Array.isArray(result) ? result : (result.orders ?? []);
 
-      // ambil daftar unik category & product
-      const uniqueCategories = Array.from(
-        new Set((result.orders ?? result).map((d: any) => d.category))
-      );
-      const uniqueProducts = Array.from(
-        new Set((result.orders ?? result).map((d: any) => d.product))
-      );
+      setOrders(ordersData);
+      setSummary({
+        totalSales:
+          result.summary?.totalSales ??
+          ordersData.reduce((a, b) => a + (b.totalSales ?? 0), 0),
+        totalQuantity:
+          result.summary?.totalQuantity ??
+          ordersData.reduce((a, b) => a + (b.quantity ?? 0), 0),
+        totalOrder: result.summary?.totalOrder ?? ordersData.length,
+        totalRefund: result.summary?.totalRefund ?? 0,
+      });
+
+      // Dapatkan unique values langsung dari 'ordersData' (BUKAN dari state 'orders')
+      const uniqueCategories = ordersData.reduce((acc: string[], curr: any) => {
+        if (!acc.includes(curr.category)) {
+          acc.push(curr.category);
+        }
+        return acc;
+      }, []);
+
+      const uniqueProducts = ordersData.reduce((acc: string[], curr: any) => {
+        if (!acc.includes(curr.product)) {
+          acc.push(curr.product);
+        }
+        return acc;
+      }, []);
 
       setCategories(uniqueCategories);
       setProducts(uniqueProducts);
@@ -232,6 +239,7 @@ export default function SalesReport() {
           <Select
             value={selectedStore}
             onValueChange={(value) => setSelectedStore(value)}
+            disabled={user.role === "STORE_ADMIN"}
           >
             <SelectTrigger className="bg-white">
               <SelectValue placeholder="Store Name"></SelectValue>

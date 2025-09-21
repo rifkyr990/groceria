@@ -18,6 +18,6 @@ export interface IStockHistory {
   reason: string;
   created_at: Date;
   created_by: { first_name: string; last_name: string };
+  created_by_name: string;
   productStock: { store: { name: string }; product: { name: string } };
-  
 }

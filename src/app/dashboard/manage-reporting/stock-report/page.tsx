@@ -28,9 +28,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { apiCall } from "@/helper/apiCall";
+import { useAuthStore } from "@/store/auth-store";
 import { useStore } from "@/store/useStore";
 import { IStockHistory } from "@/types/stock";
-import { IAdminStoreData, IStoreProps } from "@/types/store";
+import { IStoreProps } from "@/types/store";
 import { formatDate } from "@/utils/format";
 import {
   CircleArrowDown,
@@ -42,14 +43,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
-import { useAuthStore } from "@/store/auth-store";
 
-// interface Summary {
-//   totalAddition: number;
-//   totalReduction: number;
-//   totalLatestStock: number;
-//   totalOutofStock: number;
-// }
 const quantityColor = (value: number, type: string) => {
   if (type === "OUT") {
     return <p className="text-red-500">-{value}</p>;
@@ -73,13 +67,6 @@ export default function StockHistory() {
   const user = useAuthStore((state) => state.user);
   const { selectedStore, setSelectedStore } = useStore();
   const router = useRouter();
-  // const [selectedStore, setSelectedStore] = useState("all");
-  // useEffect(() => {
-  //   if (user?.role === "STORE_ADMIN" && user.store?.id) {
-  //     const id = user.store.id.toString();
-  //     setSelectedStore(id);
-  //   }
-  // }, [user]);
   const [storeList, setStoreList] = useState<IStoreProps[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -159,8 +146,6 @@ export default function StockHistory() {
     }
   };
 
-  const [open, setOpen] = useState(false);
-
   const getStockHistory = async () => {
     const { month, year } = selectedDate;
     try {
@@ -238,7 +223,10 @@ export default function StockHistory() {
           <MonthYearPicker value={selectedDate} onChange={setSelectedDate} />
         </div>
       </section>
-      <section id="summary-card" className="grid grid-cols-4 mb-5 gap-5">
+      <section
+        id="summary-card"
+        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 mb-5 gap-5"
+      >
         {summaryCard.map((s, idx) => (
           <Card key={idx} className={`${s.border}`}>
             <CardHeader className="flex justify-between items-center">
@@ -321,26 +309,14 @@ export default function StockHistory() {
                     </TableCell>
 
                     <TableCell className="text-center">
-                      {prd.created_by?.first_name ?? "John"}{" "}
+                      {/* {prd.created_by?.first_name ?? "John"}{" "}
                       {prd.created_by?.last_name ?? "Doe"}
+                       */}
+                      {prd.created_by_name ?? ""}
                     </TableCell>
                     <TableCell className="text-center max-w-[150px] whitespace-normal break-words">
                       {prd.reason}
                     </TableCell>
-
-                    {/* <TableCell>
-                    <div className="flex justify-center gap-x-2">
-                      <Button variant={"outline"} className="cursor-pointer">
-                        <Edit />
-                      </Button>
-                      <Button
-                        variant={"destructive"}
-                        className="cursor-pointer"
-                      >
-                        <Trash />
-                      </Button>
-                    </div>
-                  </TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>

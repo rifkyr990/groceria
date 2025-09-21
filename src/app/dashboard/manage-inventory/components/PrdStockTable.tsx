@@ -35,6 +35,7 @@ import EditStockProduct from "./EditStockPrd";
 interface IProductStock {
   className?: string;
   stocks: IStockProps[];
+  adminStoreData: any;
 }
 
 const stockStatus = (current: number, minStock: number) => {
@@ -47,10 +48,13 @@ const stockStatus = (current: number, minStock: number) => {
   }
 };
 
-export default function ProductStock({ className, stocks }: IProductStock) {
+export default function ProductStock({
+  className,
+  stocks,
+  adminStoreData,
+}: IProductStock) {
   const { storesData, fetchAllStores, selectedStore, setSelectedStore } =
     useStore();
-  // const [selectedStore, setSelectedStore] = useState(adminStoreId ?? "all");
   const [stockStatusFilter, setStockStatusFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   useEffect(() => {
