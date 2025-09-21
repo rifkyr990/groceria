@@ -1,5 +1,3 @@
-// Dependency File: order-list-store.ts
-// Path: src/store/order-list-store.ts
 import { create } from "zustand";
 import { apiCall } from "@/helper/apiCall";
 import { useAuthStore } from "./auth-store";

@@ -1,5 +1,3 @@
-// New File: page.tsx
-// Path: src/app/profile/orders/[orderId]/page.tsx
 "use client";
 
 import { useEffect, useState, useMemo, useRef } from "react";
@@ -16,6 +14,16 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   AlertCircle,
   ArrowLeft,
   ClipboardList,
@@ -30,6 +38,8 @@ import { FiCheckCircle } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "react-toastify";
+import OrderActions from "../OrderActions";
+import ActionCenterCard from "../ActionCenterCard";
 
 const StatusBadge = ({ status }: { status: string }) => {
   const statusConfig = useMemo(
@@ -220,13 +230,47 @@ export default function OrderDetailPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const orderId = Number(params.orderId);
-  const { order, loading, error, fetchOrder } = useOrderDetailStore();
+  const {
+    order,
+    loading,
+    error,
+    fetchOrder,
+    cancelOrder,
+    confirmReceipt,
+    repayOrder,
+  } = useOrderDetailStore();
   const { token } = useAuthStore();
   const cameFromCheckout = searchParams.get("from") === "checkout";
   const [isClient, setIsClient] = useState(false);
+  const [isCancelAlertOpen, setIsCancelAlertOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
     "profile" | "address" | "password"
   >("profile");
+
+  const handlePayNow = async () => {
+    if (!order) return;
+    const result = await repayOrder(order.id);
+    if (result.success && result.token) {
+      window.snap.pay(result.token, {
+        onSuccess: function (result: any) {
+          toast.success("Payment successful!");
+          fetchOrder(order.id);
+        },
+        onPending: function (result: any) {
+          toast.info("Your payment is pending.");
+          fetchOrder(order.id);
+        },
+        onError: function (result: any) {
+          toast.error("Payment failed. Please try again.");
+        },
+      });
+    }
+  };
+
+  const handleConfirmReceipt = async () => {
+    if (!order) return;
+    await confirmReceipt(order.id);
+  };
 
   useEffect(() => {
     setIsClient(true);
@@ -246,14 +290,6 @@ export default function OrderDetailPage() {
   }, [orderId, fetchOrder, token]);
 
   const renderContent = () => {
-    if (!token) {
-      return (
-        <div className="flex h-screen w-full items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      );
-    }
-
     if (loading) {
       return (
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -285,14 +321,6 @@ export default function OrderDetailPage() {
         </div>
       );
     }
-
-    const showPaymentDetails =
-      order.status === "PENDING_PAYMENT" &&
-      order.payment?.method === "Manual Bank Transfer";
-
-    const paymentExpiryDate = new Date(
-      new Date(order.createdAt).getTime() + 60 * 60 * 1000
-    ).toISOString();
 
     const confirmationStep = [
       {
@@ -451,15 +479,6 @@ export default function OrderDetailPage() {
           </CardContent>
         </Card>
 
-        {showPaymentDetails && (
-          <div className="mt-6">
-            <UploadProofCard
-              orderId={order.id}
-              expiryDate={paymentExpiryDate}
-            />
-          </div>
-        )}
-
         <div className="text-center mt-6">
           {cameFromCheckout ? (
             <Link
@@ -477,6 +496,32 @@ export default function OrderDetailPage() {
             </Link>
           )}
         </div>
+
+        <AlertDialog
+          open={isCancelAlertOpen}
+          onOpenChange={setIsCancelAlertOpen}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will cancel your order. This action cannot be undone and
+                your items will be returned to stock.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Back</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={async () => {
+                  if (order) await cancelOrder(order.id);
+                }}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Yes, Cancel Order
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     );
   };
@@ -486,11 +531,35 @@ export default function OrderDetailPage() {
       <div className="w-full flex-shrink-0 bg-white dark:bg-gray-800">
         <Navbar />
       </div>
-      <div className="flex-1 max-w-7xl mx-auto p-4 sm:p-6 flex gap-6 w-full">
-        <aside className="w-64 sticky top-6 self-start h-fit hidden lg:block">
-          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        </aside>
-        <main className="flex-1">{renderContent()}</main>
+      <div
+        className={cn(
+          "flex-1 mx-auto p-4 sm:p-6 w-full",
+          cameFromCheckout ? "max-w-4xl" : "max-w-7xl flex gap-6"
+        )}
+      >
+        {!cameFromCheckout && (
+          <aside className="w-64 sticky top-6 self-start h-fit hidden lg:block">
+            <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+          </aside>
+        )}
+        <main className="flex-1">
+          <div className={cn(!cameFromCheckout && "max-w-4xl mx-auto")}>
+            {renderContent()}
+
+            {order &&
+              (!cameFromCheckout ||
+                (cameFromCheckout &&
+                  order.status === "PENDING_PAYMENT" &&
+                  order.payment?.method === "Manual Bank Transfer")) && (
+                <ActionCenterCard
+                  order={order}
+                  onCancel={() => setIsCancelAlertOpen(true)}
+                  onConfirm={handleConfirmReceipt}
+                  onPay={handlePayNow}
+                />
+              )}
+          </div>
+        </main>
       </div>
       <div className="w-full flex-shrink-0">
         <Footer />

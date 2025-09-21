@@ -1,7 +1,3 @@
-// ==========================================================
-
-// New File: OrderCard.tsx
-// Path: src/app/profile/orders/OrderCard.tsx
 "use client";
 
 import { useMemo } from "react";

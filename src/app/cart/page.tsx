@@ -94,14 +94,6 @@ export default function CartPage() {
     }
   };
 
-  if (!token) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col min-h-screen">
       <div className="w-full flex-shrink-0">

@@ -61,7 +61,7 @@ export default function CheckoutPage() {
   const {
     addresses,
     loading: addressesLoading,
-    fetchAddresses,
+    fetchAddress,
   } = useAddressStore();
   const {
     fetchOptions,
@@ -110,9 +110,9 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (token) {
       fetchCart(token);
-      fetchAddresses();
+      fetchAddress();
     }
-  }, [token, fetchCart, fetchAddresses]);
+  }, [token, fetchCart, fetchAddress]);
 
   useEffect(() => {
     if (selectedAddressId) {
@@ -204,7 +204,7 @@ export default function CheckoutPage() {
 
     const orderPayload = {
       addressId: selectedAddressId,
-      shippingCost: selectedShipping.cost, // This is now a string
+      shippingCost: selectedShipping.cost,
       paymentMethodId,
       promoCode: appliedPromo?.code,
     };
@@ -258,15 +258,6 @@ export default function CheckoutPage() {
       router.push(`/profile/orders/${newOrderId}?from=checkout`);
     }
   };
-
-  // If not loading and still no token, the redirect is in progress.
-  if (!token) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <>
