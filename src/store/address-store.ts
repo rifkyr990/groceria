@@ -6,12 +6,45 @@ import { UserAddress } from "@/components/types";
 
 type NewAddressData = Omit<UserAddress, "id">;
 
+interface AddressFormValues {
+  name: string;
+  phone: string;
+  province: string;
+  city: string;
+  district: string;
+  subdistrict: string;
+  postal_code: string;
+  street: string;
+  detail: string;
+  label: "RUMAH" | "KANTOR";
+  is_primary: boolean;
+}
+
+// sesuai schema prisma
+interface Address {
+  id: number;
+  name: string;
+  phone: string;
+  province: string;
+  city: string;
+  district: string;
+  subdistrict: string;
+  postal_code: string;
+  street: string;
+  detail: string;
+  label: "RUMAH" | "KANTOR";
+  is_primary: boolean;
+}
+
 interface AddressState {
-  addresses: UserAddress[];
+  addresses: Address[];
   loading: boolean;
   error: string | null;
-  fetchAddresses: () => Promise<void>;
-  addAddress: (addressData: NewAddressData) => Promise<boolean>;
+  fetchAddress: () => Promise<void>;
+  addAddress: (data: AddressFormValues) => Promise<boolean>;
+  updateAddress: (id: number, data: Partial<Address>) => Promise<boolean>;
+  deleteAddress: (id: number) => Promise<void>;
+  setPrimary: (id: number) => Promise<void>;
 }
 
 export const useAddressStore = create<AddressState>((set, get) => ({
@@ -19,20 +52,14 @@ export const useAddressStore = create<AddressState>((set, get) => ({
   loading: false,
   error: null,
 
-  fetchAddresses: async () => {
-    set({ loading: true, error: null });
-    const token = useAuthStore.getState().token;
-    if (!token) return set({ loading: false, addresses: [] });
-
+  fetchAddress: async () => {
     try {
-      const response = await apiCall.get("/api/address", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      set({ addresses: response.data.data || [], loading: false });
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to fetch addresses");
+      set({ loading: true });
+      const res = await apiCall.get("/api/address");
+      set({ addresses: res.data.data, loading: false });
+    } catch (error: any) {
       set({
-        error: err.response?.data?.message || "Failed to fetch addresses",
+        error: error.response?.data?.message || "Gagal mengambil alamat",
         loading: false,
       });
     }
@@ -51,7 +78,7 @@ export const useAddressStore = create<AddressState>((set, get) => ({
       await apiCall.post("/api/address", addressData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      await get().fetchAddresses();
+      await get().fetchAddress();
       toast.success("Address added successfully!");
       set({ loading: false });
       return true;
@@ -62,6 +89,51 @@ export const useAddressStore = create<AddressState>((set, get) => ({
         loading: false,
       });
       return false;
+    }
+  },
+
+  updateAddress: async (id, data) => {
+    try {
+      const res = await apiCall.put(`/api/address/${id}`, data);
+      set({
+        addresses: get().addresses.map((addr) =>
+          addr.id === id ? res.data.data : addr
+        ),
+      });
+      return true;
+    } catch (error: any) {
+      set({
+        error: error.response?.data?.message || "Gagal update alamat",
+      });
+      return false;
+    }
+  },
+
+  deleteAddress: async (id) => {
+    try {
+      await apiCall.delete(`/api/address/${id}`);
+      set({
+        addresses: get().addresses.filter((addr) => addr.id !== id),
+      });
+    } catch (error: any) {
+      set({
+        error: error.response?.data?.message || "Gagal hapus alamat",
+      });
+    }
+  },
+
+  setPrimary: async (id) => {
+    try {
+      const res = await apiCall.patch(`/api/address/${id}/primary`);
+      set({
+        addresses: get().addresses.map((addr) =>
+          addr.id === id ? res.data.data : { ...addr, is_primary: false }
+        ),
+      });
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || "Gagal set alamat utama",
+      });
     }
   },
 }));
