@@ -15,6 +15,8 @@ import { Headset, MapPin, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useCartStore } from "@/store/cart-store";
+import { toast } from "react-toastify";
 
 interface IDesktopPrdDetails {
   allProduct: IProductProps[] | null;
@@ -30,7 +32,7 @@ export default function DesktopPrdDetails({
     getProductById,
     setSelectedProductDetails,
   } = useProduct();
-  // console.log(selectedProductDetails);
+  const { addItem } = useCartStore();
 
   // case untuk fetch data ulang (bila ada perubahan data stock/keterangan lain di dashboard)
   const router = useRouter();
@@ -192,6 +194,25 @@ export default function DesktopPrdDetails({
               <Button
                 className="bg-green-600 hover:bg-green-700 cursor-pointer"
                 disabled={isOutOfStock}
+                onClick={() => {
+                  if (!selectedProductDetails || !storeIdentity) return;
+                  const productForCart = {
+                    id: selectedProductDetails.id,
+                    productId: selectedProductDetails.id,
+                    name: selectedProductDetails.name,
+                    price: selectedProductDetails.price,
+                    description: selectedProductDetails.description || "",
+                    image:
+                      selectedProductDetails.images?.[0]?.image_url ||
+                      "/fallback.png",
+                  };
+                  addItem(
+                    productForCart,
+                    selectedProductDetails.stocks[0].store.id,
+                    storeIdentity.name,
+                    value
+                  );
+                }}
               >
                 <ShoppingCart />
                 Add to Cart

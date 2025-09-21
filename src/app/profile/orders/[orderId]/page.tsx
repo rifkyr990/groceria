@@ -4,6 +4,8 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import Navbar from "@/components/layout/navbar";
+import Footer from "@/components/layout/footer";
 import { useOrderDetailStore } from "@/store/order-detail-store";
 import { useUploadProofStore } from "@/store/upload-proof-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -281,16 +283,20 @@ export default function OrderDetailPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8">
-      <div className="max-w-2xl mx-auto">
-        {cameFromCheckout && (
-          <div className="mb-6 space-y-4">
-            <StepIndicator
-              steps={confirmationStep}
-              currentStep={0}
-              variant="timeline"
-            />
-            {/* <div className="text-center">
+    <div className="flex flex-col min-h-screen">
+      <div className="w-full flex-shrink-0">
+        <Navbar />
+      </div>
+      <main className="flex-1 bg-gray-50 p-4 sm:p-6 md:p-8">
+        <div className="max-w-2xl mx-auto">
+          {cameFromCheckout && (
+            <div className="mb-6 space-y-4">
+              <StepIndicator
+                steps={confirmationStep}
+                currentStep={0}
+                variant="timeline"
+              />
+              {/* <div className="text-center">
               <h2 className="text-2xl font-semibold text-gray-800">
                 Thank You For Your Order!
               </h2>
@@ -298,174 +304,172 @@ export default function OrderDetailPage() {
                 Your order has been placed successfully.
               </p>
             </div> */}
-          </div>
-        )}
-        <Card className="rounded-2xl shadow-lg shadow-gray-200/50 border-0 p-4 sm:p-8">
-          <CardHeader className="p-0 mb-6 sm:mb-8">
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="font-sans text-2xl sm:text-3xl font-bold text-gray-800">
-                  Order Details
-                </CardTitle>
-                <p className="text-sm text-gray-500 mt-1">
-                  Order #{order.id} &bull;{" "}
-                  {new Date(order.createdAt).toLocaleString("en-GB", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
-              <StatusBadge status={order.status} />
             </div>
-          </CardHeader>
-          <CardContent className="p-0 space-y-6">
-            {/* Conditional Full Details View */}
-            {!cameFromCheckout && (
-              <>
-                {/* Shipping Address */}
+          )}
+          <Card className="rounded-2xl shadow-lg shadow-gray-200/50 border-0 p-4 sm:p-8">
+            <CardHeader className="p-0 mb-6 sm:mb-8">
+              <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-gray-500" />
-                    Shipping Address
-                  </h3>
-                  <div className="text-sm text-gray-700 bg-gray-50 p-4 rounded-xl border space-y-2">
-                    <div className="grid grid-cols-[80px_1fr]">
-                      <span className="text-gray-500">Recipient</span>
-                      <span className="font-semibold">
-                        {order.destinationAddress.split(" (")[0]}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-[80px_1fr]">
-                      <span className="text-gray-500">Phone</span>
-                      <span>
-                        {order.destinationAddress.match(/\(([^)]+)\)/)?.[1]}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-[80px_1fr]">
-                      <span className="text-gray-500">Address</span>
-                      <span className="leading-relaxed">
-                        {order.destinationAddress.split("), ")[1]}
-                      </span>
+                  <CardTitle className="font-sans text-2xl sm:text-3xl font-bold text-gray-800">
+                    Order Details
+                  </CardTitle>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Order #{order.id} &bull;{" "}
+                    {new Date(order.createdAt).toLocaleString("en-GB", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+                <StatusBadge status={order.status} />
+              </div>
+            </CardHeader>
+            <CardContent className="p-0 space-y-6">
+              {/* Conditional Full Details View */}
+              {!cameFromCheckout && (
+                <>
+                  {/* Shipping Address */}
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-gray-500" />
+                      Shipping Address
+                    </h3>
+                    <div className="text-sm text-gray-700 bg-gray-50 p-4 rounded-xl border space-y-2">
+                      <div className="grid grid-cols-[80px_1fr]">
+                        <span className="text-gray-500">Recipient</span>
+                        <span className="font-semibold">
+                          {order.destinationAddress.split(" (")[0]}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-[80px_1fr]">
+                        <span className="text-gray-500">Phone</span>
+                        <span>
+                          {order.destinationAddress.match(/\(([^)]+)\)/)?.[1]}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-[80px_1fr]">
+                        <span className="text-gray-500">Address</span>
+                        <span className="leading-relaxed">
+                          {order.destinationAddress.split("), ")[1]}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="border-t border-dashed"></div>
+                  <div className="border-t border-dashed"></div>
 
-                {/* Product List */}
-                <div>
-                  <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                    <ClipboardList className="w-5 h-5 text-gray-500" />
-                    Items Ordered
-                  </h3>
-                  <div className="border border-dashed border-gray-300 rounded-xl p-4">
-                    <ul className="space-y-4">
-                      {order.items.map((item) => (
-                        <li key={item.id} className="flex items-center gap-4">
-                          <Image
-                            src={item.product.imageUrl}
-                            alt={item.product.name}
-                            width={56}
-                            height={56}
-                            className="w-14 h-14 object-cover rounded-lg border bg-white"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm text-gray-800 truncate">
-                              {item.product.name}
+                  {/* Product List */}
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                      <ClipboardList className="w-5 h-5 text-gray-500" />
+                      Items Ordered
+                    </h3>
+                    <div className="border border-dashed border-gray-300 rounded-xl p-4">
+                      <ul className="space-y-4">
+                        {order.items.map((item) => (
+                          <li key={item.id} className="flex items-center gap-4">
+                            <Image
+                              src={item.product.imageUrl}
+                              alt={item.product.name}
+                              width={56}
+                              height={56}
+                              className="w-14 h-14 object-cover rounded-lg border bg-white"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm text-gray-800 truncate">
+                                {item.product.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {item.quantity} x{" "}
+                                {formatIDRCurrency(
+                                  Number(item.priceAtPurchase)
+                                )}
+                              </p>
+                            </div>
+                            <p className="font-semibold text-sm text-gray-800 text-right">
+                              {formatIDRCurrency(
+                                item.quantity * Number(item.priceAtPurchase)
+                              )}
                             </p>
-                            <p className="text-xs text-gray-500">
-                              {item.quantity} x{" "}
-                              {formatIDRCurrency(Number(item.priceAtPurchase))}
-                            </p>
-                          </div>
-                          <p className="font-semibold text-sm text-gray-800 text-right">
-                            {formatIDRCurrency(
-                              item.quantity * Number(item.priceAtPurchase)
-                            )}
-                          </p>
-                        </li>
-                      ))}
-                    </ul>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                </div>
 
-                <div className="border-t border-dashed"></div>
-              </>
-            )}
+                  <div className="border-t border-dashed"></div>
+                </>
+              )}
 
-            {/* Payment Summary */}
-            <div>
-              <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-gray-500" />
-                Order Information
-              </h3>
-              <div className=" p-4 bg-primary-green-50 rounded-xl border space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Payment Method</span>
-                  <span className="font-medium text-gray-700">
-                    {order.payment?.method || "N/A"}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Shipping Method</span>
-                  <span className="font-medium text-gray-700">
-                    JNE Express (Placeholder)
-                  </span>
-                </div>
-                <div className="border-t border-dashed my-2"></div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Subtotal</span>
-                  <span className="font-medium text-gray-700">
-                    {formatIDRCurrency(order.subtotal)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Shipping</span>
-                  <span className="font-medium text-gray-700">
-                    {formatIDRCurrency(order.shippingCost)}
-                  </span>
-                </div>
-                {order.discountAmount > 0 && (
-                  <div className="flex justify-between text-sm text-primary-green-600">
-                    <span className="font-semibold">Discount</span>
-                    <span className="font-semibold">
-                      -{formatIDRCurrency(order.discountAmount)}
+              {/* Payment Summary */}
+              <div>
+                <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-gray-500" />
+                  Order Information
+                </h3>
+                <div className=" p-4 bg-primary-green-50 rounded-xl border space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Payment Method</span>
+                    <span className="font-medium text-gray-700">
+                      {order.payment?.method || "N/A"}
                     </span>
                   </div>
-                )}
-                <div className="border-t border-dashed my-2"></div>
-                <div className="flex justify-between items-center text-lg font-bold text-gray-800">
-                  <span>Total</span>
-                  <span className="font-mono">
-                    {formatIDRCurrency(Number(order.totalPrice))}
-                  </span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Shipping Method</span>
+                    <span className="font-medium text-gray-700">
+                      JNE Express (Placeholder)
+                    </span>
+                  </div>
+                  <div className="border-t border-dashed my-2"></div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Subtotal</span>
+                    <span className="font-medium text-gray-700">
+                      {formatIDRCurrency(Number(order.subtotal))}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Shipping</span>
+                    <span className="font-medium text-gray-700">
+                      {formatIDRCurrency(Number(order.shippingCost))}
+                    </span>
+                  </div>
+                  {Number(order.discountAmount) > 0 && (
+                    <div className="flex justify-between text-sm text-primary-green-600">
+                      <span className="font-semibold">Discount</span>
+                      <span className="font-semibold">
+                        -{formatIDRCurrency(Number(order.discountAmount))}
+                      </span>
+                    </div>
+                  )}
+                  <div className="border-t border-dashed my-2"></div>
+                  <div className="flex justify-between items-center text-lg font-bold text-gray-800">
+                    <span>Total</span>
+                    <span className="font-mono">
+                      {formatIDRCurrency(Number(order.totalPrice))}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Conditional Payment Instructions & Upload Card */}
-        {showPaymentDetails && <UploadProofCard orderId={order.id} />}
+          {/* Conditional Payment Instructions & Upload Card */}
+          {showPaymentDetails && <UploadProofCard orderId={order.id} />}
 
-        <div className="text-center mt-6">
-          {cameFromCheckout ? (
-            <Link
-              href="/"
-              className="text-sm text-gray-500 hover:underline inline-flex items-center"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" /> Continue Shopping
-            </Link>
-          ) : (
-            <Button asChild variant="link" className="text-gray-600">
-              <Link href="/profile/orders">
-                <ArrowLeft className="w-4 h-4 mr-2" /> Back to My Orders
+          <div className="text-center mt-6">
+            {cameFromCheckout && (
+              <Link
+                href="/"
+                className="text-sm text-gray-500 hover:underline inline-flex items-center"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" /> Continue Shopping
               </Link>
-            </Button>
-          )}
+            )}
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+      <Footer />
+    </div>
   );
 }

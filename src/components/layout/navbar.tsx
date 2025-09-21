@@ -15,12 +15,15 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/auth-store";
+import { useCartStore } from "@/store/cart-store";
 import { Menu, Transition } from "@headlessui/react";
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const { user, logout } = useAuthStore();
+  const { items } = useCartStore();
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -75,6 +78,19 @@ export default function Navbar() {
           </button>
         )}
 
+        {/* Cart Icon */}
+        <Link
+          href="/cart"
+          className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+        >
+          <ShoppingCart className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          {totalItems > 0 && (
+            <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+              {totalItems > 9 ? "9+" : totalItems}
+            </span>
+          )}
+        </Link>
+
         {/* Kalau belum login */}
         {!user ? (
           <div className="hidden md:flex items-center gap-4">
@@ -120,7 +136,8 @@ export default function Navbar() {
                       {({ active }) => (
                         <Link
                           // href="/dashboard/manage-store"
-                          href={ // 
+                          href={
+                            //
                             user.role === "STORE_ADMIN"
                               ? "/dashboard/manage-order"
                               : user.role === "SUPER_ADMIN"
@@ -196,6 +213,22 @@ export default function Navbar() {
         <div className="absolute top-16 left-0 w-full bg-white dark:bg-gray-900 shadow-lg md:hidden z-50">
           <ul className="flex flex-col gap-4 px-6 py-4 text-gray-600 dark:text-gray-200">
             <NavLinks />
+            <hr className="border-gray-200 dark:border-gray-700" />
+            <li>
+              <Link
+                href="/cart"
+                className="flex items-center gap-2"
+                onClick={() => setMobileOpen(false)}
+              >
+                <ShoppingCart className="w-4 h-4" />
+                Cart
+                {totalItems > 0 && (
+                  <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                    {totalItems > 9 ? "9+" : totalItems}
+                  </span>
+                )}
+              </Link>
+            </li>
             {!user ? (
               <>
                 <Link href="/login" onClick={() => setMobileOpen(false)}>

@@ -33,7 +33,7 @@ export interface ShippingOption {
   id: number;
   courier: string;
   service: string;
-  cost: number;
+  cost: string;
   estimated: string;
 }
 
@@ -47,7 +47,7 @@ export interface CartItemProps {
   id: number;
   name: string;
   description: string;
-  price: number;
+  price: string;
   image: string;
   quantity: number;
 }
@@ -69,7 +69,7 @@ export interface CartListProps {
 export interface PromoCode {
   code: string;
   description: string;
-  type: "percentage" | "fixed";
+  type: "percentage" | "fixed" | "free_shipping";
   value: number;
 }
 
@@ -78,7 +78,6 @@ export interface CheckoutSectionProps {
   appliedPromo: PromoCode | null;
   promoInputText: string;
   promoStatus: "idle" | "invalid";
-  promoCodes: PromoCode[];
   onApplyPromo: () => void;
   onRemovePromo: () => void;
   onPromoInputChange: (value: string) => void;
@@ -88,7 +87,6 @@ export interface PromoInputProps {
   inputText: string;
   status: "idle" | "invalid";
   appliedPromo: PromoCode | null;
-  promoCodes: PromoCode[];
   onInputChange: (value: string) => void;
   onApply: () => void;
   onRemove: () => void;
@@ -109,9 +107,9 @@ export interface OrderDetail {
   id: number;
   createdAt: string;
   totalPrice: string;
-  subtotal: number;
-  shippingCost: number;
-  discountAmount: number;
+  subtotal: string;
+  shippingCost: string;
+  discountAmount: string;
   destinationAddress: string;
   store: {
     id: number;

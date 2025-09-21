@@ -8,6 +8,7 @@ import { ShoppingCart, Store } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useCartStore } from "@/store/cart-store";
 
 // interface Product {
 //   id: number;
@@ -28,6 +29,7 @@ export default function ProductList() {
   const [categories, setCategories] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const { setSelectedProductDetails, setProductsByLoc } = useProduct();
+  const { addItem } = useCartStore();
 
   const productsPerPage = 8;
 
@@ -105,11 +107,6 @@ export default function ProductList() {
   );
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
-  function handleAddToCart(product: IProductProps) {
-    console.log("Tambah ke keranjang:", product);
-  }
-  // arco- start
-
   const router = useRouter();
   //   arco-end
 
@@ -179,7 +176,28 @@ export default function ProductList() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleAddToCart(product);
+                    if (
+                      !product.stocks ||
+                      product.stocks.length === 0 ||
+                      !product.stocks[0].store
+                    )
+                      return;
+
+                    const productForCart = {
+                      id: product.id,
+                      productId: product.id,
+                      name: product.name,
+                      price: product.price,
+                      description: product.description || "",
+                      image:
+                        product.images?.[0]?.image_url || "/fallback.png",
+                    };
+                    addItem(
+                      productForCart,
+                      product.stocks[0].store.id,
+                      product.stocks[0].store.name,
+                      1 // Add 1 item by default from product card
+                    );
                   }}
                   className="mt-5 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-xl transition"
                 >

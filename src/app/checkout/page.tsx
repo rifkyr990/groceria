@@ -20,6 +20,8 @@ import ShippingMethodModal from "@/components/checkout/ShippingMethodModal";
 import StepIndicator from "@/components/cart/StepIndicator";
 import { FiCreditCard } from "react-icons/fi";
 import { useAuthStore } from "@/store/auth-store";
+import Navbar from "@/components/layout/navbar";
+import Footer from "@/components/layout/footer";
 
 declare global {
   interface Window {
@@ -50,8 +52,11 @@ const checkoutStep = [
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { placeOrder, getMidtransToken, loading: isPlacingOrder } =
-    useOrderStore();
+  const {
+    placeOrder,
+    getMidtransToken,
+    loading: isPlacingOrder,
+  } = useOrderStore();
   const {
     addresses,
     loading: addressesLoading,
@@ -74,14 +79,13 @@ export default function CheckoutPage() {
     useState<PaymentMethod | null>(MockPaymentMethods[0]);
 
   const shippingCost = useMemo(
-    () => selectedShipping?.cost || 0,
+    () => selectedShipping?.cost || "0",
     [selectedShipping]
   );
 
   const {
     items,
-    appliedPromo: appliedPromoCode,
-    promoCodes,
+    appliedPromo,
     storeName,
     tryApplyPromoCode,
     removePromoCode,
@@ -112,18 +116,16 @@ export default function CheckoutPage() {
   }, [selectedAddressId, fetchOptions]);
 
   useEffect(() => {
-    setPromoInputText(appliedPromoCode || "");
-  }, [appliedPromoCode]);
+    setPromoInputText(appliedPromo?.code || "");
+  }, [appliedPromo]);
 
-  const [promoInputText, setPromoInputText] = useState(appliedPromoCode || "");
+  const [promoInputText, setPromoInputText] = useState(
+    appliedPromo?.code || ""
+  );
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
 
-  const appliedPromo = appliedPromoCode
-    ? promoCodes.find((p) => p.code === appliedPromoCode) || null
-    : null;
-
-  const handleApplyPromo = () => {
-    const success = tryApplyPromoCode(promoInputText);
+  const handleApplyPromo = async () => {
+    const success = await tryApplyPromoCode(promoInputText);
     if (!success) {
       setPromoStatus("invalid");
     }
@@ -137,15 +139,22 @@ export default function CheckoutPage() {
 
   const { total } = useMemo(() => {
     const subtotal = items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+      (sum, item) => sum + Number(item.price) * item.quantity,
       0
     );
-    const discountCut = appliedPromo
-      ? appliedPromo.type === "percentage"
-        ? Math.round((subtotal * appliedPromo.value) / 100)
-        : appliedPromo.value
-      : 0;
-    const total = Math.max(0, subtotal - discountCut + shippingCost);
+
+    const isFreeShipping = appliedPromo?.type === "free_shipping";
+
+    const discountCut =
+      appliedPromo && appliedPromo.type !== "free_shipping"
+        ? appliedPromo.type === "percentage"
+          ? Math.round((subtotal * appliedPromo.value) / 100)
+          : appliedPromo.value
+        : 0;
+
+    const finalShippingCost = isFreeShipping ? 0 : Number(shippingCost);
+
+    const total = Math.max(0, subtotal - discountCut + finalShippingCost);
     return { total };
   }, [items, appliedPromo, shippingCost]);
 
@@ -182,9 +191,9 @@ export default function CheckoutPage() {
 
     const orderPayload = {
       addressId: selectedAddressId,
-      shippingCost: selectedShipping.cost,
+      shippingCost: selectedShipping.cost, // This is now a string
       paymentMethodId,
-      promoCode: appliedPromoCode,
+      promoCode: appliedPromo?.code,
     };
 
     const orderResult = await placeOrder(orderPayload);
@@ -217,7 +226,9 @@ export default function CheckoutPage() {
         },
         onError: function (result: any) {
           console.error("Midtrans error:", result);
-          toast.error("Payment failed. Please try again or use another method.");
+          toast.error(
+            "Payment failed. Please try again or use another method."
+          );
         },
         onClose: function () {
           console.log(
@@ -237,62 +248,69 @@ export default function CheckoutPage() {
 
   return (
     <>
-      <main className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8 pb-28 lg:pb-8">
-        <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
-            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                Checkout
-              </h1>
-              <AddressSelector
-                addresses={addresses}
-                loading={addressesLoading}
-                selectedAddressId={selectedAddressId}
-                setSelectedAddressId={setSelectedAddressId}
-              />
-              <OrderReview
-                items={items}
-                storeName={storeName}
-                selectedShipping={selectedShipping}
-                onOpenModal={() => setIsModalOpen(true)}
-              />
-              <div className="hidden lg:block">
-                <PaymentMethodSelector
-                  paymentMethods={MockPaymentMethods}
-                  selectedMethod={selectedPaymentMethod}
-                  onSelectMethod={setSelectedPaymentMethod}
+      <div className="flex flex-col min-h-screen">
+        <div className="w-full flex-shrink-0">
+          <Navbar />
+        </div>
+        <main className="flex-1 bg-gray-50 p-4 sm:p-6 md:p-8 pb-28 lg:pb-8">
+          <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
+              <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                  Checkout
+                </h1>
+                <AddressSelector
+                  addresses={addresses}
+                  loading={addressesLoading}
+                  selectedAddressId={selectedAddressId}
+                  setSelectedAddressId={setSelectedAddressId}
                 />
+                <OrderReview
+                  items={items}
+                  storeName={storeName}
+                  selectedShipping={selectedShipping}
+                  onOpenModal={() => setIsModalOpen(true)}
+                />
+                <div className="hidden lg:block">
+                  <PaymentMethodSelector
+                    paymentMethods={MockPaymentMethods}
+                    selectedMethod={selectedPaymentMethod}
+                    onSelectMethod={setSelectedPaymentMethod}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-4 sm:space-y-6 lg:sticky lg:top-6 lg:h-fit">
-              <StepIndicator steps={checkoutStep} currentStep={0} />
-              <PaymentSummary
-                items={items}
-                appliedPromo={appliedPromo}
-                shippingCost={shippingCost}
-              />
-              <PromoInput
-                inputText={promoInputText}
-                status={promoStatus}
-                appliedPromo={appliedPromo}
-                promoCodes={promoCodes}
-                onInputChange={handlePromoInputChange}
-                onApply={handleApplyPromo}
-                onRemove={handleRemovePromo}
-              />
-              <div className="hidden lg:block">
-                <CheckoutButton
-                  mode="checkout"
-                  onClick={handlePlaceOrder}
-                  total={total}
-                  disabled={isPlacingOrder}
+              <div className="space-y-4 sm:space-y-6 lg:sticky lg:top-6 lg:h-fit">
+                <StepIndicator steps={checkoutStep} currentStep={0} />
+                <PaymentSummary
+                  items={items}
+                  appliedPromo={appliedPromo}
+                  shippingCost={shippingCost}
                 />
+                <PromoInput
+                  inputText={promoInputText}
+                  status={promoStatus}
+                  appliedPromo={appliedPromo}
+                  onInputChange={handlePromoInputChange}
+                  onApply={handleApplyPromo}
+                  onRemove={handleRemovePromo}
+                />
+                <div className="hidden lg:block">
+                  <CheckoutButton
+                    mode="checkout"
+                    onClick={handlePlaceOrder}
+                    total={total.toString()}
+                    disabled={isPlacingOrder}
+                  />
+                </div>
               </div>
             </div>
           </div>
+        </main>
+        <div className="hidden lg:block">
+          <Footer />
         </div>
-      </main>
+      </div>
 
       <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 pt-5 bg-white/80 backdrop-blur-sm border-t border-gray-200 space-y-3 rounded-t-2xl shadow-[0_-4px_16px_-1px_rgba(0,0,0,0.05)]">
         <div className="flex justify-between items-center">
@@ -309,7 +327,7 @@ export default function CheckoutPage() {
         <CheckoutButton
           mode="checkout"
           onClick={handlePlaceOrder}
-          total={total}
+          total={total.toString()}
           disabled={isPlacingOrder}
         />
       </div>

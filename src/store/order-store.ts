@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 
 interface OrderPayload {
   addressId: number;
-  shippingCost: number;
+  shippingCost: string;
   paymentMethodId: number;
   promoCode?: string | null;
 }

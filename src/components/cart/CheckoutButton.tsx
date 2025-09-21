@@ -7,7 +7,7 @@ import { formatIDRCurrency } from "@/utils/format";
 import { IoLockClosed } from "react-icons/io5";
 
 interface CheckoutButtonProps {
-  total: number;
+  total: string;
   onClick: () => Promise<void> | void;
   mode: "cart" | "checkout";
   disabled?: boolean;
@@ -67,7 +67,7 @@ export default function CheckoutButton({
   return (
     <Button
       onClick={handleClick}
-      disabled={loading || disabled || total === 0}
+      disabled={loading || disabled || Number(total) === 0}
       className={cn(
         "w-full p-6 py-7 sm:p-6 sm:py-7 rounded-xl flex items-center justify-between transform transition-all shadow-lg",
         "hover:scale-105 hover:shadow-xl active:scale-95",
@@ -89,7 +89,9 @@ export default function CheckoutButton({
 
       <div className="flex items-center gap-2 flex-shrink-0 ml-2">
         {config.showPrice && (
-          <span className="font-semibold">{formatIDRCurrency(total)}</span>
+          <span className="font-semibold">
+            {formatIDRCurrency(Number(total))}
+          </span>
         )}
         {config.icon}
       </div>

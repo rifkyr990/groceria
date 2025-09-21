@@ -13,6 +13,8 @@ import { ChevronDown, Headset, Phone, ShoppingCart, Store } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Autoplay from "embla-carousel-autoplay";
+import { useCartStore } from "@/store/cart-store";
+import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import {
   Accordion,
@@ -36,6 +38,7 @@ export default function MobilePrdDetails({
 }: IMobilePrdDetails) {
   const { selectedProductDetails, setSelectedProductDetails, productsByLoc } =
     useProduct();
+  const { addItem } = useCartStore();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -157,6 +160,25 @@ export default function MobilePrdDetails({
               <Button
                 className="w-full h-9 bg-green-600 hover:bg-green-700"
                 disabled={isOutOfStock}
+                onClick={() => {
+                  if (!selectedProductDetails || !storeIdentity) return;
+                  const productForCart = {
+                    id: selectedProductDetails.id,
+                    productId: selectedProductDetails.id,
+                    name: selectedProductDetails.name,
+                    price: selectedProductDetails.price,
+                    description: selectedProductDetails.description || "",
+                    image:
+                      selectedProductDetails.images?.[0]?.image_url ||
+                      "/fallback.png",
+                  };
+                  addItem(
+                    productForCart,
+                    selectedProductDetails.stocks[0].store.id,
+                    storeIdentity.name,
+                    value
+                  );
+                }}
               >
                 <ShoppingCart /> Add to Cart
               </Button>
