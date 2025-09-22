@@ -5,6 +5,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+<<<<<<< HEAD
 import { useAuthStore } from "@/store/auth-store";
 import { Bell, ChevronDown, Search, Store, Sun } from "lucide-react";
 import Image from "next/image";
@@ -19,6 +20,18 @@ export default function DashboardNavbar() {
   const [openPopover, setOpenPopover] = useState(false);
   const { user } = useAuthStore();
   const router = useRouter();
+=======
+import { Bell, ChevronDown, Search, Sun } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import DropDownProfile from "./DropDownProfile";
+import { useUserStore } from "@/store/user-store";
+import { useAuthStore } from "@/store/auth-store";
+
+export default function DashboardNavbar() {
+  const [isDropDownOpen, setIsDropDownOpen] = useState(false);
+  const { user } = useAuthStore();
+>>>>>>> 4918f9733ad19cce90b86c10bbc45e2df4b0279b
   return (
     <>
       <nav className="flex justify-between items-center h-10 p-10 max-sm:px-4 bg-white ">

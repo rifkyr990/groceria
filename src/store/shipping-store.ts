@@ -8,7 +8,10 @@ interface ShippingState {
   options: ShippingOption[];
   loading: boolean;
   error: string | null;
-  fetchOptions: (addressId: number) => Promise<ShippingOption[] | null>;
+  fetchOptions: (
+    addressId: number,
+    storeId: number
+  ) => Promise<ShippingOption[] | null>;
 }
 
 export const useShippingStore = create<ShippingState>((set) => ({
@@ -16,8 +19,9 @@ export const useShippingStore = create<ShippingState>((set) => ({
   loading: false,
   error: null,
 
-  fetchOptions: async (addressId) => {
+  fetchOptions: async (addressId, storeId) => {
     set({ loading: true, error: null, options: [] });
+
     const token = useAuthStore.getState().token;
     if (!token) {
       set({ loading: false, error: "Authentication required." });
@@ -27,7 +31,7 @@ export const useShippingStore = create<ShippingState>((set) => ({
     try {
       const response = await apiCall.post(
         "/api/shipping/options",
-        { addressId },
+        { addressId, storeId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

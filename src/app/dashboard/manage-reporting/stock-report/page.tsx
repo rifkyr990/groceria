@@ -31,7 +31,7 @@ import { apiCall } from "@/helper/apiCall";
 import { useAuthStore } from "@/store/auth-store";
 import { useStore } from "@/store/useStore";
 import { IStockHistory } from "@/types/stock";
-import { IStoreProps } from "@/types/store";
+import { IAdminStoreData, IStoreProps } from "@/types/store";
 import { formatDate } from "@/utils/format";
 import {
   CircleArrowDown,
@@ -43,7 +43,6 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
-
 const quantityColor = (value: number, type: string) => {
   if (type === "OUT") {
     return <p className="text-red-500">-{value}</p>;

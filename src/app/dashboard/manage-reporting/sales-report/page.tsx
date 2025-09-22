@@ -63,7 +63,6 @@ export default function SalesReport() {
   const [selectedProduct, setSelectedProduct] = useState("all");
   const [categories, setCategories] = useState<string[]>([]);
   const [products, setProducts] = useState<string[]>([]);
-
   const [storeList, setStoreList] = useState<IStoreProps[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState<{
@@ -91,6 +90,8 @@ export default function SalesReport() {
     }
   };
 
+  // console.log(selectedDate);
+  // console.log(selectedStore);
   const getOrderList = async () => {
     const { month, year } = selectedDate;
     try {

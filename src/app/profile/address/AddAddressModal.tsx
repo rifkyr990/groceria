@@ -273,6 +273,7 @@ export default function AddAddressModal() {
           </div>
           <div className="w-full max-w-md h-40 mx-auto my-4">
             <MapPicker
+              key={Date.now()}
               disabled={false}
               defaultLocation={{
                 lat: watch("latitude"),

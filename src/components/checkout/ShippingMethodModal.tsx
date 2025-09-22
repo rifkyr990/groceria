@@ -32,6 +32,11 @@ export default function ShippingMethodModal({
   onSelectOption,
   loading = false,
 }: ShippingMethodModalProps) {
+  const optionsWithId = shippingOptions.map((option) => ({
+    ...option,
+    id: `${option.code}-${option.service}`,
+  }));
+
   const handleConfirm = () => {
     onOpenChange(false);
   };
@@ -48,23 +53,21 @@ export default function ShippingMethodModal({
               <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
               <p className="ml-2 text-gray-500">Finding options...</p>
             </div>
-          ) : shippingOptions.length === 0 ? (
+          ) : optionsWithId.length === 0 ? (
             <div className="text-center text-gray-500 p-8">
               <p>No shipping options available for this address.</p>
               <p className="text-sm">Please select another address.</p>
             </div>
           ) : (
             <RadioGroup
-              value={selectedOption?.id.toString()}
+              value={selectedOption?.id}
               onValueChange={(value) => {
-                const option =
-                  shippingOptions.find((o) => o.id.toString() === value) ||
-                  null;
+                const option = optionsWithId.find((o) => o.id === value) || null;
                 onSelectOption(option);
               }}
             >
               <div className="space-y-3">
-                {shippingOptions.map((option) => (
+                {optionsWithId.map((option) => (
                   <Label
                     key={option.id}
                     htmlFor={`ship-${option.id}`}
@@ -76,7 +79,7 @@ export default function ShippingMethodModal({
                     )}
                   >
                     <RadioGroupItem
-                      value={option.id.toString()}
+                      value={option.id}
                       id={`ship-${option.id}`}
                     />
                     <div className="flex-1">
@@ -103,7 +106,7 @@ export default function ShippingMethodModal({
           <Button
             onClick={handleConfirm}
             className="w-full"
-            disabled={loading || shippingOptions.length === 0}
+            disabled={loading || optionsWithId.length === 0}
           >
             Confirm
           </Button>
@@ -112,4 +115,3 @@ export default function ShippingMethodModal({
     </Dialog>
   );
 }
-
