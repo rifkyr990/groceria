@@ -99,7 +99,7 @@ export default function CartPage() {
       <div className="w-full flex-shrink-0">
         <Navbar />
       </div>
-      <main className="flex-1 bg-[#F3F4F6] p-4 sm:p-6 md:p-8 lg:p-12">
+      <main className="flex-1 bg-gray-50 p-4 sm:p-6 md:p-8 lg:p-12">
         <section className="max-w-6xl mx-auto">
           <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-10">
             <div className="lg:col-span-2 space-y-4 sm:space-y-6">

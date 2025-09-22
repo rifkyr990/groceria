@@ -20,6 +20,14 @@ export const formatDate = (value: string | Date) => {
   }).format(date);
 };
 
+export const formatShortDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};
+
 // format date (05/05/2025)
 export const formatIntlDate = (date: Date) => {
   const day = String(date.getDate()).padStart(2, "0");

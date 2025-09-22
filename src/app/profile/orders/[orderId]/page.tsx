@@ -341,25 +341,30 @@ export default function OrderDetailPage() {
             />
           </div>
         )}
-        <Card className="rounded-2xl shadow-lg shadow-gray-200/50 border-0 p-4 sm:p-8">
-          <CardHeader className="p-0 mb-6 sm:mb-8">
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="font-sans text-2xl sm:text-3xl font-bold text-gray-800">
-                  Order Details
-                </CardTitle>
-                <p className="text-sm text-gray-500 mt-1">
-                  Order #{order.id} &bull;{" "}
-                  {new Date(order.createdAt).toLocaleString("en-GB", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
-              <StatusBadge status={order.status} />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            {!cameFromCheckout && (
+               <Button asChild variant="outline" size="icon" className="flex-shrink-0">
+                  <Link href="/profile/orders" aria-label="Back to My Orders">
+                    <ArrowLeft className="w-4 h-4" />
+                  </Link>
+                </Button>
+            )}
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Order Details</h1>
+              <p className="text-sm text-gray-500">
+                Order #{order.id} &bull;{" "}
+                {new Date(order.createdAt).toLocaleString("en-GB", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
             </div>
-          </CardHeader>
+          </div>
+          <StatusBadge status={order.status} />
+        </div>
+        <Card className="rounded-2xl shadow-lg shadow-gray-200/50 border-0 p-4 sm:p-8">
           <CardContent className="p-0 space-y-6">
             {!cameFromCheckout && (
               <>
@@ -480,19 +485,12 @@ export default function OrderDetailPage() {
         </Card>
 
         <div className="text-center mt-6">
-          {cameFromCheckout ? (
+          {cameFromCheckout && (
             <Link
               href="/"
               className="text-sm text-gray-500 hover:underline inline-flex items-center"
             >
               <ArrowLeft className="w-4 h-4 mr-2" /> Continue Shopping
-            </Link>
-          ) : (
-            <Link
-              href="/profile/orders"
-              className="text-sm text-gray-500 hover:underline inline-flex items-center"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" /> Back to My Orders
             </Link>
           )}
         </div>

@@ -58,15 +58,15 @@ export default function ActionCenterCard({
     if (order.payment?.method === "Manual Bank Transfer") {
       return (
         <Card className="mt-6 rounded-2xl shadow-lg shadow-gray-200/50 border-0">
-          <CardHeader className="flex flex-row items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-6 pb-2">
-            <div className="w-8 h-8 flex items-center justify-center bg-primary-green-100 rounded-full">
-              <Bolt className="w-4 h-4 text-primary-green-600" />
+          <CardContent className="p-4 sm:p-6 space-y-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 flex items-center justify-center bg-primary-green-100 rounded-full">
+                <Bolt className="w-4 h-4 text-primary-green-600" />
+              </div>
+              <CardTitle className="text-base sm:text-lg font-bold">
+                Complete Your Payment
+              </CardTitle>
             </div>
-            <CardTitle className="text-base sm:text-lg font-bold">
-              Complete Your Payment
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-sm text-orange-800 text-center">
               <p className="font-semibold text-orange-900">Bank BCA</p>
               <p>
@@ -97,7 +97,7 @@ export default function ActionCenterCard({
                 <Button
                   size="lg"
                   variant="ghost"
-                  className="w-full h-12 text-base font-bold text-primary-green-600 pointer-events-none"
+                  className="w-full h-10 text-sm font-bold text-primary-green-600 pointer-events-none"
                 >
                   <Upload className="w-5 h-5 mr-2" />
                   Select Payment Proof
@@ -122,7 +122,7 @@ export default function ActionCenterCard({
                     <Button
                       onClick={handleSubmitProof}
                       disabled={loading}
-                      className="bg-primary-green-600 hover:bg-primary-green-700 h-12 text-base"
+                      className="bg-primary-green-600 hover:bg-primary-green-700 h-10 text-sm px-4"
                     >
                       {loading ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
@@ -146,8 +146,9 @@ export default function ActionCenterCard({
               <Button
                 onClick={onCancel}
                 variant="outline"
-                className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-12 text-base"
+                className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-10 text-sm px-4"
               >
+                <XCircle className="w-4 h-4 mr-2" />
                 Cancel Order
               </Button>
             </div>
@@ -155,33 +156,26 @@ export default function ActionCenterCard({
         </Card>
       );
     } else {
-      // Payment Gateway
       return (
         <Card className="mt-6 rounded-2xl shadow-lg shadow-gray-200/50 border-0">
-          <CardHeader className="flex flex-row items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-6 pb-2">
-            <div className="w-8 h-8 flex items-center justify-center bg-primary-green-100 rounded-full">
-              <Bolt className="w-4 h-4 text-primary-green-600" />
+          <CardContent className="p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Button
+                onClick={onPay}
+                className="w-full bg-primary-green-600 hover:bg-primary-green-700 h-10 text-sm px-4"
+              >
+                <CreditCard className="w-4 h-4 mr-2" />
+                Pay Now
+              </Button>
+              <Button
+                onClick={onCancel}
+                variant="outline"
+                className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-10 text-sm px-4"
+              >
+                <XCircle className="w-4 h-4 mr-2" />
+                Cancel Order
+              </Button>
             </div>
-            <CardTitle className="text-base sm:text-lg font-bold">
-              Action Required
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0 grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Button
-              onClick={onPay}
-              className="w-full bg-primary-green-600 hover:bg-primary-green-700 h-12 text-base"
-            >
-              <CreditCard className="w-4 h-4 mr-2" />
-              Pay Now
-            </Button>
-            <Button
-              onClick={onCancel}
-              variant="outline"
-              className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-12 text-base"
-            >
-              <XCircle className="w-4 h-4 mr-2" />
-              Cancel Order
-            </Button>
           </CardContent>
         </Card>
       );
@@ -191,18 +185,10 @@ export default function ActionCenterCard({
   if (order.status === "SHIPPED") {
     return (
       <Card className="mt-6 rounded-2xl shadow-lg shadow-gray-200/50 border-0">
-        <CardHeader className="flex flex-row items-center gap-3 px-4 pt-4 sm:px-6 sm:pt-6 pb-2">
-          <div className="w-8 h-8 flex items-center justify-center bg-primary-green-100 rounded-full">
-            <Bolt className="w-4 h-4 text-primary-green-600" />
-          </div>
-          <CardTitle className="text-base sm:text-lg font-bold">
-            Confirm Delivery
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0">
+        <CardContent className="p-4 sm:p-6">
           <Button
             onClick={onConfirm}
-            className="w-full bg-primary-green-600 hover:bg-primary-green-700 h-12 text-base"
+            className="w-full bg-primary-green-600 hover:bg-primary-green-700 h-10 text-sm px-4"
           >
             <Truck className="w-4 h-4 mr-2" />
             I've Received My Order

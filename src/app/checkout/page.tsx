@@ -308,6 +308,8 @@ export default function CheckoutPage() {
                   onApply={handleApplyPromo}
                   onRemove={handleRemovePromo}
                 />
+                {/* Spacer div to push content up on mobile, preventing overlap with the fixed button bar */}
+                <div className="h-24 lg:hidden" />
                 <div className="hidden lg:block">
                   <CheckoutButton
                     mode="checkout"
