@@ -132,7 +132,6 @@ export default function CreateNewDiscount({
       // onCreate(res.data.data); //sementara off dulu
       setOpen(false);
       window.location.reload();
-
       // reset form
       setDiscType("");
       setSelectedStore("");

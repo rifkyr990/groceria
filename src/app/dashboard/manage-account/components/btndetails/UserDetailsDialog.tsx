@@ -37,9 +37,10 @@ export default function UserDetailsDialog({
   users,
   stores,
 }: IUserDetailsDialog) {
+  console.log(users);
   const main_address =
     users.addresses?.find((addr: IUserAddressProps) => addr.is_primary)
-      ?.address_line ?? "";
+      ?.street ?? "";
   const first_name = users.first_name;
   const last_name = users.last_name;
   const email = users.email;
@@ -51,29 +52,33 @@ export default function UserDetailsDialog({
     (addr: IUserAddressProps) => addr.province
   )?.province;
   const profilePic = users.image_url;
-  const full_address = main_address + ", " + city + ", " + province;
-  const [openStoreSelect, setOpenStoreSelect] = useState(false);
-  const [selectedStore, setSelectedStore] = useState<string | undefined>(
-    undefined
-  );
+  let full_address = main_address + ", " + city + ", " + province;
+  if (!main_address) {
+    full_address = (city ?? "") + (province ?? "");
+  }
+
+  // const [openStoreSelect, setOpenStoreSelect] = useState(false);
+  // const [selectedStore, setSelectedStore] = useState<string | undefined>(
+  //   undefined
+  // );
   // assign admin handler
-  const handlerAssignAdmin = async (userId: string, storeId: string) => {
-    if (!storeId) return alert("You have to choose the store");
-    try {
-      const id = userId;
-      const store_id = parseInt(storeId);
-      const res = await apiCall.patch(`/api/user/new-admin/${id}`, {
-        store_id,
-      });
-      if (res && res.data.success) {
-        toast.success("Assign Admin Success");
-        setOpen(false);
-        window.location.reload();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const handlerAssignAdmin = async (userId: string, storeId: string) => {
+  //   if (!storeId) return alert("You have to choose the store");
+  //   try {
+  //     const id = userId;
+  //     const store_id = parseInt(storeId);
+  //     const res = await apiCall.patch(`/api/user/new-admin/${id}`, {
+  //       store_id,
+  //     });
+  //     if (res && res.data.success) {
+  //       toast.success("Assign Admin Success");
+  //       setOpen(false);
+  //       window.location.reload();
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
@@ -106,13 +111,17 @@ export default function UserDetailsDialog({
             </div>
             <div id="phone" className="w-full">
               <label className="max-md:text-sm">Phone Number</label>
-              <Input disabled value={phone} />
+              <Input disabled value={phone ?? ""} />
             </div>
           </div>
           <div className="flex gap-x-1">
             <div id="address" className="w-full">
               <label className="max-md:text-sm">Main Address</label>
-              <Input disabled value={full_address} className="max-md:text-sm" />
+              <Input
+                disabled
+                value={full_address ?? ""}
+                className="max-md:text-sm"
+              />
             </div>
           </div>
           <div className="flex gap-x-1">

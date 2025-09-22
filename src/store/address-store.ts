@@ -1,47 +1,47 @@
 import { create } from "zustand";
-import { apiCall } from '@/helper/apiCall';
+import { apiCall } from "@/helper/apiCall";
 import { toast } from "react-toastify";
 
 // sesuai form
 interface AddressFormValues {
-    name: string;
-    phone: string;
-    province: string;
-    city: string;
-    district: string;
-    subdistrict: string;
-    postal_code: string;
-    street: string;
-    detail: string;
-    label: "RUMAH" | "KANTOR";
-    is_primary: boolean;
+  name: string;
+  phone: string;
+  province: string;
+  city: string;
+  district: string;
+  subdistrict: string;
+  postal_code: string;
+  street: string;
+  detail: string;
+  label: "RUMAH" | "KANTOR";
+  is_primary: boolean;
 }
 
 // sesuai schema prisma
 interface Address {
-    id: number;
-    name: string;
-    phone: string;
-    province: string;
-    city: string;
-    district: string;
-    subdistrict: string;
-    postal_code: string;
-    street: string;
-    detail: string;
-    label: "RUMAH" | "KANTOR";
-    is_primary: boolean;
+  id: number;
+  name: string;
+  phone: string;
+  province: string;
+  city: string;
+  district: string;
+  subdistrict: string;
+  postal_code: string;
+  street: string;
+  detail: string;
+  label: "RUMAH" | "KANTOR";
+  is_primary: boolean;
 }
 
 interface AddressState {
-    addresses: Address[];
-    loading: boolean;
-    error: string | null;
-    fetchAddress: () => Promise<void>;
-    addAddress: (data: AddressFormValues) => Promise<boolean>;
-    updateAddress: (id: number, data: Partial<Address>) => Promise<boolean>;
-    deleteAddress: (id: number) => Promise<void>;
-    setPrimary: (id: number) => Promise<void>;
+  addresses: Address[];
+  loading: boolean;
+  error: string | null;
+  fetchAddress: () => Promise<void>;
+  addAddress: (data: AddressFormValues) => Promise<boolean>;
+  updateAddress: (id: number, data: Partial<Address>) => Promise<boolean>;
+  deleteAddress: (id: number) => Promise<void>;
+  setPrimary: (id: number) => Promise<void>;
 }
 
 export const useAddressStore = create<AddressState>((set, get) => ({
@@ -56,8 +56,7 @@ export const useAddressStore = create<AddressState>((set, get) => ({
       set({ addresses: res.data.data, loading: false });
     } catch (error: any) {
       set({
-        error:
-          error.response?.data?.message || "Gagal mengambil alamat",
+        error: error.response?.data?.message || "Gagal mengambil alamat",
         loading: false,
       });
     }
@@ -66,7 +65,7 @@ export const useAddressStore = create<AddressState>((set, get) => ({
   addAddress: async (data: AddressFormValues): Promise<boolean> => {
     try {
       const payload = {
-        ...data
+        ...data,
       };
 
       await apiCall.post("/api/address", payload);

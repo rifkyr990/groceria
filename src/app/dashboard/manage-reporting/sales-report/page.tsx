@@ -224,44 +224,49 @@ export default function SalesReport() {
     <DashboardLayout>
       <section
         id="store-selector"
-        className="flex items-center gap-5 mb-5 justify-end"
+        className="flex max-md:flex-col items-center gap-5 mb-5 justify-end"
       >
-        <div>
-          <Button
-            onClick={() =>
-              router.replace("/dashboard/manage-reporting/stock-report")
-            }
-          >
-            Stock Report
-          </Button>
-        </div>
-        <div>
-          <Select
-            value={selectedStore}
-            onValueChange={(value) => setSelectedStore(value)}
-            disabled={user.role === "STORE_ADMIN"}
-          >
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Store Name"></SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Store Name</SelectLabel>
-                <SelectItem value="all">All Store</SelectItem>
-                {storeList.map((store, idx) => (
-                  <SelectItem key={idx} value={store.id.toString()}>
-                    {store.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+        <div className="flex gap-x-5">
+          <div>
+            <Button
+              onClick={() =>
+                router.replace("/dashboard/manage-reporting/stock-report")
+              }
+            >
+              Stock Report
+            </Button>
+          </div>
+          <div>
+            <Select
+              value={selectedStore}
+              onValueChange={(value) => setSelectedStore(value)}
+              disabled={user.role === "STORE_ADMIN"}
+            >
+              <SelectTrigger className="bg-white">
+                <SelectValue placeholder="Store Name"></SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Store Name</SelectLabel>
+                  <SelectItem value="all">All Store</SelectItem>
+                  {storeList.map((store, idx) => (
+                    <SelectItem key={idx} value={store.id.toString()}>
+                      {store.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <div>
           <MonthYearPicker value={selectedDate} onChange={setSelectedDate} />
         </div>
       </section>
-      <section id="summary-card" className="grid grid-cols-4 gap-6 mb-5">
+      <section
+        id="summary-card"
+        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-5"
+      >
         {summaryCard.map((s, idx) => (
           <Card key={idx} className={`${s.border}`}>
             <CardHeader className="flex justify-between items-center">

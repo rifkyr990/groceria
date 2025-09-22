@@ -8,4 +8,5 @@ export interface IUserAddressProps {
   postal_code: string;
   latitude: number;
   longitude: number;
+  street: string;
 }

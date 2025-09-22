@@ -110,7 +110,7 @@ export default function DiscountHistory({
   return (
     <section className="p-4 mt-5">
       <h1 className="text-xl font-semibold">Filter and Search Bar</h1>
-      <div id="filter-search" className="flex gap-x-5">
+      <div id="filter-search" className="flex max-lg:flex-col gap-x-5">
         <div className="w-full relative">
           <Input
             value={searchQuery}
@@ -119,38 +119,41 @@ export default function DiscountHistory({
           />
           <Search className="absolute text-gray-300 top-1.5 right-2 size-5" />
         </div>
-        {/* Filter Store */}
-        <Select
-          value={selectedStore}
-          onValueChange={(value) => setSelectedStore(value)}
-          disabled={userRole === "STORE_ADMIN"}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select Store" />
-          </SelectTrigger>
-          <SelectContent>
-            {storesData.map((store, idx) => (
-              <SelectItem key={idx} value={store.id.toString()}>
-                {store.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {/* Filter Discount Types */}
-        <Select
-          value={discountType}
-          onValueChange={(value) => setDiscountType(value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Discount Types" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="MANUAL">Manual per Product</SelectItem>
-            <SelectItem value="MIN_PURCH">Minimum Total Payment</SelectItem>
-            <SelectItem value="B1G1">Buy One Get One</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="max-lg:mt-5 flex gap-x-2">
+          {/* Filter Store */}
+          <Select
+            value={selectedStore}
+            onValueChange={(value) => setSelectedStore(value)}
+            disabled={userRole === "STORE_ADMIN"}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select Store" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Store</SelectItem>
+              {storesData.map((store, idx) => (
+                <SelectItem key={idx} value={store.id.toString()}>
+                  {store.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {/* Filter Discount Types */}
+          <Select
+            value={discountType}
+            onValueChange={(value) => setDiscountType(value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Discount Types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="MANUAL">Manual per Product</SelectItem>
+              <SelectItem value="MIN_PURCH">Minimum Total Payment</SelectItem>
+              <SelectItem value="B1G1">Buy One Get One</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <div id="content" className="mt-5">
         <Table>

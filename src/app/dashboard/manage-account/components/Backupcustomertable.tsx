@@ -36,83 +36,49 @@ import UsersDataCardStacks from "./CardStacksUsersData";
 import { IStoreProps } from "@/types/store";
 interface IUsersTable {
   className?: string;
-  // customers: IUserProps[];
+  customers: IUserProps[];
   stores: IStoreProps[];
-}
-function useDebounce(value: string, delay: number) {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-  return debouncedValue;
 }
 
 export default function CustomerTable({
   className,
-  // customers,
+  customers,
   stores,
 }: IUsersTable) {
-  const [userList, setUserList] = useState<IUserProps[]>([]);
-  const [pagination, setPagination] = useState({
-    total: 0,
-    page: 1,
-    limit: 5,
-    totalPages: 1,
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  // control query
+  const [userList, setUserList] = useState<IUserProps[]>(customers);
+  // console.log(userList);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all"); // diganti dari orderStatus
+  const [orderStatus, setOrderStatus] = useState<
+    "all" | "verified" | "unverified"
+  >("all");
+  const filteredUsers = userList.filter(
+    (user) =>
+      user.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    if (!orderStatus) return 0;
+    if (orderStatus === "verified") {
+      return Number(b.is_verified) - Number(a.is_verified);
+    }
+    if (orderStatus === "unverified") {
+      return Number(a.is_verified) - Number(b.is_verified);
+    }
+    return 0;
+  });
+
   const [currentPage, setCurrentPage] = useState(1);
-  // debounce per 500ms
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
-
-  const [refetchTrigger, setRefetchTrigger] = useState(0);
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setIsLoading(true);
-      try {
-        const params = new URLSearchParams({
-          page: String(currentPage),
-          limit: String(pagination.limit),
-          search: debouncedSearchQuery,
-          status: statusFilter,
-        });
-
-        const res = await apiCall.get(
-          `/api/user/customers?${params.toString()}`
-        );
-
-        setUserList(res.data.data.data);
-        setPagination(res.data.data.pagination);
-      } catch (error) {
-        console.error("Failed to fetch customers:", error);
-        toast.error("Gagal memuat data customer.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUsers();
-    // Dependency array: useEffect ini akan berjalan kembali jika salah satu nilai ini berubah
-  }, [
-    currentPage,
-    debouncedSearchQuery,
-    statusFilter,
-    pagination.limit,
-    refetchTrigger,
-  ]);
-
   const [selectedUser, setSelectedUser] = useState<IUserProps | null>(null);
   const [deleteSelectedUser, setDeleteSelectedUser] =
     useState<IUserProps | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
-
+  const usersPerPage = 5;
+  const indexOfLast = currentPage * usersPerPage;
+  const indexOfFirst = indexOfLast - usersPerPage;
+  const currentUsers = sortedUsers.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(sortedUsers.length / usersPerPage);
   const btnDelete = (user: IUserProps) => {
     setDeleteSelectedUser(user);
     setDeleteConfirm((prev) => !prev);
@@ -134,21 +100,9 @@ export default function CustomerTable({
     }
   };
 
-  // useEffect(() => {
-  //   setUserList(customers);
-  // }, [customers]);
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    // PERBAIKAN: Reset ke halaman 1 saat user mulai mencari
-    setCurrentPage(1);
-  };
-
-  const handleFilterChange = (value: string) => {
-    setStatusFilter(value);
-    // PERBAIKAN: Reset ke halaman 1 saat filter diubah
-    setCurrentPage(1);
-  };
-
+  useEffect(() => {
+    setUserList(customers);
+  }, [customers]);
   return (
     <>
       <Card className={`${className} `}>
@@ -160,7 +114,7 @@ export default function CustomerTable({
             <div id="searcbar" className="relative w-full">
               <Input
                 value={searchQuery}
-                onChange={handleSearchChange}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by first/last name or email."
                 className="text-xs"
               ></Input>
@@ -168,7 +122,12 @@ export default function CustomerTable({
             </div>
             <div className="flex gap-x-2 max-lg:justify-between max-lg:mt-5">
               <div id="filter">
-                <Select value={statusFilter} onValueChange={handleFilterChange}>
+                <Select
+                  value={orderStatus}
+                  onValueChange={(value) =>
+                    setOrderStatus(value as "all" | "verified" | "unverified")
+                  }
+                >
                   <SelectTrigger className="">
                     <SelectValue placeholder="Order By" />
                   </SelectTrigger>
@@ -204,7 +163,7 @@ export default function CustomerTable({
               </TableRow>
             </TableHeader>
             <TableBody className="text-center">
-              {userList.map((user) => (
+              {currentUsers.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>{user.first_name}</TableCell>
                   <TableCell>{user.last_name}</TableCell>
@@ -233,12 +192,12 @@ export default function CustomerTable({
             </TableBody>
           </Table>
           {/* Mobile Version - Card Stacks */}
-          <UsersDataCardStacks users={userList} stores={stores} />
+          <UsersDataCardStacks users={currentUsers} stores={stores} />
         </CardContent>
         <CardFooter className="max-lg:hidden">
           <PaginationControls
-            currentPage={pagination.page}
-            totalPages={pagination.totalPages}
+            currentPage={currentPage}
+            totalPages={totalPages}
             onPageChange={setCurrentPage}
           />
         </CardFooter>

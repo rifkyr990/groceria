@@ -159,19 +159,19 @@ export default function EditProduct() {
   return (
     <DashboardLayout>
       <section className="flex flex-row gap-x-5 p-5">
-        <section id="prd-details" className="flex basis-2/3 w-full gap-x-5">
+        <section id="prd-details" className="flex xl:basis-2/3 w-full gap-x-5">
           <section
             id="prd-info"
             className="bg-white w-full  rounded-md shadow-sm px-5 py-4"
           >
             <div id="prd-photo-uploader">
               <h1 className="text-xl font-semibold my-2">Product Picture</h1>
-              <div className="grid grid-cols-4 gap-5">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
                 {[0, 1, 2, 3].map((index) => (
                   <div key={index} className="relative">
                     <label
                       htmlFor={`file-${index}`}
-                      className="h-40 border-2 border-dashed border-black flex items-center justify-center text-gray-500 text-sm cursor-pointer rounded-md p-4 hover:bg-gray-100"
+                      className="h-40 text-center border-2 border-dashed border-black flex items-center justify-center text-gray-500 text-sm cursor-pointer rounded-md p-4 hover:bg-gray-100"
                     >
                       {previews[index] ? (
                         <Image
@@ -226,7 +226,7 @@ export default function EditProduct() {
                   onChange={(e) => setPrdDesc(e.target.value)}
                 />
               </div>
-              <div id="submenu" className="flex gap-5 mt-10">
+              <div id="submenu" className="flex gap-5 mt-10 max-lg:flex-col">
                 <div className="flex items-center gap-5">
                   <p className="">Product Category</p>
                   <Select
@@ -247,12 +247,14 @@ export default function EditProduct() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex  items-center">
-                  <p className="w-full">Product Price</p>
+                <div className="flex max-lg:gap-x-4 gap-x-5 items-center">
+                  <p className="text-nowrap">Product Price</p>
                   <Input
                     placeholder="50000 (in IDR)"
                     value={prdPrice}
                     onChange={(e) => setPrdPrice(e.target.value)}
+                    className="w-fit"
+                    type="number"
                   ></Input>
                 </div>
               </div>
@@ -269,7 +271,7 @@ export default function EditProduct() {
         </section>
         <section
           id="prd-preview"
-          className="bg-white basis-1/3 w-full h-[80vh] overflow-auto rounded-md shadow-sm  "
+          className="bg-white basis-1/3 w-full h-[80vh] overflow-auto rounded-md shadow-sm max-xl:hidden  "
         >
           <h1 className="text-xl font-semibold my-5 px-5 py-2">
             Product Preview

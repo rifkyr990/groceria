@@ -43,7 +43,10 @@ export default function DiscountPage() {
     <DashboardLayout>
       <section className="py-5">
         <section className="bg-white w-full  rounded-md shadow-sm p-5">
-          <section id="header" className="flex items-center justify-between">
+          <section
+            id="header"
+            className="flex max-md:flex-col items-center justify-between"
+          >
             <div>
               <h1 className="text-2xl font-semibold">
                 Discount Management Page
@@ -53,7 +56,7 @@ export default function DiscountPage() {
                 Numquam, dolore.
               </p>
             </div>
-            <div id="btn" className="flex gap-x-2">
+            <div id="btn" className="flex gap-x-2 mt-5">
               {/* <Button>
                 <Download /> Export History
               </Button> */}

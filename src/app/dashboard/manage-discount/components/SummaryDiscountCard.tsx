@@ -80,7 +80,7 @@ export default function SummaryDiscountCard({
     },
   ];
   return (
-    <section className="grid grid-cols-4 gap-5 mt-5">
+    <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mt-5">
       {summaryCard.map((card, idx) => (
         <Card key={idx}>
           <CardContent className="flex items-center gap-x-5">

@@ -27,66 +27,91 @@ export default function AccountPage() {
   });
   const [stores, setStores] = useState<IStoreProps[]>([]);
 
-  const getUsersData = async () => {
-    try {
-      const res = await apiCall.get("/api/user/all");
-      const data = res.data.data;
-      setUsers(data);
-    } catch (error) {
-      console.log(error);
-      alert("eror");
-    }
-  };
+  // const getUsersData = async () => {
+  //   try {
+  //     const res = await apiCall.get("/api/user/all");
+  //     const data = res.data.data;
+  //     setUsers(data);
+  //   } catch (error) {
+  //     console.log(error);
+  //     alert("eror");
+  //   }
+  // };
 
-  const getCustomersData = async () => {
-    try {
-      const res = await apiCall.get("/api/user/customers");
-      const data = res.data.data;
-      setCustomers(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const getCustomersData = async () => {
+  //   try {
+  //     const res = await apiCall.get("/api/user/customers");
+  //     const data = res.data.data;
+  //     setCustomers(data);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
-  const getStoreAdmins = async () => {
-    try {
-      const res = await apiCall.get("/api/store/store-admins");
-      const data = res.data.data;
-      setStoreAdmins(data);
-    } catch (error) {
-      console.log(error);
-      alert("eror");
-    }
-  };
+  // const getStoreAdmins = async () => {
+  //   try {
+  //     const res = await apiCall.get("/api/store/store-admins");
+  //     const data = res.data.data;
+  //     setStoreAdmins(data);
+  //   } catch (error) {
+  //     console.log(error);
+  //     alert("eror");
+  //   }
+  // };
 
-  const getStoresData = async () => {
-    try {
-      const res = await apiCall.get("/api/store/all");
-      const data = res.data.data;
-      setStores(data);
-      // console.log(data);
-    } catch (error) {
-      console.log(error);
-      alert("Eror");
-    }
-  };
+  // const getStoresData = async () => {
+  //   try {
+  //     const res = await apiCall.get("/api/store/all");
+  //     const data = res.data.data;
+  //     setStores(data);
+  //     // console.log(data);
+  //   } catch (error) {
+  //     console.log(error);
+  //     alert("Eror");
+  //   }
+  // };
 
-  useEffect(() => {
-    getUsersData();
-    getStoresData();
-    getCustomersData();
-    getStoreAdmins();
-  }, []);
+  // useEffect(() => {
+  //   getUsersData();
+  //   getStoresData();
+  //   getCustomersData();
+  //   getStoreAdmins();
+  // }, []);
   // cek role, kalau tidak bisa berikan alert
+  // useEffect(() => {
+  //   const jsonData = JSON.parse(localStorage.getItem("user")!);
+  //   if (!jsonData) return;
+  //   if (jsonData.role === "STORE_ADMIN") {
+  //     toast.error("You are not allowed to access this page");
+  //     router.replace("/dashboard/manage-order");
+  //     return;
+  //   }
+  // }, [router]);
+
   useEffect(() => {
-    const jsonData = JSON.parse(localStorage.getItem("user")!);
-    if (!jsonData) return;
-    if (jsonData.role === "STORE_ADMIN") {
-      toast.error("You are not allowed to access this page");
-      router.replace("/dashboard/manage-order");
-      return;
-    }
+    //cara dengan paralel data fetching pake Promise.all
+    const fetchAllData = async () => {
+      try {
+        const [usersRes, storesRes, customersRes, storeAdminsRes] =
+          await Promise.all([
+            apiCall.get("/api/user/all"),
+            apiCall.get("/api/store/all"),
+            apiCall.get("/api/user/customers"),
+            apiCall.get("/api/store/store-admins"),
+          ]);
+        setUsers(usersRes.data.data);
+        setStores(storesRes.data.data);
+        setCustomers(customersRes.data.data);
+        setStoreAdmins(storeAdminsRes.data.data);
+      } catch (error) {
+        console.log("Failed to fetch data", error);
+        toast.error("You are not allowed access this page");
+        router.replace("/dashboard/manage-order");
+      }
+    };
+    fetchAllData();
   }, [router]);
+
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-4 ">
