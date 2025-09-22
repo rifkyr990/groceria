@@ -27,9 +27,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { zodResolver } from "@hookform/resolvers/zod";
+import useWilayah from "@/hooks/use-wilayah"; // Hook wilayah
+import { useEffect } from "react";
 
+// MapPicker dengan SSR disabled
 const MapPicker = dynamic(() => import("@/components/MapPickerInner"), {
-  ssr: false,
+    ssr: false,
 });
 
 interface IStoreDetailsDialog {
@@ -57,14 +60,19 @@ export default function StoreDetailsDialog({
       storeName: store.name,
       address: store.address,
       city: store.city,
+      city_id: store.city_id || "",
       province: store.province,
+      province_id: store.province_id || "",
       latitude: store.latitude,
       longitude: store.longitude,
       is_active: storeStatus,
     },
+
   });
-  const address = watch("address");
   const [edit, setEdit] = useState(false);
+  const { provinces, cities } = useWilayah({
+    provinceId: watch("province_id"),
+  });
 
   const onBtnSubmit = async (data: any) => {
     try {
@@ -73,7 +81,9 @@ export default function StoreDetailsDialog({
         name: data.storeName,
         address: data.address,
         city: data.city,
+        city_id: data.city_id,
         province: data.province,
+        province_id: data.province_id,
         latitude: data.latitude,
         longitude: data.longitude,
         is_active: storeStatus,
@@ -89,6 +99,15 @@ export default function StoreDetailsDialog({
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    const selectedProvince = provinces.find((p) => p.province_id === watch("province_id"));
+    const selectedCity = cities.find((c) => c.city_id === watch("city_id"));
+
+    setValue("province", selectedProvince?.province || "");
+    setValue("city", selectedCity?.city_name || "");
+  }, [watch("province_id"), watch("city_id"), provinces, cities]);
+
 
   return (
     <>
@@ -121,24 +140,51 @@ export default function StoreDetailsDialog({
                 className="max-sm:text-xs"
               />
             </div>
-            <div id="store-city-province" className="flex gap-x-2">
-              <div id="city" className="w-full">
-                <label className="text-sm">City/County</label>
-                <Input
-                  disabled={!edit}
-                  {...register("city")}
-                  className="max-sm:text-xs"
-                />
-              </div>
-              <div id="province" className="w-full">
+            <div className="flex gap-x-2">
+              <div className="w-full">
                 <label className="text-sm">Province</label>
-                <Input
+                <select
                   disabled={!edit}
-                  {...register("province")}
-                  className="max-sm:text-xs"
-                />
+                  {...register("province_id")}
+                  onChange={(e) => {
+                    const selectedProvId = e.target.value;
+                    setValue("province_id", selectedProvId);
+                    const selectedProv = provinces.find((p) => p.province_id === selectedProvId);
+                    setValue("province", selectedProv?.province || "");
+                  }}
+                  className="input w-full"
+                >
+                  <option value="">Pilih Provinsi</option>
+                  {provinces.map((prov) => (
+                    <option key={prov.province_id} value={prov.province_id}>
+                      {prov.province}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-full">
+                <label className="text-sm">City/County</label>
+                <select
+                  disabled={!edit || !watch("province_id")}
+                  {...register("city_id")}
+                  onChange={(e) => {
+                    const selectedCityId = e.target.value;
+                    setValue("city_id", selectedCityId);
+                    const selectedCity = cities.find((c) => c.city_id === selectedCityId);
+                    setValue("city", selectedCity?.city_name || "");
+                  }}
+                  className="input w-full"
+                >
+                  <option value="">Pilih Kota</option>
+                  {cities.map((city) => (
+                    <option key={city.city_id} value={city.city_id}>
+                      {city.city_name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
+
 
             <div className="flex gap-x-2">
               <div id="status" className=" ">
@@ -169,8 +215,8 @@ export default function StoreDetailsDialog({
               <MapPicker
                 disabled={!edit}
                 defaultLocation={{
-                  lat: store.latitude,
-                  long: store.longitude,
+                  lat: store.latitude !== 0 ? store.latitude : -6.2,
+                  long: store.longitude !== 0 ? store.longitude : 106.816666,
                   road: store.address || "",
                   city: store.city || "",
                   province: store.province || "",
