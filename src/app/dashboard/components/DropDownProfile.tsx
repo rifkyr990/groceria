@@ -5,18 +5,26 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useAuthStore } from "@/store/auth-store";
 import { LogOut, Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function DropDownProfile() {
+  const { logout } = useAuthStore();
+  const router = useRouter();
+  const handleLogout = () => {
+    logout();
+    router.replace("/");
+  };
   return (
     <DropdownMenuContent className="p-1">
       <DropdownMenuLabel>My Account</DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem>
+      <DropdownMenuItem onClick={() => router.replace("/profile")}>
         <Settings />
         Settings
       </DropdownMenuItem>
-      <DropdownMenuItem>
+      <DropdownMenuItem onClick={handleLogout}>
         <LogOut />
         Logout
       </DropdownMenuItem>

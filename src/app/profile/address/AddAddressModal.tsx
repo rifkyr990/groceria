@@ -54,7 +54,7 @@ export default function AddAddressModal() {
         detail: "",
         label: "RUMAH",
         is_primary: false,
-        latitude: -6.2, // default Jakarta
+        latitude: -6.2,
         longitude: 106.816666,
       },
     });
@@ -79,12 +79,24 @@ export default function AddAddressModal() {
   }, [selectedSub, setValue]);
 
   useEffect(() => {
-    const provinceName = provinces.find((p) => p.province_id === watch("province"))?.province;
+    const provinceName = provinces.find(
+      (p) => p.province_id === watch("province")
+    )?.province;
     const cityName = cities.find((c) => c.city_id === watch("city"))?.city_name;
-    const districtName = districts.find((d) => d.district_id === watch("district"))?.district_name;
-    const subdistrictName = subdistricts.find((s) => s.subdistrict_id === watch("subdistrict"))?.subdistrict_name;
+    const districtName = districts.find(
+      (d) => d.district_id === watch("district")
+    )?.district_name;
+    const subdistrictName = subdistricts.find(
+      (s) => s.subdistrict_id === watch("subdistrict")
+    )?.subdistrict_name;
 
-    const fullAddress = [subdistrictName, districtName, cityName, provinceName, "Indonesia"]
+    const fullAddress = [
+      subdistrictName,
+      districtName,
+      cityName,
+      provinceName,
+      "Indonesia",
+    ]
       .filter(Boolean)
       .join(", ");
 
@@ -105,8 +117,12 @@ export default function AddAddressModal() {
       };
       fetchCoords();
     }
-  }, [watch("province"), watch("city"), watch("district"), watch("subdistrict")]);
-
+  }, [
+    watch("province"),
+    watch("city"),
+    watch("district"),
+    watch("subdistrict"),
+  ]);
 
   const onSubmit = async (data: AddressFormValues) => {
     const provinceName =
@@ -126,6 +142,10 @@ export default function AddAddressModal() {
       city: cityName,
       district: districtName,
       subdistrict: subdistrictName,
+      province_id: data.province,
+      city_id: data.city,
+      district_id: data.district,
+      subdistrict_id: data.subdistrict,
     };
 
     const success = await addAddress(payload);
@@ -151,7 +171,7 @@ export default function AddAddressModal() {
       ))}
     </>
   );
-  
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -215,7 +235,7 @@ export default function AddAddressModal() {
                 )}
               </select>
             </div>
-          {/* Kelurahan/Desa */}
+            {/* Kelurahan/Desa */}
             <div>
               <Label className="mb-3">Kelurahan/Desa</Label>
               <select
@@ -231,7 +251,6 @@ export default function AddAddressModal() {
                 )}
               </select>
             </div>
-
           </div>
           {/* Kecamatan */}
           <div>
@@ -254,6 +273,7 @@ export default function AddAddressModal() {
           </div>
           <div className="w-full max-w-md h-40 mx-auto my-4">
             <MapPicker
+              key={Date.now()}
               disabled={false}
               defaultLocation={{
                 lat: watch("latitude"),
@@ -286,7 +306,7 @@ export default function AddAddressModal() {
             <input type="checkbox" {...register("is_primary")} />
             <span>Jadikan alamat utama</span>
           </div>
-            
+
           <div className="flex justify-end gap-2 pt-4">
             <Button
               type="button"

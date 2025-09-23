@@ -23,6 +23,7 @@ interface AuthState {
   resetPassword: (token: string, newPassword: string) => Promise<boolean>;
   verifyEmail: (token: string, password: string) => Promise<boolean>;
   verifyNewEmail: (token: string) => Promise<boolean>;
+  clearAuth: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -76,7 +77,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("applied_promo");
-    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("token"); // arco
 
     set({ user: null, token: null });
   },
@@ -179,4 +180,5 @@ export const useAuthStore = create<AuthState>((set) => ({
       return false;
     }
   },
+  clearAuth: () => set({ user: null, token: null }), // arco
 }));

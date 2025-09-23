@@ -1,8 +1,13 @@
 "use client";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import DashboardLayout from "../../components/DashboardLayout";
-import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import {
   Select,
   SelectContent,
@@ -12,18 +17,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, TicketPercent } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { apiCall } from "@/helper/apiCall";
 import { IProductProps } from "@/types/product";
 import { formatIDRCurrency, upperFirstCharacter } from "@/utils/format";
-import { apiCall } from "@/helper/apiCall";
+import { ShoppingCart, TicketPercent } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import DashboardLayout from "../../components/DashboardLayout";
+import {
+  productFormSchema,
+  ProductFormValues,
+} from "@/helper/createProductSchema";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface CategoryWithProducts {
   category: string;
@@ -31,6 +39,17 @@ interface CategoryWithProducts {
 }
 
 export default function NewProduct() {
+  const router = useRouter();
+  // check role, kalau store admin, lempar ke order page
+  useEffect(() => {
+    const jsonData = JSON.parse(localStorage.getItem("user")!);
+    if (!jsonData) return;
+    if (jsonData.role === "STORE_ADMIN") {
+      toast.error("You are not allowed to access this page");
+      router.replace("/dashboard/manage-product/product-list");
+      return;
+    }
+  }, [router]);
   const [images, setImages] = useState<(File | null)[]>([
     null,
     null,
@@ -86,7 +105,20 @@ export default function NewProduct() {
     }
   };
   const arrCategories = categories.map((cat) => cat.category);
-  console.log(arrCategories);
+
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   control,watch
+  // } = useForm<ProductFormValues>({
+  //   resolver: zodResolver(productFormSchema),
+  //   defaultValues: {
+  //     name: "",
+  //     description: "",
+  //     category: "",
+  //     images: undefined,
+  //   },
+  // });
 
   const handleSubmit = async () => {
     if (!prdName || !prdPrice || !prdCategory) {
@@ -125,19 +157,19 @@ export default function NewProduct() {
   return (
     <DashboardLayout>
       <section className="flex flex-row gap-x-5 p-5">
-        <section id="prd-details" className="flex basis-2/3 w-full gap-x-5">
+        <section id="prd-details" className="flex xl:basis-2/3 w-full gap-x-5">
           <section
             id="prd-info"
             className="bg-white w-full  rounded-md shadow-sm px-5 py-4"
           >
             <div id="prd-photo-uploader">
               <h1 className="text-xl font-semibold my-2">Product Picture</h1>
-              <div className="grid grid-cols-4 gap-5">
+              <div className="grid grid-cols-2 lg:grid-cols-4  gap-5">
                 {[0, 1, 2, 3].map((index) => (
                   <div key={index} className="relative">
                     <label
                       htmlFor={`file-${index}`}
-                      className="h-40 border-2 border-dashed border-black flex items-center justify-center text-gray-500 text-sm cursor-pointer rounded-md p-4 hover:bg-gray-100"
+                      className="h-40 text-center border-2 border-dashed border-black flex items-center justify-center text-gray-500 text-sm cursor-pointer rounded-md p-4 hover:bg-gray-100"
                     >
                       {previews[index] ? (
                         <Image
@@ -192,7 +224,7 @@ export default function NewProduct() {
                   onChange={(e) => setPrdDesc(e.target.value)}
                 />
               </div>
-              <div id="submenu" className="flex gap-5 mt-10">
+              <div id="submenu" className="flex gap-5 mt-10 max-lg:flex-col">
                 <div className="flex items-center gap-5">
                   <p className="">Product Category</p>
                   <Select
@@ -213,12 +245,15 @@ export default function NewProduct() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex  items-center">
-                  <p className="w-full">Product Price</p>
+                <div className="flex max-lg:gap-x-4 gap-x-5 items-center">
+                  <p className="text-nowrap">Product Price</p>
                   <Input
                     placeholder="50000 (in IDR)"
+                    type="number"
                     value={prdPrice}
                     onChange={(e) => setPrdPrice(e.target.value)}
+                    className="w-fit"
+                    typeof="number"
                   ></Input>
                 </div>
               </div>
@@ -235,7 +270,7 @@ export default function NewProduct() {
         </section>
         <section
           id="prd-preview"
-          className="bg-white basis-1/3 w-full h-[80vh] overflow-auto rounded-md shadow-sm  "
+          className="bg-white basis-1/3 w-full h-[80vh] overflow-auto rounded-md shadow-sm max-xl:hidden  "
         >
           <h1 className="text-xl font-semibold my-5 px-5 py-2">
             Product Preview

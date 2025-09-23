@@ -74,6 +74,7 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
     null
   );
+
   const [selectedShipping, setSelectedShipping] =
     useState<ShippingOption | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
@@ -88,6 +89,7 @@ export default function CheckoutPage() {
     items,
     appliedPromo,
     storeName,
+    storeId,
     tryApplyPromoCode,
     removePromoCode,
     fetchCart,
@@ -115,9 +117,9 @@ export default function CheckoutPage() {
   }, [token, fetchCart, fetchAddress]);
 
   useEffect(() => {
-    if (selectedAddressId) {
+    if (selectedAddressId && storeId) {
       const getOptions = async () => {
-        const options = await fetchOptions(selectedAddressId);
+        const options = await fetchOptions(selectedAddressId, storeId);
         if (options && options.length > 0) {
           setSelectedShipping(options[0]);
         } else {

@@ -175,12 +175,12 @@ export default function MapPicker({
             ? [defaultLocation.lat, defaultLocation.long]
             : [-6.2, 106.8]
         }
-        dragging={disabled}
-        doubleClickZoom={disabled}
-        zoomControl={disabled}
+        dragging={!disabled}
+        doubleClickZoom={!disabled}
+        zoomControl={!disabled}
+        scrollWheelZoom={!disabled}
         zoom={13}
-        scrollWheelZoom={disabled}
-        style={{ width: "100%", height: "60%" }}
+        style={{ width: "100%", height: "80%" }}
         ref={mapRef}
       >
         <TileLayer

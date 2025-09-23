@@ -26,15 +26,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useStore } from "@/store/useStore";
 import { IStockProps } from "@/types/stock";
-import { Edit, PackageSearch, Search, Trash } from "lucide-react";
-import { useState } from "react";
+import { formatDate } from "@/utils/format";
+import { PackageSearch, Search } from "lucide-react";
+import { useEffect, useState } from "react";
 import EditStockProduct from "./EditStockPrd";
-import { formatDate, formatIntlDate } from "@/utils/format";
-import { apiCall } from "@/helper/apiCall";
 interface IProductStock {
   className?: string;
   stocks: IStockProps[];
+  adminStoreData: any;
 }
 
 const stockStatus = (current: number, minStock: number) => {
@@ -47,7 +48,19 @@ const stockStatus = (current: number, minStock: number) => {
   }
 };
 
-export default function ProductStock({ className, stocks }: IProductStock) {
+export default function ProductStock({
+  className,
+  stocks,
+  adminStoreData,
+}: IProductStock) {
+  const { storesData, fetchAllStores, selectedStore, setSelectedStore } =
+    useStore();
+  const [stockStatusFilter, setStockStatusFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  useEffect(() => {
+    fetchAllStores();
+  }, []);
+
   const [editStock, setEditStock] = useState(false);
   const [selectedProductStock, setSelectedProductStock] =
     useState<IStockProps | null>(null);
@@ -63,39 +76,58 @@ export default function ProductStock({ className, stocks }: IProductStock) {
             </CardDescription>
           </div>
           <div>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Store Name"></SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Store Name</SelectLabel>
-                  <SelectItem value="a">A</SelectItem>
-                  <SelectItem value="b">B</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            {adminStoreData?.role !== "STORE_ADMIN" && (
+              <Select value={selectedStore} onValueChange={setSelectedStore}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Store Name"></SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Store Name</SelectLabel>
+                    <SelectItem value="all">All Stores</SelectItem>
+                    {storesData
+                      .filter((store) => {
+                        if (adminStoreData?.role !== "STORE_ADMIN") return true;
+                        return store.id === adminStoreData?.store_id;
+                      })
+                      .map((store, idx) => (
+                        <SelectItem key={idx} value={store.id.toString()}>
+                          {store.name}
+                        </SelectItem>
+                      ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </CardHeader>
         {/* Searchbar-filter-newprd */}
         <div className="flex max-md:flex-col justify-between gap-2 px-7">
           <div id="search-bar" className="w-full relative">
             <Search className="absolute top-2 right-2 size-5 text-gray-400" />
-            <Input className="w-full" placeholder="Search product ..." />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
+              className="w-full"
+              placeholder="Search product ..."
+            />
           </div>
           <div className="flex justify-between gap-x-2">
             <div id="filter-status">
-              <Select>
+              <Select
+                value={stockStatusFilter}
+                onValueChange={(value) => setStockStatusFilter(value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="All Status"></SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Product Stock</SelectLabel>
-                    <SelectItem value="a">All</SelectItem>
-                    <SelectItem value="b">Normal</SelectItem>
-                    <SelectItem value="b">Low</SelectItem>
-                    <SelectItem value="b">Out of Stock</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="oos">Out of Stock</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -120,47 +152,72 @@ export default function ProductStock({ className, stocks }: IProductStock) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {stocks.map((prd, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>{prd.product.name}</TableCell>
-                  <TableCell className="text-center">
-                    {prd.stock_quantity}
-                  </TableCell>
-                  <TableCell className="text-center">{prd.min_stock}</TableCell>
-                  <TableCell className="text-center">
-                    {prd.store.name}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {stockStatus(prd.stock_quantity, prd.min_stock)}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {prd.product.is_active === true ? "Active" : "Inactive"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {formatDate(prd.updated_at)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-center gap-x-2">
-                      <Button
-                        variant={"outline"}
-                        className="cursor-pointer"
-                        onClick={() => {
-                          setSelectedProductStock(prd);
-                          setEditStock((prev) => !prev);
-                        }}
-                      >
-                        <PackageSearch /> Update
-                      </Button>
-                      {/* <Button
+              {stocks
+                .filter((prd) => {
+                  const isStoreMatch =
+                    selectedStore === "all" ||
+                    prd.store.id.toString() === selectedStore;
+
+                  const isSearchMatch = prd.product.name
+                    .toLowerCase()
+                    .includes(searchQuery);
+
+                  const stockQty = prd.stock_quantity;
+                  const minQty = prd.min_stock;
+
+                  const isStatusMatch =
+                    stockStatusFilter === "all" ||
+                    (stockStatusFilter === "normal" && stockQty > minQty) ||
+                    (stockStatusFilter === "low" &&
+                      stockQty <= minQty &&
+                      stockQty !== 0) ||
+                    (stockStatusFilter === "oos" && stockQty === 0);
+
+                  return isStoreMatch && isSearchMatch && isStatusMatch;
+                })
+                .map((prd, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>{prd.product.name}</TableCell>
+                    <TableCell className="text-center">
+                      {prd.stock_quantity}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {prd.min_stock}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {prd.store.name}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {stockStatus(prd.stock_quantity, prd.min_stock)}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {prd.product.is_active === true ? "Active" : "Inactive"}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {formatDate(prd.updated_at)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center gap-x-2">
+                        <Button
+                          variant={"outline"}
+                          className="cursor-pointer"
+                          onClick={() => {
+                            setSelectedProductStock(prd);
+                            setEditStock((prev) => !prev);
+                          }}
+                        >
+                          <PackageSearch /> Update
+                        </Button>
+                        {/* <Button
                         variant={"destructive"}
                         className="cursor-pointer"
                       >
                         <Trash />
                       </Button> */}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </CardContent>

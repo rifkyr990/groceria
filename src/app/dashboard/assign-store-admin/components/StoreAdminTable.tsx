@@ -31,30 +31,49 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import RelocateAdmin from "./btndetails/RelocateAdmin";
 import { IRelocateAdminData } from "@/types/relocate_admin";
+import { IUserProps } from "@/types/user";
 
 interface IStoreAdminData {
   className?: string;
-  storeAdmins: IStoreProps[];
+
+  storeAdmins: {
+    withStore: IStoreProps[];
+    withoutStore: IUserProps[];
+  };
 }
 
 export default function StoreAdminData({
   className,
   storeAdmins,
 }: IStoreAdminData) {
-  const storeAdminData = storeAdmins.flatMap((store) =>
-    store.admins?.map((admin) => ({
+  const storeAdminData = [
+    ...(storeAdmins?.withStore?.flatMap(
+      (store) =>
+        store.admins?.map((admin) => ({
+          adminId: admin.id,
+          adminFirstName: admin.first_name,
+          adminLastName: admin.last_name,
+          storeName: store.name,
+          adminRole: admin.role,
+          storeId: store.id,
+          adminPhone: admin.phone,
+        })) ?? []
+    ) ?? []),
+    ...(storeAdmins?.withoutStore?.map((admin) => ({
       adminId: admin.id,
       adminFirstName: admin.first_name,
       adminLastName: admin.last_name,
-      storeName: store.name,
+      storeName: "No Store",
       adminRole: admin.role,
-      storeId: store.id,
-    }))
-  );
-  const storeList = storeAdmins.map((store) => ({
-    id: store.id,
-    name: store.name,
-  }));
+      storeId: null,
+      adminPhone: admin.phone,
+    })) ?? []),
+  ];
+  const storeList =
+    storeAdmins?.withStore?.map((store) => ({
+      id: store.id,
+      name: store.name,
+    })) ?? [];
   // search query - search bar
   const [searchQuery, setSearchQuery] = useState("");
   // filter store
@@ -186,7 +205,7 @@ export default function StoreAdminData({
                         setOpenStoreTf({
                           adminData: {
                             adminId: admin?.adminId,
-                            storeId: admin?.storeId,
+                            storeId: admin?.storeId ?? 0,
                             storeName: admin?.storeName,
                           },
                           storeList: storeList,

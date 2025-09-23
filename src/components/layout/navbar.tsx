@@ -135,7 +135,15 @@ export default function Navbar() {
                     <Menu.Item>
                       {({ active }) => (
                         <Link
-                          href="/dashboard"
+                          // href="/dashboard/manage-store"
+                          href={
+                            //
+                            user.role === "STORE_ADMIN"
+                              ? "/dashboard/manage-order"
+                              : user.role === "SUPER_ADMIN"
+                                ? "/dashboard/manage-store"
+                                : "/"
+                          }
                           className={`flex items-center gap-2 px-4 py-2 text-sm ${
                             active ? "bg-gray-100 dark:bg-gray-700" : ""
                           } text-gray-700 dark:text-gray-200`}

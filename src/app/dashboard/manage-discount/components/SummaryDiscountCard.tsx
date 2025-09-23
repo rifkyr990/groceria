@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { useFilteredDiscounts } from "@/helper/filteredDiscount";
 import { useDiscountStore } from "@/store/useDiscount";
 import { IDiscountProps } from "@/types/discount";
 import {
@@ -10,27 +11,36 @@ import {
 
 interface ISummaryDiscountCard {
   className?: string;
+  discountType: string;
+  searchQuery: string;
 }
 
-export default function SummaryDiscountCard() {
+export default function SummaryDiscountCard({
+  discountType,
+  searchQuery,
+}: ISummaryDiscountCard) {
   // discounts data
   const discounts = useDiscountStore((state) => state.discounts);
-
-  // hitung banyak active/expired/scheduled/...
+  const filteredDiscounts = useFilteredDiscounts(
+    discounts,
+    discountType,
+    searchQuery
+  );
+  // hitung banyak active/expired/scheduled
   const today = new Date();
 
-  const activeDiscount = discounts.filter((d) => {
+  const activeDiscount = filteredDiscounts.filter((d) => {
     const start = new Date(d.start_date);
     const end = new Date(d.end_date);
     return today >= start && today <= end;
   });
 
-  const expiredDiscount = discounts.filter((d) => {
+  const expiredDiscount = filteredDiscounts.filter((d) => {
     const end = new Date(d.end_date);
     return today > end;
   });
 
-  const scheduleDiscount = discounts.filter((d) => {
+  const scheduleDiscount = filteredDiscounts.filter((d) => {
     const start = new Date(d.start_date);
     return today < start;
   });
@@ -42,7 +52,7 @@ export default function SummaryDiscountCard() {
       icon: (
         <PercentSquare className="bg-amber-400 rounded-sm size-10 p-2 text-white" />
       ),
-      qty: discounts.length,
+      qty: filteredDiscounts.length,
     },
     {
       id: 2,
@@ -70,7 +80,7 @@ export default function SummaryDiscountCard() {
     },
   ];
   return (
-    <section className="grid grid-cols-4 gap-5 mt-5">
+    <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mt-5">
       {summaryCard.map((card, idx) => (
         <Card key={idx}>
           <CardContent className="flex items-center gap-x-5">

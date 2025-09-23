@@ -30,7 +30,7 @@ export default function CheckEmailPage() {
             setResending(true);
             setMessage("");
         try {
-            const res = await apiCall.post("/api/auth/resend-verification", { email });
+            const res = await apiCall.post("/api/auth/resent-regist", { email });
             toast.success(res.data.message || "Email verifikasi sudah dikirim ulang");
             setCountdown(60);
         } catch (err: any) {

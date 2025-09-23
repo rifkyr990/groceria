@@ -12,6 +12,8 @@ import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function CartPage() {
+  const router = useRouter();
+
   const {
     items,
     appliedPromo,
@@ -29,9 +31,24 @@ export default function CartPage() {
     appliedPromo?.code || ""
   );
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
-  const { token, user } = useAuthStore();
-  const router = useRouter();
+
+  const { token, user, hydrate } = useAuthStore();
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [isClient, setIsClient] = useState(false);
+
+  // Hydrate auth store di awal
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
+  // Cek apakah user belum login / belum verifikasi
+  useEffect(() => {
+    if (!token || !user || !user.is_verified) {
+      router.replace("/");
+    } else {
+      setCheckingAuth(false);
+    }
+  }, [token, user, router]);
 
   useEffect(() => {
     setIsClient(true);
@@ -44,6 +61,7 @@ export default function CartPage() {
     }
   }, [isClient, token, router]);
 
+  // Ambil data cart
   useEffect(() => {
     if (token) {
       fetchCart(token);
@@ -93,6 +111,9 @@ export default function CartPage() {
       setPromoStatus("idle");
     }
   };
+
+  // Jangan render apapun sebelum pengecekan auth selesai
+  if (checkingAuth) return null;
 
   return (
     <div className="flex flex-col min-h-screen">

@@ -104,7 +104,6 @@ export default function ProfilePage() {
         <div className="flex items-center gap-4">
           <div className="w-24 h-24 relative rounded-full overflow-hidden border">
             {preview ? (
-              // next/image requires host config for remote images; preview (object URL) works in browser
               <Image src={preview} alt="Profile" fill className="object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400">

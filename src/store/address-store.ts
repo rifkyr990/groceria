@@ -1,11 +1,8 @@
 import { create } from "zustand";
 import { apiCall } from "@/helper/apiCall";
-import { useAuthStore } from "./auth-store";
 import { toast } from "react-toastify";
-import { UserAddress } from "@/components/types";
 
-type NewAddressData = Omit<UserAddress, "id">;
-
+// sesuai form
 interface AddressFormValues {
   name: string;
   phone: string;
@@ -65,29 +62,18 @@ export const useAddressStore = create<AddressState>((set, get) => ({
     }
   },
 
-  addAddress: async (addressData) => {
-    set({ loading: true, error: null });
-    const token = useAuthStore.getState().token;
-    if (!token) {
-      toast.error("You must be logged in to add an address.");
-      set({ loading: false });
-      return false;
-    }
-
+  addAddress: async (data: AddressFormValues): Promise<boolean> => {
     try {
-      await apiCall.post("/api/address", addressData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const payload = {
+        ...data,
+      };
+
+      await apiCall.post("/api/address", payload);
       await get().fetchAddress();
-      toast.success("Address added successfully!");
-      set({ loading: false });
       return true;
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to add address");
-      set({
-        error: err.response?.data?.message || "Failed to add address",
-        loading: false,
-      });
+    } catch (err) {
+      console.error(err);
+      toast.error("Gagal menambahkan alamat.");
       return false;
     }
   },

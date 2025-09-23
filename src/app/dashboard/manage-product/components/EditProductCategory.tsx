@@ -33,6 +33,14 @@ export default function EditProductCategory({
   open,
   setOpen,
 }: IEditProductCat) {
+  const [role, setRole] = useState("");
+  useEffect(() => {
+    const jsonData = JSON.parse(localStorage.getItem("user")!);
+    if (!jsonData) return;
+    if (jsonData.role === "STORE_ADMIN") {
+      setRole(jsonData.role);
+    }
+  }, []);
   const [categories, setCategories] = useState<CategoryWithProducts[]>([]);
   const [editCat, setEditCat] = useState<CategoryWithProducts | null>(null);
   const [categoryName, setCategoryName] = useState("");
@@ -104,27 +112,30 @@ export default function EditProductCategory({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
-        <DialogHeader>
+        <DialogHeader className=" max-md:mt-5">
           <DialogTitle>Add/Edit Existing Category</DialogTitle>
         </DialogHeader>
         <section>
           <section id="new-category">
             <label>Category Name</label>
-            <div className="flex gap-x-3">
+            <div className="flex gap-x-3 max-md:flex-col">
               <Input
                 placeholder="Input new category "
                 value={categoryName}
                 onChange={(e) => setCategoryName(e.target.value)}
+                disabled={role ? true : false}
+                className="max-md:w-full"
               />
               {!editCat ? (
                 <Button
-                  className="bg-blue-500 hover:bg-blue-600"
+                  className="bg-blue-500 hover:bg-blue-600 max-md:w-full max-md:my-3"
                   onClick={newCategory}
+                  disabled={role ? true : false}
                 >
                   Create
                 </Button>
               ) : (
-                <div className="flex gap-x-2">
+                <div className="flex gap-x-2 mt-2">
                   <Button onClick={() => editCategory()}>Save</Button>
                   <Button
                     variant={"destructive"}
@@ -145,7 +156,9 @@ export default function EditProductCategory({
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-center">Category Name</TableHead>
-                  <TableHead className="text-center">Total Product</TableHead>
+                  <TableHead className="text-center max-md:hidden">
+                    Total Product
+                  </TableHead>
                   <TableHead className="text-center">Change</TableHead>
                 </TableRow>
               </TableHeader>
@@ -155,11 +168,12 @@ export default function EditProductCategory({
                     <TableCell className="text-center">
                       {upperFirstCharacter(cat.category)}
                     </TableCell>
-                    <TableCell className="text-center">
+                    <TableCell className="text-center max-md:hidden">
                       {cat.products.length}
                     </TableCell>
                     <TableCell className="flex items-center gap-x-2 justify-center">
                       <Button
+                        disabled={role ? true : false}
                         onClick={() => {
                           setCategoryName(cat.category);
                           setEditCat(cat);
@@ -170,6 +184,7 @@ export default function EditProductCategory({
                       <Button
                         variant={"destructive"}
                         onClick={() => deleteCategory(cat.category)}
+                        disabled={role ? true : false}
                       >
                         <Trash />
                       </Button>
