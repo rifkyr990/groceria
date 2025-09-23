@@ -44,7 +44,7 @@ interface Summary {
 }
 
 export default function SalesReport() {
-  const [selectedStore, setSelectedStore] = useState();
+  const [selectedStore, setSelectedStore] = useState("all");
   // get store admin id
   useEffect(() => {
     const jsonData = JSON.parse(localStorage.getItem("user")!);
@@ -148,13 +148,13 @@ export default function SalesReport() {
     getStoreList();
   }, []);
   // Filter berdasarkan store dan bulan/tahun
-  const filteredData = orders.filter((item) => {
-    const storeMatch =
-      selectedStore === "all" || item.storeId === Number(selectedStore);
-    const dateMatch =
-      item.month === selectedDate.month && item.year === selectedDate.year;
-    return storeMatch && dateMatch;
-  });
+  // const filteredData = orders.filter((item) => {
+  //   const storeMatch =
+  //     selectedStore === "all" || item.storeId === Number(selectedStore);
+  //   const dateMatch =
+  //     item.month === selectedDate.month && item.year === selectedDate.year;
+  //   return storeMatch && dateMatch;
+  // });
 
   const summaryCard = [
     {
@@ -167,7 +167,7 @@ export default function SalesReport() {
           {formatIDRCurrency(summary.totalSales)}
         </span>
       ),
-      desc: "this month",
+      desc: "this month  (by PAID payment status)",
     },
     {
       id: 2,
@@ -179,7 +179,7 @@ export default function SalesReport() {
           {summary.totalQuantity}
         </span>
       ),
-      desc: "products this month",
+      desc: "products this month (by PAID payment status)",
     },
     // {
     //   id: 3,
@@ -241,7 +241,7 @@ export default function SalesReport() {
             <Select
               value={selectedStore}
               onValueChange={(value) => setSelectedStore(value)}
-              disabled={user.role === "STORE_ADMIN"}
+              disabled={user?.role === "STORE_ADMIN"}
             >
               <SelectTrigger className="bg-white">
                 <SelectValue placeholder="Store Name"></SelectValue>
@@ -277,7 +277,7 @@ export default function SalesReport() {
             <CardContent>
               <p className="text-center">{s.total}</p>
             </CardContent>
-            <CardFooter className="text-gray-400">{s.desc}</CardFooter>
+            <CardFooter className="text-gray-400 text-xs">{s.desc}</CardFooter>
           </Card>
         ))}
       </section>

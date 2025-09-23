@@ -34,6 +34,7 @@ import { toast } from "react-toastify";
 import UserDetailsDialog from "./btndetails/UserDetailsDialog";
 import UsersDataCardStacks from "./CardStacksUsersData";
 import { IStoreProps } from "@/types/store";
+import { useRouter } from "next/navigation";
 interface IUsersTable {
   className?: string;
   // customers: IUserProps[];
@@ -57,6 +58,7 @@ export default function CustomerTable({
   // customers,
   stores,
 }: IUsersTable) {
+  const router = useRouter();
   const [userList, setUserList] = useState<IUserProps[]>([]);
   const [pagination, setPagination] = useState({
     total: 0,
@@ -83,23 +85,19 @@ export default function CustomerTable({
           search: debouncedSearchQuery,
           status: statusFilter,
         });
-
         const res = await apiCall.get(
           `/api/user/customers?${params.toString()}`
         );
-
         setUserList(res.data.data.data);
         setPagination(res.data.data.pagination);
       } catch (error) {
         console.error("Failed to fetch customers:", error);
-        toast.error("Gagal memuat data customer.");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchUsers();
-    // Dependency array: useEffect ini akan berjalan kembali jika salah satu nilai ini berubah
   }, [
     currentPage,
     debouncedSearchQuery,
@@ -139,13 +137,11 @@ export default function CustomerTable({
   // }, [customers]);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    // PERBAIKAN: Reset ke halaman 1 saat user mulai mencari
     setCurrentPage(1);
   };
 
   const handleFilterChange = (value: string) => {
     setStatusFilter(value);
-    // PERBAIKAN: Reset ke halaman 1 saat filter diubah
     setCurrentPage(1);
   };
 

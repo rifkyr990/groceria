@@ -103,10 +103,12 @@ export default function AccountPage() {
         setStores(storesRes.data.data);
         setCustomers(customersRes.data.data);
         setStoreAdmins(storeAdminsRes.data.data);
-      } catch (error) {
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          // toast.error("You are not allowed access this page");
+          router.replace("/error/forbidden");
+        }
         console.log("Failed to fetch data", error);
-        toast.error("You are not allowed access this page");
-        router.replace("/dashboard/manage-order");
       }
     };
     fetchAllData();
@@ -117,7 +119,7 @@ export default function AccountPage() {
       <div className="flex flex-col gap-4 ">
         <div className="flex flex-col 2xl:flex-row 2xl:justify-between gap-3">
           <CustomerTable
-            customers={customers}
+            // customers={customers}
             stores={stores}
             className="w-full"
           />
