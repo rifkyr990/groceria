@@ -172,6 +172,7 @@ export default function MobilePrdDetails({
                   isOutOfStock ||
                   !user ||
                   !user.is_verified ||
+                  user.role !== "CUSTOMER" ||
                   quantityInCart >= (stock ?? 0)
                 }
                 title={
@@ -179,9 +180,11 @@ export default function MobilePrdDetails({
                     ? "Please log in to add items"
                     : !user.is_verified
                       ? "Please verify your email to shop"
-                      : isOutOfStock || quantityInCart >= (stock ?? 0)
-                        ? "Out of stock"
-                        : ""
+                      : user.role !== "CUSTOMER"
+                        ? "Admin accounts cannot shop."
+                        : isOutOfStock || quantityInCart >= (stock ?? 0)
+                          ? "Out of stock"
+                          : ""
                 }
                 onClick={() => {
                   if (!selectedProductDetails || !storeIdentity || !stock)

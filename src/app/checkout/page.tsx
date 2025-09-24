@@ -97,27 +97,36 @@ export default function CheckoutPage() {
 
   const { token, user } = useAuthStore();
   const [isClient, setIsClient] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   useEffect(() => {
-    if (isClient && !token) {
+    if (!isClient) {
+      return;
+    }
+
+    if (!token) {
       toast.warn("You must be logged in to view the checkout page.");
       router.replace("/login");
+      return;
     }
-  }, [isClient, token, router]);
+
+    if (!user?.is_verified) {
+      toast.warn("Please verify your email to proceed to checkout.");
+      router.replace("/");
+      return;
+    }
+
+    fetchAddress().then(() => {
+      setCheckingAuth(false);
+    });
+  }, [isClient, token, user, router, fetchAddress]);
 
   useEffect(() => {
-    if (token) {
-      fetchCart(token);
-      fetchAddress();
-    }
-  }, [token, fetchCart, fetchAddress]);
-
-  useEffect(() => {
-    if (selectedAddressId && storeId) {
+    if (!checkingAuth && selectedAddressId && storeId) {
       const getOptions = async () => {
         const options = await fetchOptions(selectedAddressId, storeId);
         if (options && options.length > 0) {
@@ -128,7 +137,7 @@ export default function CheckoutPage() {
       };
       getOptions();
     }
-  }, [selectedAddressId, fetchOptions]);
+  }, [checkingAuth, selectedAddressId, storeId, fetchOptions]);
 
   useEffect(() => {
     setPromoInputText(appliedPromo?.code || "");
@@ -204,12 +213,32 @@ export default function CheckoutPage() {
       return;
     }
 
+    const { storeId } = useCartStore.getState();
+    if (!storeId) {
+      toast.error(
+        "Could not identify the store. Please try re-adding an item to your cart."
+      );
+      return;
+    }
+
     const orderPayload = {
       addressId: selectedAddressId,
+      storeId: storeId,
       shippingCost: selectedShipping.cost,
       paymentMethodId,
       promoCode: appliedPromo?.code,
     };
+
+    if (total === 0) {
+      const orderResult = await placeOrder(orderPayload);
+      if (orderResult.success && orderResult.orderId) {
+        toast.success("Your free order has been placed successfully");
+        router.push(`/profile/orders/${orderResult.orderId}$from=checkout`);
+      } else {
+        toast.error("Failed to place your free order. Please try again.");
+      }
+      return;
+    }
 
     const orderResult = await placeOrder(orderPayload);
 
@@ -219,6 +248,12 @@ export default function CheckoutPage() {
     }
 
     const newOrderId = orderResult.orderId;
+
+    if (selectedPaymentMethod.id === "manual_transfer") {
+      toast.success("Order placed! Please upload your payment proof.");
+      router.push(`/profile/orders/${newOrderId}?from=checkout`);
+      return;
+    }
 
     if (selectedPaymentMethod.id === "payment_gateway") {
       const paymentResult = await getMidtransToken(newOrderId);
@@ -254,12 +289,16 @@ export default function CheckoutPage() {
           );
         },
       });
-    } else {
-      // Manual transfer flow
-      toast.success("Order placed! Please upload your payment proof.");
-      router.push(`/profile/orders/${newOrderId}?from=checkout`);
     }
   };
+
+  if (checkingAuth) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      </div>
+    );
+  }
 
   return (
     <>

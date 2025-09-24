@@ -183,7 +183,13 @@ export default function StoreDetailsDialog({
                   city: store.city || "",
                   province: store.province || "",
                 }}
-                onLocationSelect={(data) => {
+                onLocationSelect={(data: {
+                  lat: number;
+                  long: number;
+                  road: string;
+                  city: string;
+                  province: string;
+                }) => {
                   setValue("address", data.road);
                   setValue("city", data.city);
                   setValue("province", data.province);

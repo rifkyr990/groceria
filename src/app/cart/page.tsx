@@ -32,41 +32,42 @@ export default function CartPage() {
   );
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
 
-  const { token, user, hydrate } = useAuthStore();
+  const { token, user } = useAuthStore();
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [isClient, setIsClient] = useState(false);
-
-  // Hydrate auth store di awal
-  useEffect(() => {
-    hydrate();
-  }, [hydrate]);
-
-  // Cek apakah user belum login / belum verifikasi
-  useEffect(() => {
-    if (!token || !user || !user.is_verified) {
-      router.replace("/");
-    } else {
-      setCheckingAuth(false);
-    }
-  }, [token, user, router]);
+  const [isClient, setIsClient] = useState(true);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+  // Cek apakah user belum login / belum verifikasi
   useEffect(() => {
-    if (isClient && !token) {
+    if (!isClient) {
+      return;
+    }
+
+    if (!token) {
       toast.warn("You must be logged in to view your cart.");
       router.replace("/login");
+      return;
     }
-  }, [isClient, token, router]);
 
-  // Ambil data cart
-  useEffect(() => {
-    if (token) {
-      fetchCart(token);
+    if (!user?.is_verified) {
+      toast.warn("Please verify your email to access your cart.");
+      router.replace("/");
+      return;
     }
-  }, [token, fetchCart]);
+
+    if (user?.role !== "CUSTOMER") {
+      toast.info("Admins are redirected to their dashboard.");
+      router.replace("/dashboard/manage-order");
+      return;
+    }
+
+    // fetchCart is now handled by StoreInitializer globally.
+    // We just need to wait for the auth check to complete.
+    setCheckingAuth(false);
+  }, [token, user, router, isClient]);
 
   useEffect(() => {
     setPromoInputText(appliedPromo?.code || "");

@@ -25,30 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatIDRCurrency, formatDate } from "@/utils/format";
 import { Button } from "@/components/ui/button";
-
-const StatusBadge = ({ status }: { status: string }) => {
-  const statusConfig = {
-    PENDING_PAYMENT: "bg-orange-100 text-orange-800 border-orange-200",
-    PAID: "bg-blue-100 text-blue-800 border-blue-200",
-    PROCESSING: "bg-blue-100 text-blue-800 border-blue-200",
-    SHIPPED: "bg-indigo-100 text-indigo-800 border-indigo-200",
-    DELIVERED: "bg-green-100 text-green-800 border-green-200",
-    CANCELLED: "bg-red-100 text-red-800 border-red-200",
-  };
-
-  return (
-    <Badge
-      className={cn(
-        "font-medium border pointer-events-none capitalize",
-        statusConfig[status as keyof typeof statusConfig] ||
-          "bg-gray-100 text-gray-800"
-      )}
-    >
-      {status.replace(/_/g, " ")}
-    </Badge>
-  );
-};
-
+import StatusBadge from "@/components/shared/StatusBadge";
 import { useAdminOrderDetailStore } from "@/store/admin-order-detail-store";
 import AdminActionCard from "./AdminActionCard";
 import PaymentProofCard from "./PaymentProofCard";
@@ -68,6 +45,7 @@ export default function AdminOrderDetailClient({
     rejectPayment,
     sendOrder,
     cancelOrder,
+    markAsRefunded,
   } = useAdminOrderDetailStore();
   const { token } = useAuthStore();
 
@@ -82,6 +60,19 @@ export default function AdminOrderDetailClient({
 
   const renderActions = () => {
     if (!order) return null;
+
+    if (order.status === "CANCELLED" && order.payment.status === "SUCCESS") {
+      return (
+        <Button
+          onClick={() => markAsRefunded(order.id)}
+          disabled={loading}
+          variant="secondary"
+          className="w-full bg-yellow-500 hover:bg-yellow-600 text-white h-10 text-sm px-4"
+        >
+          <CheckCircle className="w-4 h-4 mr-2" /> Mark as Refunded
+        </Button>
+      );
+    }
 
     if (
       order.status === "PAID" &&

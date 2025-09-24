@@ -9,6 +9,7 @@ interface AuthState {
   token: string | null;
   loading: boolean;
   error: string | null;
+  isHydrated: boolean;
   login: (data: { email: string; password: string }) => Promise<boolean>;
   logout: () => void;
   hydrate: () => void;
@@ -26,11 +27,12 @@ interface AuthState {
   clearAuth: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   token: null,
   loading: false,
   error: null,
+  isHydrated: false,
 
   register: async (data) => {
     set({ loading: true, error: null });
@@ -84,14 +86,20 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   hydrate: () => {
     if (typeof window === "undefined") return;
-
-    const token =
-      localStorage.getItem("token") || sessionStorage.getItem("token");
-    const user = localStorage.getItem("user");
-    if (token && user) {
-      set({ token, user: JSON.parse(user) });
-    } else {
+    try {
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+      const userItem = localStorage.getItem("user");
+      if (token && userItem) {
+        set({ token, user: JSON.parse(userItem) });
+      } else {
+        set({ user: null, token: null });
+      }
+    } catch (e) {
+      console.error("Failed to hydrate auth store:", e);
       set({ user: null, token: null });
+    } finally {
+      set({ isHydrated: true });
     }
   },
   loginWithGoogle: async (idToken) => {

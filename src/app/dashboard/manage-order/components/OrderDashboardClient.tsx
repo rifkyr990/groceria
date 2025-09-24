@@ -32,6 +32,7 @@ import {
 import { format } from "date-fns";
 import { IStoreProps } from "@/types/store";
 import AdminOrderCard from "./AdminOrderCard";
+import SummaryCards from "./SummaryCards";
 
 const OrderDashboardClient = () => {
   const { user } = useAuthStore();
@@ -43,6 +44,9 @@ const OrderDashboardClient = () => {
     fetchOrders,
     filters,
     setFilters,
+    summary,
+    summaryLoading,
+    fetchSummary,
   } = useAdminOrderStore();
 
   // Local state for filter inputs
@@ -52,10 +56,11 @@ const OrderDashboardClient = () => {
   const [localStoreId, setLocalStoreId] = useState(filters.storeId);
   const [stores, setStores] = useState<IStoreProps[]>([]);
 
-  // Fetch orders on mount
+  // Fetch orders and summary on mount
   useEffect(() => {
     fetchOrders(1);
-  }, [fetchOrders]);
+    fetchSummary();
+  }, [fetchOrders, fetchSummary]);
 
   // Fetch stores for Super Admin filter
   useEffect(() => {
@@ -101,6 +106,8 @@ const OrderDashboardClient = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Order Management</h1>
+
+      <SummaryCards summary={summary} loading={summaryLoading} />
 
       {/* --- Filter Toolbar --- */}
       <div className="bg-white p-4 rounded-2xl shadow-lg shadow-gray-200/50">

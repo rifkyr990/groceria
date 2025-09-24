@@ -67,7 +67,7 @@ export default function CheckoutButton({
   return (
     <Button
       onClick={handleClick}
-      disabled={loading || disabled || Number(total) === 0}
+      disabled={loading || disabled}
       className={cn(
         "w-full p-6 py-7 sm:p-6 sm:py-7 rounded-xl flex items-center justify-between transform transition-all shadow-lg",
         "hover:scale-105 hover:shadow-xl active:scale-95",

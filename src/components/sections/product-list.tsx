@@ -10,6 +10,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // interface Product {
 //   id: number;
@@ -149,6 +155,58 @@ export default function ProductList() {
           const quantityInCart = itemInCart?.quantity || 0;
           const stock = product.stocks?.[0]?.stock_quantity ?? 0;
           const isOutOfStock = stock === 0 || quantityInCart >= stock;
+          const isUserGuest = !user;
+
+          const button = (
+            <button
+              disabled={
+                !user ||
+                !user.is_verified ||
+                user.role !== "CUSTOMER" ||
+                isOutOfStock
+              }
+              title={
+                !user
+                  ? "Please log in to add items"
+                  : !user.is_verified
+                    ? "Please verify your email to shop"
+                    : user.role !== "CUSTOMER"
+                      ? "Admin accounts cannot shop."
+                      : isOutOfStock
+                        ? "Out of stock"
+                        : ""
+              }
+              onClick={(e) => {
+                e.stopPropagation();
+                if (
+                  !product.stocks ||
+                  product.stocks.length === 0 ||
+                  !product.stocks[0].store
+                )
+                  return;
+
+                const productForCart = {
+                  id: product.id,
+                  productId: product.id,
+                  name: product.name,
+                  price: String(product.price),
+                  description: product.description || "",
+                  image: product.images?.[0]?.image_url || "/fallback.png",
+                };
+                addItem(
+                  productForCart,
+                  product.stocks[0].store.id,
+                  product.stocks[0].store.name,
+                  stock,
+                  1 // Add 1 item by default from product card
+                );
+              }}
+              className="mt-5 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-xl transition disabled:bg-green-600/40 disabled:cursor-not-allowed"
+            >
+              <ShoppingCart size={18} />
+              <span className="text-sm font-medium">Tambah Keranjang</span>
+            </button>
+          );
 
           return (
             <div
@@ -182,48 +240,18 @@ export default function ProductList() {
                   {formatIDRCurrency(Number(product.price))}
                 </p>
 
-                <button
-                  disabled={!user || !user.is_verified || isOutOfStock}
-                  title={
-                    !user
-                      ? "Please log in to add items"
-                      : !user.is_verified
-                        ? "Please verify your email to shop"
-                        : isOutOfStock
-                          ? "Out of stock"
-                          : ""
-                  }
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (
-                      !product.stocks ||
-                      product.stocks.length === 0 ||
-                      !product.stocks[0].store
-                    )
-                      return;
-
-                    const productForCart = {
-                      id: product.id,
-                      productId: product.id,
-                      name: product.name,
-                      price: String(product.price),
-                      description: product.description || "",
-                      image:
-                        product.images?.[0]?.image_url || "/fallback.png",
-                    };
-                    addItem(
-                      productForCart,
-                      product.stocks[0].store.id,
-                      product.stocks[0].store.name,
-                      stock,
-                      1 // Add 1 item by default from product card
-                    );
-                  }}
-                  className="mt-5 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-xl transition disabled:bg-green-600/40 disabled:cursor-not-allowed"
-                >
-                  <ShoppingCart size={18} />
-                  <span className="text-sm font-medium">Tambah Keranjang</span>
-                </button>
+                {isUserGuest ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>{button}</TooltipTrigger>
+                      <TooltipContent>
+                        <p>Please log in to add items to your cart.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  button
+                )}
               </div>
             </div>
           );
