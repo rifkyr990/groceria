@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,11 @@ import useWilayah, { Wilayah } from "@/hooks/use-wilayah";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
+// Load MapPicker secara dinamis (hanya di client)
+const MapPicker = dynamic(() => import("@/components/MapPickerInner"), {
+  ssr: false,
+});
+
 interface AddressFormValues {
   name: string;
   phone: string;
@@ -28,10 +34,12 @@ interface AddressFormValues {
   detail: string;
   label: "RUMAH" | "KANTOR";
   is_primary: boolean;
+  latitude: number;
+  longitude: number;
 }
 
 interface EditAddressModalProps {
-  address: AddressFormValues & { id: Number };
+  address: AddressFormValues & { id: number };
 }
 
 export default function EditAddressModal({ address }: EditAddressModalProps) {
@@ -61,7 +69,6 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
     }
   }, [selectedSub, setValue]);
 
-  // ✅ Jalankan reset satu kali saat modal dibuka
   const mapToWilayahId = () => {
     const provinceId =
       provinces.find((p) => p.province === address.province)?.province_id || "";
@@ -70,7 +77,8 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
     const districtId =
       districts.find((d) => d.district_name === address.district)?.district_id || "";
     const subdistrictId =
-      subdistricts.find((s) => s.subdistrict_name === address.subdistrict)?.subdistrict_id || "";
+      subdistricts.find((s) => s.subdistrict_name === address.subdistrict)
+        ?.subdistrict_id || "";
 
     reset({
       ...address,
@@ -78,6 +86,8 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
       city: cityId,
       district: districtId,
       subdistrict: subdistrictId,
+      latitude: address.latitude,
+      longitude: address.longitude,
     });
   };
 
@@ -129,19 +139,16 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
       open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
-        if (isOpen) {
-          mapToWilayahId(); // ✅ Reset form hanya saat modal dibuka
-        }
+        if (isOpen) mapToWilayahId();
       }}
     >
       <DialogTrigger asChild>
         <Button className="bg-blue-600 text-white">Edit</Button>
       </DialogTrigger>
+
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl scrollbar-thin scrollbar-thumb-gray-400 hover:scrollbar-thumb-gray-500">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold">
-            Edit Alamat
-          </DialogTitle>
+          <DialogTitle className="text-lg font-semibold">Edit Alamat</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
@@ -159,12 +166,7 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
             <div>
               <Label>Provinsi</Label>
               <select {...register("province")} className="input w-full">
-                {renderOptions(
-                  provinces,
-                  "province_id",
-                  "province",
-                  "Pilih Provinsi"
-                )}
+                {renderOptions(provinces, "province_id", "province", "Pilih Provinsi")}
               </select>
             </div>
 
@@ -188,12 +190,7 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
                 className="input w-full"
                 disabled={!watch("city")}
               >
-                {renderOptions(
-                  districts,
-                  "district_id",
-                  "district_name",
-                  "Pilih Kecamatan"
-                )}
+                {renderOptions(districts, "district_id", "district_name", "Pilih Kecamatan")}
               </select>
             </div>
 
@@ -231,6 +228,24 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
               placeholder="Blok, RT/RW, patokan, dll"
               className="w-full border rounded p-2"
             ></textarea>
+          </div>
+
+          {/* MapPicker */}
+          <div className="w-full max-w-md h-40 mx-auto my-4">
+            <MapPicker
+              disabled={false}
+              defaultLocation={{
+                lat: watch("latitude"),
+                long: watch("longitude"),
+                road: watch("street"),
+                city: watch("city"),
+                province: watch("province"),
+              }}
+              onLocationSelect={(data) => {
+                setValue("latitude", data.lat);
+                setValue("longitude", data.long);
+              }}
+            />
           </div>
 
           <div>

@@ -216,17 +216,17 @@ export default function AddStoreDialog() {
             {/* Map Picker */}
             <div id="map-picker" className="w-full max-w-md h-40 mx-auto my-4">
               <MapPicker
-              disabled={false}
-              defaultLocation={defaultLocation}
-              onLocationSelect={(data) => {
-                setValue("address", data.road);
-                setValue("latitude", data.lat);
-                setValue("longitude", data.long);
-                // Optional, jika data.city atau data.province dari MapPicker bisa dipakai:
-                // setValue("city", data.city);
-                // setValue("province", data.province);
+                disabled={false}
+                defaultLocation={defaultLocation}
+                onLocationSelect={(data) => {
+                  setValue("address", data.road);
+                  setValue("latitude", data.lat);
+                  setValue("longitude", data.long);
+                  // Optional, jika data.city atau data.province dari MapPicker bisa dipakai:
+                  // setValue("city", data.city);
+                  // setValue("province", data.province);
               }}
-            />
+              />
             </div>
           </form>
 
