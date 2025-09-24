@@ -14,15 +14,15 @@ interface LocationState {
 }
 
 export const useLocationStore = create<LocationState>((set) => ({
-  latitude: null,
-  longitude: null,
-  city: null,
-  province: null,
-  setLocation: (lat, lng, city, province) =>
+    latitude: null,
+    longitude: null,
+    city: null,
+    province: null,
+    setLocation: (lat, lng, city, province) =>
     set({
         latitude: lat,
         longitude: lng,
-        city: city ? city.toUpperCase() : null,
-        province: province ? province.toUpperCase() : null,
+        city: city ? city : null,
+        province: province ? province : null,
     }),
 }));

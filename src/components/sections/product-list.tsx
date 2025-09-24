@@ -8,16 +8,10 @@ import { ShoppingCart, Store } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
-
-// interface Product {
-//   id: number;
-//   name: string;
-//   price: number;
-//   image: string;
-//   category: string;
-
-// }
+import { MapPin } from "lucide-react";
+import { getDistanceFromLatLonInKm } from "@/utils/distance";
 
 export default function ProductList() {
   const { city, province, latitude, longitude } = useLocationStore();
@@ -29,52 +23,50 @@ export default function ProductList() {
   const [categories, setCategories] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const { setSelectedProductDetails, setProductsByLoc } = useProduct();
-  const { addItem } = useCartStore();
+  const { addItem, items: cartItems } = useCartStore();
+  const { user } = useAuthStore();
 
   const productsPerPage = 8;
 
   useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const url =
-          province && city
-            ? `/api/product?province=${encodeURIComponent(province)}&city=${encodeURIComponent(city)}${latitude && longitude ? `&lat=${latitude}&long=${longitude}` : ""}`
-            : `/api/product/landing/all`;
+  async function fetchProducts() {
+    try {
+      const url =
+        province && city
+          ? `/api/product?province=${encodeURIComponent(province)}&city=${encodeURIComponent(city)}${latitude && longitude ? `&lat=${latitude}&long=${longitude}` : ""}`
+          : `/api/product/landing/all`;
 
-        const res = await apiCall.get(url);
-        const result = res.data.data;
-        // console.log(result);
-        // console.log(filteredByLocation);
-        // const res = await fetch(url);
-        // console.log(url);
-        // // const data = await res.json();
-        // const json = await res.json();
-        // const data = json.data || [];
-        setProducts(result);
-        setFilteredProducts(result);
-        setProductsByLoc(result);
-      } catch (error) {
-        console.error("Gagal fetch data", error);
+      const res = await apiCall.get(url);
+      let result = res.data.data as IProductProps[];
+
+      // ⬇️ Sort by distance if lat/lon available
+      if (latitude && longitude) {
+        result = result
+          .filter((product) => product.stocks?.[0]?.store?.latitude && product.stocks?.[0]?.store?.longitude)
+          .map((product) => {
+            const store = product.stocks?.[0]?.store;
+            const distance = getDistanceFromLatLonInKm(
+              latitude,
+              longitude,
+              store.latitude,
+              store.longitude
+            );
+            return { ...product, distance };
+          })
+          .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
       }
+
+      setProducts(result);
+      setFilteredProducts(result);
+      setProductsByLoc(result);
+    } catch (error) {
+      console.error("Gagal fetch data", error);
     }
+  }
 
-    fetchProducts();
-  }, [province, city, latitude, longitude]);
+  fetchProducts();
+}, [province, city, latitude, longitude]);
 
-  // useEffect(() => {
-  //   if (selectedCategory === "semua") {
-  //     setFilteredProducts(products);
-  //   } else {
-  //     setFilteredProducts(
-  //       products.filter(
-  //         (p: IProductProps) =>
-  //           p.category.category.toLowerCase() === selectedCategory
-  //       )
-  //     );
-  //   }
-  //   setCurrentPage(1);
-  // }, [selectedCategory, products]);
-  // filtered products
   useEffect(() => {
     if (selectedCategory === "semua") {
       setFilteredProducts(products);
@@ -141,7 +133,15 @@ export default function ProductList() {
       {/* Product Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 my-5">
         {currentProducts.map((product) => {
+          const itemInCart = cartItems.find(
+            (item) => item.productId === product.id
+          );
+          const quantityInCart = itemInCart?.quantity || 0;
+          const stock = product.stocks?.[0]?.stock_quantity ?? 0;
+          const isOutOfStock = stock === 0 || quantityInCart >= stock;
+
           return (
+            
             <div
               key={product.id}
               className="group bg-white border-2 rounded-2xl shadow-md hover:shadow-lg transition overflow-hidden flex flex-col justify-center dark:bg-gray-800 dark:text-gray-200 "
@@ -170,10 +170,25 @@ export default function ProductList() {
                 </h3>
                 <p className="text-green-600 font-bold mt-1">
                   {/* Rp {product.price.toLocaleString()} */}
-                  {formatIDRCurrency(Math.trunc(product.price))}
+                  {formatIDRCurrency(Number(product.price))}
                 </p>
-
+                {product.distance && (
+                  <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                    <MapPin size={12} />
+                    Sekitar {product.distance.toFixed(1)} km dari lokasi kamu
+                  </p>
+                )}
                 <button
+                  disabled={!user || !user.is_verified || isOutOfStock}
+                  title={
+                    !user
+                      ? "Please log in to add items"
+                      : !user.is_verified
+                        ? "Please verify your email to shop"
+                        : isOutOfStock
+                          ? "Out of stock"
+                          : ""
+                  }
                   onClick={(e) => {
                     e.stopPropagation();
                     if (
@@ -187,7 +202,7 @@ export default function ProductList() {
                       id: product.id,
                       productId: product.id,
                       name: product.name,
-                      price: product.price,
+                      price: String(product.price),
                       description: product.description || "",
                       image:
                         product.images?.[0]?.image_url || "/fallback.png",
@@ -196,10 +211,11 @@ export default function ProductList() {
                       productForCart,
                       product.stocks[0].store.id,
                       product.stocks[0].store.name,
+                      stock,
                       1 // Add 1 item by default from product card
                     );
                   }}
-                  className="mt-5 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-xl transition"
+                  className="mt-5 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-xl transition disabled:bg-green-600/40 disabled:cursor-not-allowed"
                 >
                   <ShoppingCart size={18} />
                   <span className="text-sm font-medium">Tambah Keranjang</span>

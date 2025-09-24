@@ -15,6 +15,7 @@ import { Headset, MapPin, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 import { toast } from "react-toastify";
 
@@ -32,7 +33,8 @@ export default function DesktopPrdDetails({
     getProductById,
     setSelectedProductDetails,
   } = useProduct();
-  const { addItem } = useCartStore();
+  const { addItem, items: cartItems } = useCartStore();
+  const { user } = useAuthStore();
 
   // case untuk fetch data ulang (bila ada perubahan data stock/keterangan lain di dashboard)
   const router = useRouter();
@@ -59,6 +61,11 @@ export default function DesktopPrdDetails({
     }
   };
 
+  const itemInCart = cartItems.find(
+    (item) => item.productId === selectedProductDetails?.id
+  );
+  const quantityInCart = itemInCart?.quantity || 0;
+
   // prd preview handler
   const [preview, setPreview] = useState("");
   const handlerPreview = (img: string) => {
@@ -77,27 +84,14 @@ export default function DesktopPrdDetails({
   const isOutOfStock = stock === 0;
   const isLowStock = stock && stock <= 5;
   // Store
-  const storeIdentity = selectedProductDetails?.stocks.map((stock: any) => {
-    return {
-      name: stock.store.name,
-      city: stock.store.city,
-      province: stock.store.province,
-    };
-  })[0];
+  const storeIdentity = selectedProductDetails?.stocks?.[0]?.store
+  ? {
+      name: selectedProductDetails.stocks[0].store.name,
+      city: selectedProductDetails.stocks[0].store.city,
+      province: selectedProductDetails.stocks[0].store.province,
+    }
+  : null;
 
-  // console.log(storeIdentity);
-  // Contact Handler
-  // const adminContact =
-  //   selectedProductDetails?.stocks?.[0]?.store?.admins?.[0]?.phone ?? null;
-  // console.log(adminContact);
-  // const handlerWhatsapp = () => {
-  //   const waUrl = `https://wa.me/${phone.phone}`;
-  //   window.open(waUrl);
-  // };
-
-  // useEffect(() => {
-  //   console.log(value);
-  // }, [value]);
 
   return (
     <section className={`${className}  `}>
@@ -179,7 +173,9 @@ export default function DesktopPrdDetails({
                   className="cursor-pointer select-none bg-emerald-500 hover:bg-emerald-600"
                   id="increment"
                   onClick={() => handlerValue("inc")}
-                  disabled={value === stock || isOutOfStock}
+                  disabled={
+                    value + quantityInCart >= (stock ?? 0) || isOutOfStock
+                  }
                 >
                   +
                 </Button>
@@ -193,14 +189,29 @@ export default function DesktopPrdDetails({
             <div id="add-cart">
               <Button
                 className="bg-green-600 hover:bg-green-700 cursor-pointer"
-                disabled={isOutOfStock}
+                disabled={
+                  isOutOfStock ||
+                  !user ||
+                  !user.is_verified ||
+                  quantityInCart >= (stock ?? 0)
+                }
+                title={
+                  !user
+                    ? "Please log in to add items"
+                    : !user.is_verified
+                      ? "Please verify your email to shop"
+                      : isOutOfStock || quantityInCart >= (stock ?? 0)
+                        ? "Out of stock"
+                        : ""
+                }
                 onClick={() => {
-                  if (!selectedProductDetails || !storeIdentity) return;
+                  if (!selectedProductDetails || !storeIdentity || !stock)
+                    return;
                   const productForCart = {
                     id: selectedProductDetails.id,
                     productId: selectedProductDetails.id,
                     name: selectedProductDetails.name,
-                    price: selectedProductDetails.price,
+                    price: String(selectedProductDetails.price),
                     description: selectedProductDetails.description || "",
                     image:
                       selectedProductDetails.images?.[0]?.image_url ||
@@ -210,6 +221,7 @@ export default function DesktopPrdDetails({
                     productForCart,
                     selectedProductDetails.stocks[0].store.id,
                     storeIdentity.name,
+                    stock,
                     value
                   );
                 }}
@@ -265,7 +277,12 @@ export default function DesktopPrdDetails({
               </div>
               <p className="flex text-xs gap-x-1 items-center">
                 <MapPin className="size-5" />
-                {storeIdentity?.city}, {storeIdentity?.province}{" "}
+                {storeIdentity?.city}, {storeIdentity?.province}
+                {selectedProductDetails?.distance && (
+                  <span className="ml-2 text-gray-500">
+                    • {selectedProductDetails.distance.toFixed(1)} km dari kamu
+                  </span>
+                )}
               </p>
             </div>
           </div>

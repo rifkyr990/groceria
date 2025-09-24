@@ -123,3 +123,40 @@ export interface OrderDetail {
   } | null;
   items: OrderItemDetail[];
 }
+
+export interface AdminOrderItem {
+  id: number;
+  name: string;
+  quantity: number;
+  price: string;
+  imageUrl: string;
+}
+
+export interface AdminOrderDetail {
+  id: number;
+  createdAt: string;
+  status: string;
+  customer: {
+    name: string;
+    email: string;
+    phone: string | null;
+  };
+  store: {
+    name: string;
+  };
+  shipping: {
+    address: string;
+    cost: string;
+  };
+  payment: {
+    method: string;
+    status: string;
+    proofUrl: string | null;
+  };
+  pricing: {
+    subtotal: string;
+    discount: string;
+    total: string;
+  };
+  items: AdminOrderItem[];
+}

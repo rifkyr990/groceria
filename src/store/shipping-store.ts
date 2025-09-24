@@ -10,7 +10,7 @@ interface ShippingState {
   error: string | null;
   fetchOptions: (
     addressId: number,
-    storeId: number
+    // storeId: number
   ) => Promise<ShippingOption[] | null>;
 }
 
@@ -19,7 +19,7 @@ export const useShippingStore = create<ShippingState>((set) => ({
   loading: false,
   error: null,
 
-  fetchOptions: async (addressId, storeId) => {
+  fetchOptions: async (addressId) => {
     set({ loading: true, error: null, options: [] });
 
     const token = useAuthStore.getState().token;
@@ -31,7 +31,7 @@ export const useShippingStore = create<ShippingState>((set) => ({
     try {
       const response = await apiCall.post(
         "/api/shipping/options",
-        { addressId, storeId },
+        { addressId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

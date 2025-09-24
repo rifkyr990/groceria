@@ -13,6 +13,7 @@ import { ChevronDown, Headset, Phone, ShoppingCart, Store } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Autoplay from "embla-carousel-autoplay";
+import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
@@ -38,7 +39,8 @@ export default function MobilePrdDetails({
 }: IMobilePrdDetails) {
   const { selectedProductDetails, setSelectedProductDetails, productsByLoc } =
     useProduct();
-  const { addItem } = useCartStore();
+  const { addItem, items: cartItems } = useCartStore();
+  const { user } = useAuthStore();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -73,6 +75,11 @@ export default function MobilePrdDetails({
       setValue((prev) => prev - 1);
     }
   };
+
+  const itemInCart = cartItems.find(
+    (item) => item.productId === selectedProductDetails?.id
+  );
+  const quantityInCart = itemInCart?.quantity || 0;
 
   useEffect(() => {
     if (!api) return;
@@ -150,7 +157,9 @@ export default function MobilePrdDetails({
                   className="cursor-pointer select-none bg-emerald-500 hover:bg-emerald-600"
                   id="increment"
                   onClick={() => handlerValue("inc")}
-                  disabled={value === stock || isOutOfStock}
+                  disabled={
+                    value + quantityInCart >= (stock ?? 0) || isOutOfStock
+                  }
                 >
                   +
                 </Button>
@@ -159,14 +168,29 @@ export default function MobilePrdDetails({
             <div id="cart">
               <Button
                 className="w-full h-9 bg-green-600 hover:bg-green-700"
-                disabled={isOutOfStock}
+                disabled={
+                  isOutOfStock ||
+                  !user ||
+                  !user.is_verified ||
+                  quantityInCart >= (stock ?? 0)
+                }
+                title={
+                  !user
+                    ? "Please log in to add items"
+                    : !user.is_verified
+                      ? "Please verify your email to shop"
+                      : isOutOfStock || quantityInCart >= (stock ?? 0)
+                        ? "Out of stock"
+                        : ""
+                }
                 onClick={() => {
-                  if (!selectedProductDetails || !storeIdentity) return;
+                  if (!selectedProductDetails || !storeIdentity || !stock)
+                    return;
                   const productForCart = {
                     id: selectedProductDetails.id,
                     productId: selectedProductDetails.id,
                     name: selectedProductDetails.name,
-                    price: selectedProductDetails.price,
+                    price: String(selectedProductDetails.price),
                     description: selectedProductDetails.description || "",
                     image:
                       selectedProductDetails.images?.[0]?.image_url ||
@@ -176,6 +200,7 @@ export default function MobilePrdDetails({
                     productForCart,
                     selectedProductDetails.stocks[0].store.id,
                     storeIdentity.name,
+                    stock,
                     value
                   );
                 }}

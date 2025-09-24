@@ -1,9 +1,10 @@
 import DashboardLayout from "../components/DashboardLayout";
+import OrderDashboardClient from "./components/OrderDashboardClient";
 
-export default function ManageOrder() {
+export default function ManageOrderPage() {
   return (
     <DashboardLayout>
-      <h1>This is order management page</h1>
+      <OrderDashboardClient />
     </DashboardLayout>
   );
 }

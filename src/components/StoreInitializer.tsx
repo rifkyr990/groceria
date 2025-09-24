@@ -12,9 +12,10 @@ export default function StoreInitializer() {
       useCartStore.getState().hydratePromo();
 
       const token = useAuthStore.getState().token;
-
       if (token) {
         useCartStore.getState().fetchCart(token);
+      } else {
+        useCartStore.getState().resetCart();
       }
     };
     initialize();
