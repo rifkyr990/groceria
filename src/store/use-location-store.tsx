@@ -5,13 +5,24 @@ interface LocationState {
     longitude: number | null;
     city: string | null;
     province: string | null;
-    setLocation: (lat: number, lng: number, city?: string, province?: string) => void;
+    setLocation: (
+        lat: number,
+        lng: number,
+        city?: string,
+        province?: string
+    ) => void;
 }
 
 export const useLocationStore = create<LocationState>((set) => ({
-    latitude: null,
-    longitude: null,
-    city: null,
-    province: null,
-    setLocation: (lat, lng, city, province) => set({ latitude: lat, longitude: lng, city: city ?? null, province: province ?? null }),
+  latitude: null,
+  longitude: null,
+  city: null,
+  province: null,
+  setLocation: (lat, lng, city, province) =>
+    set({
+        latitude: lat,
+        longitude: lng,
+        city: city ? city.toUpperCase() : null,
+        province: province ? province.toUpperCase() : null,
+    }),
 }));

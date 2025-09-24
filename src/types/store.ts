@@ -5,7 +5,9 @@ export interface IStoreProps {
   name: string;
   address: string;
   province?: string;
+  province_id?: string;
   city?: string;
+  city_id?: string;
   latitude: number;
   longitude: number;
   is_active: boolean;
