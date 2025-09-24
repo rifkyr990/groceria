@@ -253,7 +253,6 @@ export default function NewProduct() {
                     value={prdPrice}
                     onChange={(e) => setPrdPrice(e.target.value)}
                     className="w-fit"
-                    typeof="number"
                   ></Input>
                 </div>
               </div>

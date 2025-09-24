@@ -37,7 +37,6 @@ import { IStoreProps } from "@/types/store";
 import { useRouter } from "next/navigation";
 interface IUsersTable {
   className?: string;
-  // customers: IUserProps[];
   stores: IStoreProps[];
 }
 function useDebounce(value: string, delay: number) {
@@ -55,10 +54,8 @@ function useDebounce(value: string, delay: number) {
 
 export default function CustomerTable({
   className,
-  // customers,
   stores,
 }: IUsersTable) {
-  const router = useRouter();
   const [userList, setUserList] = useState<IUserProps[]>([]);
   const [pagination, setPagination] = useState({
     total: 0,

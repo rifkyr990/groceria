@@ -27,7 +27,6 @@ export default function AccountPage() {
   });
   const [stores, setStores] = useState<IStoreProps[]>([]);
   useEffect(() => {
-    //cara dengan paralel data fetching pake Promise.all
     const fetchAllData = async () => {
       try {
         const [usersRes, storesRes, customersRes, storeAdminsRes] =
