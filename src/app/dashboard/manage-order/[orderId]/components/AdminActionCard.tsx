@@ -10,8 +10,8 @@ interface AdminActionCardProps {
   onConfirmPayment: () => void;
   onRejectPayment: () => void;
   onSendOrder: () => void;
-  onCancelOrder: () => void;
-  onAdminCancelOrder: () => void; // Added for clarity
+  onAdminCancelOrder: () => void;
+  onMarkAsRefunded: () => void;
   disabled: boolean;
 }
 
@@ -21,6 +21,7 @@ export default function AdminActionCard({
   onRejectPayment,
   onSendOrder,
   onAdminCancelOrder,
+  onMarkAsRefunded,
   disabled,
 }: AdminActionCardProps) {
   const renderActions = () => {
@@ -67,20 +68,43 @@ export default function AdminActionCard({
     if (order.status === "PROCESSING") {
       return (
         <div className="space-y-3">
-           <Button onClick={onSendOrder} className="w-full h-10 text-sm px-4 bg-primary-green-600 hover:bg-primary-green-700">
-                <Send className="w-4 h-4 mr-2" /> Mark as Shipped
-            </Button>
-             <Button onClick={onAdminCancelOrder} variant="outline" className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-10 text-sm px-4">
-                <XCircle className="w-4 h-4 mr-2" /> Cancel Order
-            </Button>
+          <Button
+            onClick={onSendOrder}
+            className="w-full h-10 text-sm px-4 bg-primary-green-600 hover:bg-primary-green-700"
+          >
+            <Send className="w-4 h-4 mr-2" /> Mark as Shipped
+          </Button>
+          <Button
+            onClick={onAdminCancelOrder}
+            variant="outline"
+            className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-10 text-sm px-4"
+          >
+            <XCircle className="w-4 h-4 mr-2" /> Cancel Order
+          </Button>
         </div>
       );
     }
 
-     if (order.status === "PAID") {
-       return (
-        <Button onClick={onAdminCancelOrder} variant="outline" className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-10 text-sm px-4">
-            <XCircle className="w-4 h-4 mr-2" /> Cancel Order
+    if (order.status === "PAID") {
+      return (
+        <Button
+          onClick={onAdminCancelOrder}
+          variant="outline"
+          className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-10 text-sm px-4"
+        >
+          <XCircle className="w-4 h-4 mr-2" /> Cancel Order
+        </Button>
+      );
+    }
+
+    if (order.status === "CANCELLED" && order.payment.status === "SUCCESS") {
+      return (
+        <Button
+          onClick={onMarkAsRefunded}
+          variant="secondary"
+          className="w-full bg-yellow-500 hover:bg-yellow-600 text-white h-10 text-sm px-4"
+        >
+          <CheckCircle className="w-4 h-4 mr-2" /> Mark as Refunded
         </Button>
       );
     }

@@ -95,7 +95,7 @@ export const useAdminOrderStore = create<AdminOrderState>((set, get) => ({
 
     try {
       const response = await apiCall.get(
-        `/api/orders/all-for-admin?${params.toString()}`,
+        `/api/admin/orders?${params.toString()}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -118,7 +118,7 @@ export const useAdminOrderStore = create<AdminOrderState>((set, get) => ({
     }
 
     try {
-      const response = await apiCall.get("/api/orders/admin/summary", {
+      const response = await apiCall.get("/api/admin/orders/summary", {
         headers: { Authorization: `Bearer ${token}` },
       });
       set({ summary: response.data.data, summaryLoading: false });
