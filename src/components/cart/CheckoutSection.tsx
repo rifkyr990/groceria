@@ -55,6 +55,7 @@ export default function CheckoutSection({
         mode="cart"
         onClick={() => router.push("/checkout")}
         total={total.toString()}
+        disabled={items.length === 0}
       />
     </>
   );

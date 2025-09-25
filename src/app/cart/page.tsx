@@ -58,14 +58,6 @@ export default function CartPage() {
       return;
     }
 
-    if (user?.role !== "CUSTOMER") {
-      toast.info("Admins are redirected to their dashboard.");
-      router.replace("/dashboard/manage-order");
-      return;
-    }
-
-    // fetchCart is now handled by StoreInitializer globally.
-    // We just need to wait for the auth check to complete.
     setCheckingAuth(false);
   }, [token, user, router, isClient]);
 

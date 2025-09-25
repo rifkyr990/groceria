@@ -356,7 +356,7 @@ export default function CheckoutPage() {
                     mode="checkout"
                     onClick={handlePlaceOrder}
                     total={total.toString()}
-                    disabled={isPlacingOrder}
+                    disabled={isPlacingOrder || items.length === 0}
                   />
                 </div>
               </div>
@@ -384,7 +384,7 @@ export default function CheckoutPage() {
           mode="checkout"
           onClick={handlePlaceOrder}
           total={total.toString()}
-          disabled={isPlacingOrder}
+          disabled={isPlacingOrder || items.length === 0}
         />
       </div>
 

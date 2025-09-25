@@ -294,9 +294,15 @@ export default function AdminOrderDetailClient({
             <PaymentProofCard proofUrl={order.payment.proofUrl} />
           )}
 
-          <Card className="rounded-2xl shadow-lg shadow-gray-200/50 border-0">
-            <CardContent className="p-4 sm:p-6">{renderActions()}</CardContent>
-          </Card>
+          <AdminActionCard
+            order={order}
+            disabled={loading}
+            onConfirmPayment={() => confirmPayment(order.id)}
+            onRejectPayment={() => rejectPayment(order.id)}
+            onSendOrder={() => sendOrder(order.id)}
+            onAdminCancelOrder={() => cancelOrder(order.id)}
+            onCancelOrder={() => {}}
+          />
         </div>
       </div>
     </div>

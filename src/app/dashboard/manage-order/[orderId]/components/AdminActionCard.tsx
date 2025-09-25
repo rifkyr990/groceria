@@ -11,6 +11,7 @@ interface AdminActionCardProps {
   onRejectPayment: () => void;
   onSendOrder: () => void;
   onCancelOrder: () => void;
+  onAdminCancelOrder: () => void; // Added for clarity
   disabled: boolean;
 }
 
@@ -19,7 +20,7 @@ export default function AdminActionCard({
   onConfirmPayment,
   onRejectPayment,
   onSendOrder,
-  onCancelOrder,
+  onAdminCancelOrder,
   disabled,
 }: AdminActionCardProps) {
   const renderActions = () => {
@@ -36,15 +37,28 @@ export default function AdminActionCard({
       order.payment.method === "Manual Bank Transfer"
     ) {
       return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Button
+              onClick={onConfirmPayment}
+              className="bg-green-600 hover:bg-green-700 h-10 text-sm px-4"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" /> Confirm Payment
+            </Button>
+            <Button
+              onClick={onRejectPayment}
+              variant="destructive"
+              className="h-10 text-sm px-4"
+            >
+              <XCircle className="w-4 h-4 mr-2" /> Reject Payment
+            </Button>
+          </div>
           <Button
-            onClick={onConfirmPayment}
-            className="bg-green-600 hover:bg-green-700 h-10 text-sm px-4"
+            onClick={onAdminCancelOrder}
+            variant="outline"
+            className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-10 text-sm px-4"
           >
-            <CheckCircle className="w-4 h-4 mr-2" /> Confirm Payment
-          </Button>
-          <Button onClick={onRejectPayment} variant="destructive" className="h-10 text-sm px-4">
-            <XCircle className="w-4 h-4 mr-2" /> Reject Payment
+            <XCircle className="w-4 h-4 mr-2" /> Cancel Order
           </Button>
         </div>
       );
@@ -56,7 +70,7 @@ export default function AdminActionCard({
            <Button onClick={onSendOrder} className="w-full h-10 text-sm px-4 bg-primary-green-600 hover:bg-primary-green-700">
                 <Send className="w-4 h-4 mr-2" /> Mark as Shipped
             </Button>
-             <Button onClick={onCancelOrder} variant="outline" className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-10 text-sm px-4">
+             <Button onClick={onAdminCancelOrder} variant="outline" className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-10 text-sm px-4">
                 <XCircle className="w-4 h-4 mr-2" /> Cancel Order
             </Button>
         </div>
@@ -65,7 +79,7 @@ export default function AdminActionCard({
 
      if (order.status === "PAID") {
        return (
-        <Button onClick={onCancelOrder} variant="outline" className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-10 text-sm px-4">
+        <Button onClick={onAdminCancelOrder} variant="outline" className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-10 text-sm px-4">
             <XCircle className="w-4 h-4 mr-2" /> Cancel Order
         </Button>
       );
