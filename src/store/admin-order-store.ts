@@ -34,30 +34,21 @@ interface Filters {
 interface AdminOrderState {
   orders: AdminOrderSummary[];
   pagination: PaginationInfo | null;
-<<<<<<< HEAD
-=======
   summary: Record<string, number> | null;
   summaryLoading: boolean;
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
   loading: boolean;
   error: string | null;
   filters: Filters;
   setFilters: (newFilters: Partial<Filters>) => void;
   fetchOrders: (page?: number, limit?: number) => Promise<void>;
-<<<<<<< HEAD
-=======
   fetchSummary: () => Promise<void>;
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
 }
 
 export const useAdminOrderStore = create<AdminOrderState>((set, get) => ({
   orders: [],
   pagination: null,
-<<<<<<< HEAD
-=======
   summary: null,
   summaryLoading: true,
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
   loading: true,
   error: null,
   filters: {
@@ -118,9 +109,6 @@ export const useAdminOrderStore = create<AdminOrderState>((set, get) => ({
       set({ error: errorMsg, loading: false });
     }
   },
-<<<<<<< HEAD
-}));
-=======
 
   fetchSummary: async () => {
     set({ summaryLoading: true });
@@ -142,4 +130,3 @@ export const useAdminOrderStore = create<AdminOrderState>((set, get) => ({
     }
   },
 }));
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44

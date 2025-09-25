@@ -277,21 +277,6 @@ export const useCartStore = create<CartState>((set, get) => {
     },
 
     resetCart: () => {
-<<<<<<< HEAD
-      localStorage.removeItem("applied_promo");
-      set({
-        items: [],
-        storeId: null,
-        storeName: null,
-        appliedPromo: null,
-        loading: false,
-        error: null,
-      });
-    },
-
-    clearCart: () => {
-=======
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
       localStorage.removeItem("applied_promo");
       set({
         items: [],

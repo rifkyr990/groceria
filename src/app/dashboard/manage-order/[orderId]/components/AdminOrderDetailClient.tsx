@@ -25,34 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatIDRCurrency, formatDate } from "@/utils/format";
 import { Button } from "@/components/ui/button";
-<<<<<<< HEAD
-
-const StatusBadge = ({ status }: { status: string }) => {
-  const statusConfig = {
-    PENDING_PAYMENT: "bg-orange-100 text-orange-800 border-orange-200",
-    PAID: "bg-blue-100 text-blue-800 border-blue-200",
-    PROCESSING: "bg-blue-100 text-blue-800 border-blue-200",
-    SHIPPED: "bg-indigo-100 text-indigo-800 border-indigo-200",
-    DELIVERED: "bg-green-100 text-green-800 border-green-200",
-    CANCELLED: "bg-red-100 text-red-800 border-red-200",
-  };
-
-  return (
-    <Badge
-      className={cn(
-        "font-medium border pointer-events-none capitalize",
-        statusConfig[status as keyof typeof statusConfig] ||
-          "bg-gray-100 text-gray-800"
-      )}
-    >
-      {status.replace(/_/g, " ")}
-    </Badge>
-  );
-};
-
-=======
 import StatusBadge from "@/components/shared/StatusBadge";
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
 import { useAdminOrderDetailStore } from "@/store/admin-order-detail-store";
 import AdminActionCard from "./AdminActionCard";
 import PaymentProofCard from "./PaymentProofCard";
@@ -72,10 +45,7 @@ export default function AdminOrderDetailClient({
     rejectPayment,
     sendOrder,
     cancelOrder,
-<<<<<<< HEAD
-=======
     markAsRefunded,
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
   } = useAdminOrderDetailStore();
   const { token } = useAuthStore();
 
@@ -91,8 +61,6 @@ export default function AdminOrderDetailClient({
   const renderActions = () => {
     if (!order) return null;
 
-<<<<<<< HEAD
-=======
     if (order.status === "CANCELLED" && order.payment.status === "SUCCESS") {
       return (
         <Button
@@ -106,7 +74,6 @@ export default function AdminOrderDetailClient({
       );
     }
 
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
     if (
       order.status === "PAID" &&
       order.payment.method === "Manual Bank Transfer"
@@ -327,11 +294,6 @@ export default function AdminOrderDetailClient({
             <PaymentProofCard proofUrl={order.payment.proofUrl} />
           )}
 
-<<<<<<< HEAD
-          <Card className="rounded-2xl shadow-lg shadow-gray-200/50 border-0">
-            <CardContent className="p-4 sm:p-6">{renderActions()}</CardContent>
-          </Card>
-=======
           <AdminActionCard
             order={order}
             disabled={loading}
@@ -341,7 +303,6 @@ export default function AdminOrderDetailClient({
             onAdminCancelOrder={() => cancelOrder(order.id)}
             onCancelOrder={() => {}}
           />
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
         </div>
       </div>
     </div>

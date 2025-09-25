@@ -34,17 +34,6 @@ export default function StoreInitializer() {
       return; // Wait for the auth store to be ready.
     }
 
-<<<<<<< HEAD
-      const token = useAuthStore.getState().token;
-      if (token) {
-        useCartStore.getState().fetchCart(token);
-      } else {
-        useCartStore.getState().resetCart();
-      }
-    };
-    initialize();
-  }, []);
-=======
     if (token) {
       // If a token exists after hydration, it means the user is logged in.
       // We should fetch their cart from the database.
@@ -55,7 +44,6 @@ export default function StoreInitializer() {
     // The only time the cart should be reset is on an explicit logout action,
     // which is already handled in the auth-store's logout() function.
   }, [token, isAuthHydrated, fetchCart]);
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
 
   return null;
 }

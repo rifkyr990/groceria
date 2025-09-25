@@ -41,11 +41,7 @@ import OrderCard from "./OrderCard";
 
 const OrderListPage = () => {
   const router = useRouter();
-<<<<<<< HEAD
-  const { token } = useAuthStore();
-=======
   const { token, user } = useAuthStore();
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
   const {
     orders,
     pagination,
@@ -62,17 +58,6 @@ const OrderListPage = () => {
   const [localSearch, setLocalSearch] = useState(filters.searchTerm);
   const [localStatus, setLocalStatus] = useState(filters.statusFilter);
   const [localDateRange, setLocalDateRange] = useState(filters.dateRange);
-<<<<<<< HEAD
-
-  useEffect(() => {
-    if (!token) {
-      toast.warn("Please log in to view your orders.");
-      router.replace("/login");
-    } else {
-      fetchOrders(1);
-    }
-  }, [token, router]);
-=======
   const [isClient, setIsClient] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
@@ -99,7 +84,6 @@ const OrderListPage = () => {
 
     fetchOrders(1).finally(() => setCheckingAuth(false));
   }, [isClient, token, user, router, fetchOrders]);
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
 
   const handlePageChange = (page: number) => {
     fetchOrders(page);
@@ -125,11 +109,7 @@ const OrderListPage = () => {
   };
 
   const renderContent = () => {
-<<<<<<< HEAD
-    if (loading) {
-=======
     if (checkingAuth || (loading && orders.length === 0)) {
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
       return (
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-8 h-8 animate-spin text-gray-500" />

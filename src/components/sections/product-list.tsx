@@ -10,16 +10,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
-<<<<<<< HEAD
-import { MapPin } from "lucide-react";
-import { getDistanceFromLatLonInKm } from "@/utils/distance";
-=======
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getDistanceFromLatLonInKm } from "@/utils/distance";
 
 // interface Product {
 //   id: number;
@@ -29,7 +26,6 @@ import {
 //   category: string;
 
 // }
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
 
 export default function ProductList() {
   const { city, province, latitude, longitude } = useLocationStore();
@@ -164,8 +160,6 @@ export default function ProductList() {
           const quantityInCart = itemInCart?.quantity || 0;
           const stock = product.stocks?.[0]?.stock_quantity ?? 0;
           const isOutOfStock = stock === 0 || quantityInCart >= stock;
-<<<<<<< HEAD
-=======
           const isUserGuest = !user;
 
           const button = (
@@ -218,7 +212,6 @@ export default function ProductList() {
               <span className="text-sm font-medium">Tambah Keranjang</span>
             </button>
           );
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
 
           return (
             <div
@@ -248,57 +241,6 @@ export default function ProductList() {
                   {product.name}
                 </h3>
                 <p className="text-green-600 font-bold mt-1">
-<<<<<<< HEAD
-                  {formatIDRCurrency(Number(product.price))}
-                </p>
-                {product.distance && (
-                  <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                    <MapPin size={12} />
-                    Sekitar {product.distance.toFixed(1)} km dari lokasi kamu
-                  </p>
-                )}
-                <button
-                  disabled={!user || !user.is_verified || isOutOfStock}
-                  title={
-                    !user
-                      ? "Please log in to add items"
-                      : !user.is_verified
-                        ? "Please verify your email to shop"
-                        : isOutOfStock
-                          ? "Out of stock"
-                          : ""
-                  }
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (
-                      !product.stocks ||
-                      product.stocks.length === 0 ||
-                      !product.stocks[0].store
-                    )
-                      return;
-
-                    const productForCart = {
-                      id: product.id,
-                      productId: product.id,
-                      name: product.name,
-                      price: String(product.price),
-                      description: product.description || "",
-                      image: product.images?.[0]?.image_url || "/fallback.png",
-                    };
-                    addItem(
-                      productForCart,
-                      product.stocks[0].store.id,
-                      product.stocks[0].store.name,
-                      stock,
-                      1 // Add 1 item by default from product card
-                    );
-                  }}
-                  className="mt-5 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-xl transition disabled:bg-green-600/40 disabled:cursor-not-allowed"
-                >
-                  <ShoppingCart size={18} />
-                  <span className="text-sm font-medium">Tambah Keranjang</span>
-                </button>
-=======
                   {/* Rp {product.price.toLocaleString()} */}
                   {formatIDRCurrency(Number(product.price))}
                 </p>
@@ -315,7 +257,6 @@ export default function ProductList() {
                 ) : (
                   button
                 )}
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
               </div>
             </div>
           );

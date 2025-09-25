@@ -29,33 +29,17 @@ export default function CartPage() {
     appliedPromo?.code || ""
   );
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
-  const { token, user } = useAuthStore();
   const router = useRouter();
-  const [isClient, setIsClient] = useState(false);
 
-<<<<<<< HEAD
-=======
   const { token, user } = useAuthStore();
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [isClient, setIsClient] = useState(true);
 
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   useEffect(() => {
-<<<<<<< HEAD
-    if (isClient && !token) {
-      toast.warn("You must be logged in to view your cart.");
-      router.replace("/login");
-    }
-  }, [isClient, token, router]);
-
-  useEffect(() => {
-    if (token) {
-      fetchCart(token);
-=======
     if (!isClient) {
       return;
     }
@@ -64,7 +48,6 @@ export default function CartPage() {
       toast.warn("You must be logged in to view your cart.");
       router.replace("/login");
       return;
->>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
     }
 
     if (!user?.is_verified) {
