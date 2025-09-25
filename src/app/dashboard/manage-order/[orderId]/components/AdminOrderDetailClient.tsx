@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatIDRCurrency, formatDate } from "@/utils/format";
 import { Button } from "@/components/ui/button";
+<<<<<<< HEAD
 
 const StatusBadge = ({ status }: { status: string }) => {
   const statusConfig = {
@@ -49,6 +50,9 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
+=======
+import StatusBadge from "@/components/shared/StatusBadge";
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
 import { useAdminOrderDetailStore } from "@/store/admin-order-detail-store";
 import AdminActionCard from "./AdminActionCard";
 import PaymentProofCard from "./PaymentProofCard";
@@ -68,6 +72,10 @@ export default function AdminOrderDetailClient({
     rejectPayment,
     sendOrder,
     cancelOrder,
+<<<<<<< HEAD
+=======
+    markAsRefunded,
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
   } = useAdminOrderDetailStore();
   const { token } = useAuthStore();
 
@@ -83,6 +91,22 @@ export default function AdminOrderDetailClient({
   const renderActions = () => {
     if (!order) return null;
 
+<<<<<<< HEAD
+=======
+    if (order.status === "CANCELLED" && order.payment.status === "SUCCESS") {
+      return (
+        <Button
+          onClick={() => markAsRefunded(order.id)}
+          disabled={loading}
+          variant="secondary"
+          className="w-full bg-yellow-500 hover:bg-yellow-600 text-white h-10 text-sm px-4"
+        >
+          <CheckCircle className="w-4 h-4 mr-2" /> Mark as Refunded
+        </Button>
+      );
+    }
+
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
     if (
       order.status === "PAID" &&
       order.payment.method === "Manual Bank Transfer"
@@ -303,9 +327,21 @@ export default function AdminOrderDetailClient({
             <PaymentProofCard proofUrl={order.payment.proofUrl} />
           )}
 
+<<<<<<< HEAD
           <Card className="rounded-2xl shadow-lg shadow-gray-200/50 border-0">
             <CardContent className="p-4 sm:p-6">{renderActions()}</CardContent>
           </Card>
+=======
+          <AdminActionCard
+            order={order}
+            disabled={loading}
+            onConfirmPayment={() => confirmPayment(order.id)}
+            onRejectPayment={() => rejectPayment(order.id)}
+            onSendOrder={() => sendOrder(order.id)}
+            onAdminCancelOrder={() => cancelOrder(order.id)}
+            onCancelOrder={() => {}}
+          />
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
         </div>
       </div>
     </div>

@@ -26,6 +26,7 @@ interface AdminOrderSummary {
   status: string;
 }
 
+<<<<<<< HEAD
 const StatusBadge = ({ status }: { status: string }) => {
   const statusConfig = useMemo(
     () => ({
@@ -54,6 +55,9 @@ const StatusBadge = ({ status }: { status: string }) => {
     </Badge>
   );
 };
+=======
+import StatusBadge from "@/components/shared/StatusBadge";
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
 
 interface OrderTableProps {
   orders: AdminOrderSummary[];

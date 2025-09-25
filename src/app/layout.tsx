@@ -1,22 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Poppins } from "next/font/google";
+import { Poppins } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import ClientWrapper from "./client-wrapper";
+import StoreInitializer from "@/components/StoreInitializer";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import StoreInitializer from "@/components/StoreInitializer";
 import Script from "next/script";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const geistSans = GeistSans;
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistMono = GeistMono;
 
 const PoppinsFont = Poppins({
   variable: "--font-poppins",
@@ -40,18 +36,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${PoppinsFont.variable} antialiased [scrollbar-gutter:stable]`}
+        className={`${geistSans.variable} ${geistMono.variable} ${PoppinsFont.variable} antialiased`}
       >
         <Script
           id="midtrans-snap"
           type="text/javascript"
           src={process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL}
           data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
-          strategy="beforeInteractive"
         />
-        <StoreInitializer />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <ClientWrapper>
+            <StoreInitializer />
             {children}
             <ToastContainer
               position="top-right"
@@ -67,6 +62,7 @@ export default function RootLayout({
             />
           </ClientWrapper>
         </ThemeProvider>
+        <div id="map-portal-root"></div> {/* <--- ADD THIS LINE */}
       </body>
     </html>
   );

@@ -17,12 +17,18 @@ import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 import { Menu, Transition } from "@headlessui/react";
+import { useShallow } from "zustand/shallow";
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const { user, logout } = useAuthStore();
-  const { items } = useCartStore();
+  const { items } = useCartStore(
+    useShallow((state) => ({
+      items: state.items,
+      version: state.version,
+    }))
+  );
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const [mobileOpen, setMobileOpen] = useState(false);
 

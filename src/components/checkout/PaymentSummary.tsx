@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatIDRCurrency } from "@/utils/format";
 import { CartItemProps, PromoCode } from "../types";
@@ -16,6 +16,9 @@ export default function PaymentSummary({
   appliedPromo,
   shippingCost,
 }: PaymentSummaryProps) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [maxHeight, setMaxHeight] = useState("0px");
+
   const { subtotal, discountCut, finalShippingCost, total } = useMemo(() => {
     const subtotal = items.reduce(
       (sum, item) => sum + Number(item.price) * item.quantity,
@@ -37,6 +40,12 @@ export default function PaymentSummary({
     return { subtotal, discountCut, finalShippingCost, total };
   }, [items, appliedPromo, shippingCost]);
 
+  useEffect(() => {
+    if (contentRef.current) {
+      setMaxHeight(`${contentRef.current.scrollHeight}px`);
+    }
+  }, [items, appliedPromo, shippingCost]);
+
   const isFreeShipping = appliedPromo?.type === "free_shipping";
   const showShippingLine = Number(shippingCost) > 0 || isFreeShipping;
 
@@ -47,48 +56,53 @@ export default function PaymentSummary({
           Payment Summary
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 text-sm px-4 sm:px-6 pb-4 sm:pb-6">
-        <div className="flex justify-between text-gray-500">
-          <span>Subtotal</span>
-          <span className="font-medium">{formatIDRCurrency(subtotal)}</span>
-        </div>
-
-        {showShippingLine && (
+      <CardContent
+        className="transition-[max-height] duration-300 ease-in-out overflow-hidden px-4 sm:px-6 pb-4 sm:pb-6"
+        style={{ maxHeight }}
+      >
+        <div ref={contentRef} className="space-y-3 text-sm">
           <div className="flex justify-between text-gray-500">
-            <span>Shipping cost</span>
-            {isFreeShipping ? (
-              Number(shippingCost) > 0 ? (
-                <div className="flex items-center gap-2">
-                  <span className="font-medium line-through">
-                    {formatIDRCurrency(Number(shippingCost))}
-                  </span>
+            <span>Subtotal</span>
+            <span className="font-medium">{formatIDRCurrency(subtotal)}</span>
+          </div>
+
+          {showShippingLine && (
+            <div className="flex justify-between text-gray-500">
+              <span>Shipping cost</span>
+              {isFreeShipping ? (
+                Number(shippingCost) > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium line-through">
+                      {formatIDRCurrency(Number(shippingCost))}
+                    </span>
+                    <span className="font-bold text-green-600">Free</span>
+                  </div>
+                ) : (
                   <span className="font-bold text-green-600">Free</span>
-                </div>
+                )
               ) : (
-                <span className="font-bold text-green-600">Free</span>
-              )
-            ) : (
+                <span className="font-medium">
+                  {formatIDRCurrency(Number(shippingCost))}
+                </span>
+              )}
+            </div>
+          )}
+
+          {typeof discountCut === "number" && discountCut > 0 && (
+            <div className="flex justify-between text-green-600">
+              <span>Discount</span>
               <span className="font-medium">
-                {formatIDRCurrency(Number(shippingCost))}
+                - {formatIDRCurrency(discountCut)}
               </span>
-            )}
+            </div>
+          )}
+
+          <div className="border-t border-dashed border-gray-200 pt-2"></div>
+
+          <div className="flex justify-between text-base font-bold text-gray-800">
+            <span>Total</span>
+            <span aria-live="polite">{formatIDRCurrency(total)}</span>
           </div>
-        )}
-
-        {typeof discountCut === "number" && discountCut > 0 && (
-          <div className="flex justify-between text-green-600">
-            <span>Discount</span>
-            <span className="font-medium">
-              - {formatIDRCurrency(discountCut)}
-            </span>
-          </div>
-        )}
-
-        <div className="border-t border-dashed border-gray-200 pt-2"></div>
-
-        <div className="flex justify-between text-base font-bold text-gray-800">
-          <span>Total</span>
-          <span aria-live="polite">{formatIDRCurrency(total)}</span>
         </div>
       </CardContent>
     </Card>

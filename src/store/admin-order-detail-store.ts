@@ -12,6 +12,10 @@ interface AdminOrderDetailState {
   rejectPayment: (orderId: number) => Promise<void>;
   sendOrder: (orderId: number) => Promise<void>;
   cancelOrder: (orderId: number) => Promise<void>;
+<<<<<<< HEAD
+=======
+  markAsRefunded: (orderId: number) => Promise<void>;
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
 }
 
 export const useAdminOrderDetailStore = create<AdminOrderDetailState>((set, get) => ({
@@ -78,4 +82,19 @@ export const useAdminOrderDetailStore = create<AdminOrderDetailState>((set, get)
       set({ loading: false });
     }
   },
+<<<<<<< HEAD
+=======
+
+  markAsRefunded: async (orderId) => {
+    set({ loading: true });
+    try {
+      await apiCall.patch(`/api/orders/admin/${orderId}/mark-refunded`);
+      toast.info("Order marked as refunded.");
+      get().fetchOrder(orderId);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to mark as refunded.");
+      set({ loading: false });
+    }
+  },
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
 }));

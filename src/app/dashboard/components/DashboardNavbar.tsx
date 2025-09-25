@@ -16,7 +16,6 @@ import PopoverNotification from "./PopoverNotifications";
 
 export default function DashboardNavbar() {
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
-  const [openPopover, setOpenPopover] = useState(false);
   const { user } = useAuthStore();
   const router = useRouter();
   return (
@@ -52,7 +51,12 @@ export default function DashboardNavbar() {
           <PopoverNotification />
           <div className="max-lg:hidden bg-gradient-to-b from-emerald-500 to-teal-600 text-white flex p-2 rounded-md gap-3 font-semibold">
             <Store />
+<<<<<<< HEAD
             {user.store?.name ?? "No Store"}
+=======
+            {user.store?.name ||
+              (user.role === "SUPER_ADMIN" ? "All Stores" : "Unassigned")}
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
           </div>
           <div className="flex items-center justify-between gap-x-3 ">
             <div className="w-1 h-8 bg-blue-500 max-md:hidden"></div>

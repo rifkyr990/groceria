@@ -34,16 +34,30 @@ interface Filters {
 interface AdminOrderState {
   orders: AdminOrderSummary[];
   pagination: PaginationInfo | null;
+<<<<<<< HEAD
+=======
+  summary: Record<string, number> | null;
+  summaryLoading: boolean;
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
   loading: boolean;
   error: string | null;
   filters: Filters;
   setFilters: (newFilters: Partial<Filters>) => void;
   fetchOrders: (page?: number, limit?: number) => Promise<void>;
+<<<<<<< HEAD
+=======
+  fetchSummary: () => Promise<void>;
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
 }
 
 export const useAdminOrderStore = create<AdminOrderState>((set, get) => ({
   orders: [],
   pagination: null,
+<<<<<<< HEAD
+=======
+  summary: null,
+  summaryLoading: true,
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
   loading: true,
   error: null,
   filters: {
@@ -104,4 +118,28 @@ export const useAdminOrderStore = create<AdminOrderState>((set, get) => ({
       set({ error: errorMsg, loading: false });
     }
   },
+<<<<<<< HEAD
 }));
+=======
+
+  fetchSummary: async () => {
+    set({ summaryLoading: true });
+    const token = useAuthStore.getState().token;
+    if (!token) {
+      return set({ summaryLoading: false, error: "Authentication required." });
+    }
+
+    try {
+      const response = await apiCall.get("/api/orders/admin/summary", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      set({ summary: response.data.data, summaryLoading: false });
+    } catch (err: any) {
+      const errorMsg =
+        err.response?.data?.message || "Failed to fetch summary.";
+      toast.error(errorMsg);
+      set({ error: errorMsg, summaryLoading: false });
+    }
+  },
+}));
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44

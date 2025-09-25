@@ -43,6 +43,7 @@ interface CartState {
   storeId: number | null;
   storeName: string | null;
   items: CartItem[];
+  version: number;
   appliedPromo: PromoCode | null;
   tryApplyPromoCode: (
     code: string,
@@ -99,6 +100,7 @@ export const useCartStore = create<CartState>((set, get) => {
     storeId: null,
     storeName: null,
     items: [],
+    version: 0,
     appliedPromo: null,
     loading: false,
     error: null,
@@ -162,6 +164,7 @@ export const useCartStore = create<CartState>((set, get) => {
           storeName,
           items: updatedItems,
           appliedPromo: isNewStore ? null : state.appliedPromo,
+          version: state.version + 1,
         };
 
         setTimeout(() => {
@@ -196,7 +199,7 @@ export const useCartStore = create<CartState>((set, get) => {
       const updatedItems = get().items.map((item) =>
         item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item
       );
-      set({ items: updatedItems });
+      set((state) => ({ items: updatedItems, version: state.version + 1 }));
 
       debouncedSaveAndRevalidate(updatedItems);
     },
@@ -207,14 +210,14 @@ export const useCartStore = create<CartState>((set, get) => {
           ? { ...item, quantity: Math.max(1, item.quantity - 1) }
           : item
       );
-      set({ items: updatedItems });
+      set((state) => ({ items: updatedItems, version: state.version + 1 }));
 
       debouncedSaveAndRevalidate(updatedItems);
     },
 
     removeItem: (cartItemId) => {
       const updatedItems = get().items.filter((item) => item.id !== cartItemId);
-      set({ items: updatedItems });
+      set((state) => ({ items: updatedItems, version: state.version + 1 }));
 
       debouncedSaveAndRevalidate(updatedItems);
     },
@@ -274,6 +277,7 @@ export const useCartStore = create<CartState>((set, get) => {
     },
 
     resetCart: () => {
+<<<<<<< HEAD
       localStorage.removeItem("applied_promo");
       set({
         items: [],
@@ -286,12 +290,28 @@ export const useCartStore = create<CartState>((set, get) => {
     },
 
     clearCart: () => {
+=======
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
       localStorage.removeItem("applied_promo");
       set({
+        items: [],
+        storeId: null,
+        storeName: null,
+        appliedPromo: null,
+        loading: false,
+        error: null,
+        version: 0,
+      });
+    },
+
+    clearCart: () => {
+      localStorage.removeItem("applied_promo");
+      set((state) => ({
         storeId: null,
         items: [],
         appliedPromo: null,
-      });
+        version: state.version + 1,
+      }));
     },
 
     hydratePromo: () => {
@@ -308,7 +328,13 @@ export const useCartStore = create<CartState>((set, get) => {
 
     fetchCart: async (token: string | null) => {
       if (!token) {
-        set({ items: [], storeId: null, storeName: null, loading: false });
+        set((state) => ({
+          items: [],
+          storeId: null,
+          storeName: null,
+          loading: false,
+          version: state.version + 1,
+        }));
         return;
       }
       set({ loading: true, error: null });
@@ -320,7 +346,7 @@ export const useCartStore = create<CartState>((set, get) => {
 
         const data: ApiCartResponse = response.data.data;
 
-        set({
+        set((state) => ({
           storeId: data.store?.id || null,
           storeName: data.store?.name || null,
           items: (data.cartItems || []).map((item) => ({
@@ -333,7 +359,8 @@ export const useCartStore = create<CartState>((set, get) => {
             image: item.product.imageUrl,
           })),
           loading: false,
-        });
+          version: state.version + 1,
+        }));
       } catch (err) {
         const error = err as AxiosError<ApiError>;
         if (error.response?.status !== 401 && error.response?.status !== 404) {

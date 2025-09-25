@@ -32,6 +32,10 @@ import {
 import { format } from "date-fns";
 import { IStoreProps } from "@/types/store";
 import AdminOrderCard from "./AdminOrderCard";
+<<<<<<< HEAD
+=======
+import SummaryCards from "./SummaryCards";
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
 
 const OrderDashboardClient = () => {
   const { user } = useAuthStore();
@@ -43,6 +47,12 @@ const OrderDashboardClient = () => {
     fetchOrders,
     filters,
     setFilters,
+<<<<<<< HEAD
+=======
+    summary,
+    summaryLoading,
+    fetchSummary,
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
   } = useAdminOrderStore();
 
   // Local state for filter inputs
@@ -52,10 +62,18 @@ const OrderDashboardClient = () => {
   const [localStoreId, setLocalStoreId] = useState(filters.storeId);
   const [stores, setStores] = useState<IStoreProps[]>([]);
 
+<<<<<<< HEAD
   // Fetch orders on mount
   useEffect(() => {
     fetchOrders(1);
   }, [fetchOrders]);
+=======
+  // Fetch orders and summary on mount
+  useEffect(() => {
+    fetchOrders(1);
+    fetchSummary();
+  }, [fetchOrders, fetchSummary]);
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
 
   // Fetch stores for Super Admin filter
   useEffect(() => {
@@ -102,6 +120,11 @@ const OrderDashboardClient = () => {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Order Management</h1>
 
+<<<<<<< HEAD
+=======
+      <SummaryCards summary={summary} loading={summaryLoading} />
+
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
       {/* --- Filter Toolbar --- */}
       <div className="bg-white p-4 rounded-2xl shadow-lg shadow-gray-200/50">
         <div className="flex flex-col md:flex-row md:flex-wrap md:items-end md:gap-4">

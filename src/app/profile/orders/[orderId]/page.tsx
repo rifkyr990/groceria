@@ -36,6 +36,7 @@ import { formatIDRCurrency } from "@/utils/format";
 import StepIndicator from "@/components/cart/StepIndicator";
 import { FiCheckCircle } from "react-icons/fi";
 import { cn } from "@/lib/utils";
+<<<<<<< HEAD
 import { Badge } from "@/components/ui/badge";
 import { toast } from "react-toastify";
 import OrderActions from "../OrderActions";
@@ -224,6 +225,12 @@ const UploadProofCard = ({
     </Card>
   );
 };
+=======
+import { toast } from "react-toastify";
+import OrderActions from "../OrderActions";
+import ActionCenterCard from "../ActionCenterCard";
+import StatusBadge from "@/components/shared/StatusBadge";
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -239,9 +246,16 @@ export default function OrderDetailPage() {
     confirmReceipt,
     repayOrder,
   } = useOrderDetailStore();
+<<<<<<< HEAD
   const { token } = useAuthStore();
   const cameFromCheckout = searchParams.get("from") === "checkout";
   const [isClient, setIsClient] = useState(false);
+=======
+  const { token, user } = useAuthStore();
+  const cameFromCheckout = searchParams.get("from") === "checkout";
+  const [isClient, setIsClient] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
   const [isCancelAlertOpen, setIsCancelAlertOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
     "profile" | "address" | "password"
@@ -277,6 +291,7 @@ export default function OrderDetailPage() {
   }, []);
 
   useEffect(() => {
+<<<<<<< HEAD
     if (isClient && !token) {
       toast.warn("You must be logged in to view your orders.");
       router.replace("/login");
@@ -330,6 +345,73 @@ export default function OrderDetailPage() {
       },
     ];
 
+=======
+    if (!isClient) {
+      return;
+    }
+
+    if (!token) {
+      toast.warn("You must be logged in to view this page.");
+      router.replace("/login");
+      return;
+    }
+
+    if (!user?.is_verified) {
+      toast.warn("Please verify your email to view your orders.");
+      router.replace("/");
+      return;
+    }
+
+    if (orderId && !isNaN(orderId)) {
+      fetchOrder(orderId).finally(() => setCheckingAuth(false));
+    } else {
+      toast.error("Invalid Order ID.");
+      router.replace("/profile/orders");
+    }
+  }, [isClient, token, user, orderId, router, fetchOrder]);
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-4">
+          <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+          <h2 className="text-xl font-bold text-gray-800">
+            Failed to load order
+          </h2>
+          <p className="text-gray-500">{error}</p>
+        </div>
+      );
+    }
+
+    if (!order) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-4">
+          <AlertCircle className="w-12 h-12 text-yellow-500 mb-4" />
+          <h2 className="text-xl font-bold text-gray-800">Order Not Found</h2>
+          <p className="text-gray-500">
+            We couldn't find an order with this ID.
+          </p>
+        </div>
+      );
+    }
+
+    const confirmationStep = [
+      {
+        id: "confirmation",
+        label: "Order Confirmation",
+        icon: <FiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />,
+      },
+    ];
+
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
     return (
       <div className="w-full">
         {cameFromCheckout && (
@@ -344,6 +426,7 @@ export default function OrderDetailPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
             {!cameFromCheckout && (
+<<<<<<< HEAD
                <Button asChild variant="outline" size="icon" className="flex-shrink-0">
                   <Link href="/profile/orders" aria-label="Back to My Orders">
                     <ArrowLeft className="w-4 h-4" />
@@ -352,6 +435,23 @@ export default function OrderDetailPage() {
             )}
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Order Details</h1>
+=======
+              <Button
+                asChild
+                variant="outline"
+                size="icon"
+                className="flex-shrink-0"
+              >
+                <Link href="/profile/orders" aria-label="Back to My Orders">
+                  <ArrowLeft className="w-4 h-4" />
+                </Link>
+              </Button>
+            )}
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                Order Details
+              </h1>
+>>>>>>> 2b1669caedb962851817d77f02cb0146a921bb44
               <p className="text-sm text-gray-500">
                 Order #{order.id} &bull;{" "}
                 {new Date(order.createdAt).toLocaleString("en-GB", {
