@@ -33,6 +33,36 @@ interface Address {
   is_primary: boolean;
 }
 
+interface AddressFormValues {
+  name: string;
+  phone: string;
+  province: string;
+  city: string;
+  district: string;
+  subdistrict: string;
+  postal_code: string;
+  street: string;
+  detail: string;
+  label: "RUMAH" | "KANTOR";
+  is_primary: boolean;
+}
+
+// sesuai schema prisma
+interface Address {
+  id: number;
+  name: string;
+  phone: string;
+  province: string;
+  city: string;
+  district: string;
+  subdistrict: string;
+  postal_code: string;
+  street: string;
+  detail: string;
+  label: "RUMAH" | "KANTOR";
+  is_primary: boolean;
+}
+
 interface AddressState {
   addresses: Address[];
   loading: boolean;

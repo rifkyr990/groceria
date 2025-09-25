@@ -26,7 +26,6 @@ export default function VerifyNewEmailPage() {
       const success = await verifyNewEmail(token);
       if (success) {
         setStatus("success");
-        toast.success("Email baru berhasil diverifikasi!");
         setTimeout(() => router.push("/profile"), 2000);
       } else {
         setStatus("error");

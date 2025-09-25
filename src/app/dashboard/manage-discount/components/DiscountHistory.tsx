@@ -59,6 +59,7 @@ export default function DiscountHistory({
     discountType,
     searchQuery
   );
+  console.log(filteredDiscounts);
   // const untuk selector
   // const [searchQuery, setSearchQuery] = useState("");
   // const [discountType, setDiscountType] = useState("all");
@@ -75,33 +76,6 @@ export default function DiscountHistory({
       console.log(error);
     }
   };
-  // // Filter discounts berdasarkan semua kriteria
-  // const filteredDiscounts = discounts.filter((d) => {
-  //   // Filter berdasarkan userRole dan selectedStore
-  //   if (userRole === "STORE_ADMIN") {
-  //     if (d.store_id.toString() !== selectedStore) return false;
-  //   } else {
-  //     if (
-  //       selectedStore &&
-  //       selectedStore !== "all" &&
-  //       d.store_id.toString() !== selectedStore
-  //     )
-  //       return false;
-  //   }
-
-  //   // Filter berdasarkan discountType
-  //   if (discountType !== "all" && d.type !== discountType) return false;
-
-  //   // Filter berdasarkan searchQuery (cari di product name dan code)
-  //   if (searchQuery.trim() !== "") {
-  //     const q = searchQuery.toLowerCase();
-  //     const productName = d.product.name.toLowerCase();
-  //     const code = d.code.toLowerCase();
-  //     if (!productName.includes(q) && !code.includes(q)) return false;
-  //   }
-
-  //   return true;
-  // });
 
   useEffect(() => {
     fetchAllStores();
@@ -193,7 +167,9 @@ export default function DiscountHistory({
                       new Date(d.end_date)
                     )}
                   </TableCell>
-                  <TableCell className="text-center">John Doe</TableCell>
+                  <TableCell className="text-center">
+                    {d.creator.first_name} {d.creator.last_name}
+                  </TableCell>
                   <TableCell className="text-center">
                     {d.store?.name || "-"}
                   </TableCell>

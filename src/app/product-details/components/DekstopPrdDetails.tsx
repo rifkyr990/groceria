@@ -84,27 +84,13 @@ export default function DesktopPrdDetails({
   const isOutOfStock = stock === 0;
   const isLowStock = stock && stock <= 5;
   // Store
-  const storeIdentity = selectedProductDetails?.stocks.map((stock: any) => {
-    return {
-      name: stock.store.name,
-      city: stock.store.city,
-      province: stock.store.province,
-    };
-  })[0];
-
-  // console.log(storeIdentity);
-  // Contact Handler
-  // const adminContact =
-  //   selectedProductDetails?.stocks?.[0]?.store?.admins?.[0]?.phone ?? null;
-  // console.log(adminContact);
-  // const handlerWhatsapp = () => {
-  //   const waUrl = `https://wa.me/${phone.phone}`;
-  //   window.open(waUrl);
-  // };
-
-  // useEffect(() => {
-  //   console.log(value);
-  // }, [value]);
+  const storeIdentity = selectedProductDetails?.stocks?.[0]?.store
+    ? {
+        name: selectedProductDetails.stocks[0].store.name,
+        city: selectedProductDetails.stocks[0].store.city,
+        province: selectedProductDetails.stocks[0].store.province,
+      }
+    : null;
 
   return (
     <section className={`${className}  `}>
@@ -247,7 +233,7 @@ export default function DesktopPrdDetails({
               </Button>
             </div>
           </div>
-          {/* <div id="share-prd" className="my-5 flex justify-between">
+          <div id="share-prd" className="my-5 flex justify-between">
             <div className="flex items-center">
               <p className="text-sm">Share:</p>
               <div id="icon-social" className="flex items-center">
@@ -274,7 +260,7 @@ export default function DesktopPrdDetails({
                 />
               </div>
             </div>
-          </div> */}
+          </div>
         </div>
       </section>
       <section id="store-profile" className=" mt-10 p-5 xl:w-[75%] mx-auto ">
@@ -293,7 +279,12 @@ export default function DesktopPrdDetails({
               </div>
               <p className="flex text-xs gap-x-1 items-center">
                 <MapPin className="size-5" />
-                {storeIdentity?.city}, {storeIdentity?.province}{" "}
+                {storeIdentity?.city}, {storeIdentity?.province}
+                {selectedProductDetails?.distance && (
+                  <span className="ml-2 text-gray-500">
+                    • {selectedProductDetails.distance.toFixed(1)} km dari kamu
+                  </span>
+                )}
               </p>
             </div>
           </div>
@@ -357,7 +348,7 @@ export default function DesktopPrdDetails({
                   <CardContent className="p-3">
                     <p className="text-xs font-semibold">{product.name}</p>
                     <p className="mt-2 font-bold text-green-600">
-                      Rp.{product.price.toLocaleString()}
+                      {formatIDRCurrency(Math.trunc(product.price))}
                     </p>
                   </CardContent>
                   <Button className="text-xs h-7 w-[85%] mx-auto my-3 bg-green-600 hover:bg-green-700 ">

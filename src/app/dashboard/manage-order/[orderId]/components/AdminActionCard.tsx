@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdminOrderDetail } from "@/components/types";
-import { CheckCircle, Loader2, Send, ShieldAlert, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { CheckCircle, Loader2, Send, XCircle } from "lucide-react";
 
 interface AdminActionCardProps {
   order: AdminOrderDetail;

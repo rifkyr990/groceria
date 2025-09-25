@@ -27,16 +27,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { apiCall } from "@/helper/apiCall";
+import { IStoreProps } from "@/types/store";
 import { IUserProps } from "@/types/user";
 import { FileSearch, Search, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import UserDetailsDialog from "./btndetails/UserDetailsDialog";
 import UsersDataCardStacks from "./CardStacksUsersData";
-import { IStoreProps } from "@/types/store";
 interface IUsersTable {
   className?: string;
-  // customers: IUserProps[];
   stores: IStoreProps[];
 }
 function useDebounce(value: string, delay: number) {
@@ -52,11 +51,7 @@ function useDebounce(value: string, delay: number) {
   return debouncedValue;
 }
 
-export default function CustomerTable({
-  className,
-  // customers,
-  stores,
-}: IUsersTable) {
+export default function CustomerTable({ className, stores }: IUsersTable) {
   const [userList, setUserList] = useState<IUserProps[]>([]);
   const [pagination, setPagination] = useState({
     total: 0,
@@ -83,23 +78,19 @@ export default function CustomerTable({
           search: debouncedSearchQuery,
           status: statusFilter,
         });
-
         const res = await apiCall.get(
           `/api/user/customers?${params.toString()}`
         );
-
         setUserList(res.data.data.data);
         setPagination(res.data.data.pagination);
       } catch (error) {
         console.error("Failed to fetch customers:", error);
-        toast.error("Gagal memuat data customer.");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchUsers();
-    // Dependency array: useEffect ini akan berjalan kembali jika salah satu nilai ini berubah
   }, [
     currentPage,
     debouncedSearchQuery,
@@ -122,7 +113,7 @@ export default function CustomerTable({
       const userId = data.id;
       console.log(userId);
       try {
-        const res = await apiCall.delete(`/api/user/${userId}`);
+        const res = await apiCall.patch(`/api/user/${userId}`);
         console.log(res);
         toast.success("Delete User Data Success");
         setUserList((prev) => prev.filter((user) => user.id !== data.id));
@@ -139,13 +130,11 @@ export default function CustomerTable({
   // }, [customers]);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    // PERBAIKAN: Reset ke halaman 1 saat user mulai mencari
     setCurrentPage(1);
   };
 
   const handleFilterChange = (value: string) => {
     setStatusFilter(value);
-    // PERBAIKAN: Reset ke halaman 1 saat filter diubah
     setCurrentPage(1);
   };
 

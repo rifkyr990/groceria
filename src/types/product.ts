@@ -4,6 +4,7 @@ export interface IProductProps {
   id: number;
   name: string;
   price: number;
+  distance: number;
   stocks: {
     store: IStoreProps;
     product_id: number;

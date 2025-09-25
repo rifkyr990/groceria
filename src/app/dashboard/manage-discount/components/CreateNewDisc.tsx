@@ -110,6 +110,7 @@ export default function CreateNewDiscount({
       type: discType,
       start_date: dateRange.from,
       end_date: dateRange.to,
+      user_id: user.id,
     };
 
     if (discType === "MANUAL") {
@@ -129,7 +130,6 @@ export default function CreateNewDiscount({
       const res = await apiCall.post("/api/discount/new", { data: payload });
       if (!res) return;
       toast.success("Create New Discount Success");
-      // onCreate(res.data.data); //sementara off dulu
       setOpen(false);
       window.location.reload();
       // reset form

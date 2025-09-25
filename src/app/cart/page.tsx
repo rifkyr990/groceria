@@ -12,8 +12,6 @@ import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function CartPage() {
-  const router = useRouter();
-
   const {
     items,
     appliedPromo,
@@ -31,6 +29,7 @@ export default function CartPage() {
     appliedPromo?.code || ""
   );
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
+  const router = useRouter();
 
   const { token, user } = useAuthStore();
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -40,7 +39,6 @@ export default function CartPage() {
     setIsClient(true);
   }, []);
 
-  // Cek apakah user belum login / belum verifikasi
   useEffect(() => {
     if (!isClient) {
       return;
@@ -104,9 +102,6 @@ export default function CartPage() {
       setPromoStatus("idle");
     }
   };
-
-  // Jangan render apapun sebelum pengecekan auth selesai
-  if (checkingAuth) return null;
 
   return (
     <div className="flex flex-col min-h-screen">

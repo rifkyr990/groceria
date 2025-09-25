@@ -16,6 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getDistanceFromLatLonInKm } from "@/utils/distance";
 
 // interface Product {
 //   id: number;
@@ -46,18 +47,37 @@ export default function ProductList() {
       try {
         const url =
           province && city
-            ? `/api/product?province=${encodeURIComponent(province)}&city=${encodeURIComponent(city)}${latitude && longitude ? `&lat=${latitude}&long=${longitude}` : ""}`
+            ? `/api/product?province=${encodeURIComponent(province.trim().toUpperCase())}&city=${encodeURIComponent(city.trim().toUpperCase())}${latitude && longitude ? `&lat=${latitude}&long=${longitude}` : ""}`
             : `/api/product/landing/all`;
-
         const res = await apiCall.get(url);
-        const result = res.data.data;
-        // console.log(result);
-        // console.log(filteredByLocation);
-        // const res = await fetch(url);
-        // console.log(url);
-        // // const data = await res.json();
-        // const json = await res.json();
-        // const data = json.data || [];
+
+        console.log(res);
+        console.log(url);
+
+        let result = res.data.data as IProductProps[];
+        console.log(result);
+
+        // ⬇️ Sort by distance if lat/lon available
+        if (latitude && longitude) {
+          result = result
+            .filter(
+              (product) =>
+                product.stocks?.[0]?.store?.latitude &&
+                product.stocks?.[0]?.store?.longitude
+            )
+            .map((product) => {
+              const store = product.stocks?.[0]?.store;
+              const distance = getDistanceFromLatLonInKm(
+                latitude,
+                longitude,
+                store.latitude,
+                store.longitude
+              );
+              return { ...product, distance };
+            })
+            .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+        }
+
         setProducts(result);
         setFilteredProducts(result);
         setProductsByLoc(result);
@@ -69,20 +89,6 @@ export default function ProductList() {
     fetchProducts();
   }, [province, city, latitude, longitude]);
 
-  // useEffect(() => {
-  //   if (selectedCategory === "semua") {
-  //     setFilteredProducts(products);
-  //   } else {
-  //     setFilteredProducts(
-  //       products.filter(
-  //         (p: IProductProps) =>
-  //           p.category.category.toLowerCase() === selectedCategory
-  //       )
-  //     );
-  //   }
-  //   setCurrentPage(1);
-  // }, [selectedCategory, products]);
-  // filtered products
   useEffect(() => {
     if (selectedCategory === "semua") {
       setFilteredProducts(products);
@@ -130,7 +136,6 @@ export default function ProductList() {
 
       {/* Filter */}
       <div className="flex gap-3 mb-6 flex-wrap">
-        {/* {["semua", "buah", "sayur", "daging", "lainnya"].map((cat) => ( */}
         {categories.map((cat) => (
           <button
             key={cat}

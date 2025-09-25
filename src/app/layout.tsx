@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+// import { GeistSans } from "geist/font/sans";
+// import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import ClientWrapper from "./client-wrapper";
@@ -10,9 +10,9 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Script from "next/script";
 
-const geistSans = GeistSans;
+// const geistSans = GeistSans;
 
-const geistMono = GeistMono;
+// const geistMono = GeistMono;
 
 const PoppinsFont = Poppins({
   variable: "--font-poppins",
@@ -35,9 +35,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
+      {/* <body
         className={`${geistSans.variable} ${geistMono.variable} ${PoppinsFont.variable} antialiased`}
-      >
+      > */}
+      <body className={` ${PoppinsFont.variable} antialiased`}>
         <Script
           id="midtrans-snap"
           type="text/javascript"
