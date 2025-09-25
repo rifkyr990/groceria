@@ -146,7 +146,6 @@ export interface AdminOrderDetail {
   };
   shipping: {
     address: string;
-    cost: string;
   };
   payment: {
     method: string;
@@ -156,6 +155,7 @@ export interface AdminOrderDetail {
   pricing: {
     subtotal: string;
     discount: string;
+    cost: string;
     total: string;
   };
   items: AdminOrderItem[];
