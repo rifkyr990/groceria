@@ -38,7 +38,9 @@ export default function StoreTable({ className, stores }: IStoreTable) {
   const handlerDelete = async (data: IStoreProps) => {
     const storeId = data.id;
     try {
-      const deleteStore = await apiCall.patch(`/api/store/${storeId}`); // soft delete store
+      const deleteStore = await apiCall.patch(
+        `/api/store/soft-delete/${storeId}`
+      ); // soft delete store
 
       if (deleteStore) {
         toast.success("Delete Store and Revert Admin Success");
