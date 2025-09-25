@@ -167,7 +167,7 @@ export default function SalesReport() {
           {formatIDRCurrency(summary.totalSales)}
         </span>
       ),
-      desc: "this month  (by PAID payment status)",
+      desc: "this month  (by SHIPPED transaction status)",
     },
     {
       id: 2,
@@ -179,7 +179,7 @@ export default function SalesReport() {
           {summary.totalQuantity}
         </span>
       ),
-      desc: "products this month (by PAID payment status)",
+      desc: "products this month (by SHIPPED transaction status)",
     },
     // {
     //   id: 3,

@@ -4,8 +4,9 @@ export interface IProductProps {
   id: number;
   name: string;
   price: number;
+  distance: number;
   stocks: {
-    store: IStoreProps[];
+    store: IStoreProps;
     product_id: number;
     stock_quantity: number;
     min_stock: number;

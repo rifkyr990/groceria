@@ -27,14 +27,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { apiCall } from "@/helper/apiCall";
+import { IStoreProps } from "@/types/store";
 import { IUserProps } from "@/types/user";
 import { FileSearch, Search, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import UserDetailsDialog from "./btndetails/UserDetailsDialog";
 import UsersDataCardStacks from "./CardStacksUsersData";
-import { IStoreProps } from "@/types/store";
-import { useRouter } from "next/navigation";
 interface IUsersTable {
   className?: string;
   stores: IStoreProps[];
@@ -52,10 +51,7 @@ function useDebounce(value: string, delay: number) {
   return debouncedValue;
 }
 
-export default function CustomerTable({
-  className,
-  stores,
-}: IUsersTable) {
+export default function CustomerTable({ className, stores }: IUsersTable) {
   const [userList, setUserList] = useState<IUserProps[]>([]);
   const [pagination, setPagination] = useState({
     total: 0,
@@ -117,7 +113,7 @@ export default function CustomerTable({
       const userId = data.id;
       console.log(userId);
       try {
-        const res = await apiCall.delete(`/api/user/${userId}`);
+        const res = await apiCall.patch(`/api/user/${userId}`);
         console.log(res);
         toast.success("Delete User Data Success");
         setUserList((prev) => prev.filter((user) => user.id !== data.id));

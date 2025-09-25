@@ -52,7 +52,7 @@ export default function DashboardNavbar() {
           <PopoverNotification />
           <div className="max-lg:hidden bg-gradient-to-b from-emerald-500 to-teal-600 text-white flex p-2 rounded-md gap-3 font-semibold">
             <Store />
-            {user.store.name}
+            {user.store?.name ?? "No Store"}
           </div>
           <div className="flex items-center justify-between gap-x-3 ">
             <div className="w-1 h-8 bg-blue-500 max-md:hidden"></div>

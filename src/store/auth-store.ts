@@ -2,6 +2,7 @@ import { email } from "zod";
 import { create } from "zustand";
 import { apiCall } from "@/helper/apiCall";
 import { toast } from "react-toastify";
+import { useCartStore } from "./cart-store";
 
 interface AuthState {
   user: any | null;

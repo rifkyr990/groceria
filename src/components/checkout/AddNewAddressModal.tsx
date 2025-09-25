@@ -43,7 +43,7 @@ interface AddNewAddressModalProps {
 }
 
 interface AddressFormData {
-  label: string;
+  label: "RUMAH" | "KANTOR";
   name: string;
   phone: string;
   province_id: string;
@@ -51,6 +51,7 @@ interface AddressFormData {
   city_id: string;
   city: string;
   district: string;
+  subdistrict: string;
   street: string;
   postal_code: string;
   is_primary: boolean;
@@ -266,7 +267,7 @@ export default function AddNewAddressModal({
   } = useLocationStore();
 
   const initialFormState: AddressFormData = {
-    label: "",
+    label: "RUMAH",
     name: "",
     phone: "",
     province_id: "",
@@ -274,6 +275,7 @@ export default function AddNewAddressModal({
     city_id: "",
     city: "",
     district: "",
+    subdistrict: "",
     street: "",
     postal_code: "",
     is_primary: false,

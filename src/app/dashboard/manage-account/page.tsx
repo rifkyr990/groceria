@@ -8,12 +8,7 @@ import { toast } from "react-toastify";
 import DashboardLayout from "../components/DashboardLayout";
 import CustomerTable from "./components/CustomerTable";
 import StoreAdminData from "./components/StoreAdminTable";
-// interface IStoreAdminData {
-//   storeAdmins: {
-//     withStore: IStoreProps[];
-//     withoutStore: IUserProps[];
-//   };
-// }
+
 export default function AccountPage() {
   const router = useRouter();
   const [users, setUsers] = useState<IUserProps[]>([]);
@@ -25,6 +20,7 @@ export default function AccountPage() {
     withStore: [],
     withoutStore: [],
   });
+  console.log(storeAdmins);
   const [stores, setStores] = useState<IStoreProps[]>([]);
   useEffect(() => {
     const fetchAllData = async () => {

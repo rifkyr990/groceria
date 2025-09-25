@@ -97,46 +97,13 @@ export default function StoreAdminData({
   const currentUsers = filteredAdmin.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredAdmin.length / usersPerPage);
 
-  // revert store admin to cust
-  // const handlerRevertAdmin = async (
-  //   id: string,
-  //   role: string,
-  //   store_id: number
-  // ) => {
-  //   try {
-  //     const confirmAlert = confirm("Are you sure revert this store admin?");
-  //     if (!confirmAlert) return;
-  //     const res = await apiCall.patch(`/api/user/revert-admin/${id}`, {
-  //       role,
-  //       store_id,
-  //     });
-  //     if (!res) toast.error("Revert Store Admin Error");
-  //     toast.success("Revert Admin Success");
-  //     window.location.reload();
-  //     console.log(res.data.data);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-  // change store
-  // const [openStoreTf, setOpenStoreTf] = useState<{
-  //   adminData: IRelocateAdminData | null;
-  //   storeList: { id: number; name: string }[];
-  //   open: boolean;
-  // }>({
-  //   adminData: null,
-  //   storeList: storeList,
-  //   open: false,
-  // });
-
-  // delete admin by id (as a user)
-
+  // soft delete methods
   const deleteStoreAdmin = async (id: string) => {
     const confirm = window.confirm("Are you sure delete this store admin?");
     if (!confirm) return;
     try {
       const user_id = id;
-      await apiCall.delete(`/api/user/${user_id}`);
+      await apiCall.patch(`/api/user/${user_id}`);
       alert("Delete store admin success");
       window.location.reload();
     } catch (error) {
