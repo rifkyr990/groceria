@@ -60,7 +60,7 @@ export const processOrderPlacement = async ({
   if (total === 0) {
     const orderResult = await placeOrder(orderPayload);
     if (orderResult.success && orderResult.orderId) {
-      router.push(`/profile/orders/${orderResult.orderId}?from=checkout`);
+      router.push(`/pengaturan/orders/${orderResult.orderId}?from=checkout`);
     }
     return;
   }
@@ -73,19 +73,21 @@ export const processOrderPlacement = async ({
   const newOrderId = orderResult.orderId;
 
   if (selectedPaymentMethod.id === "manual_transfer") {
-    router.push(`/profile/orders/${newOrderId}?from=checkout`);
+    router.push(`/pengaturan/orders/${newOrderId}?from=checkout`);
   } else if (selectedPaymentMethod.id === "payment_gateway") {
     const paymentResult = await getMidtransToken(newOrderId);
     if (paymentResult.success && paymentResult.token) {
       window.snap.pay(paymentResult.token, {
         onSuccess: () =>
-          router.push(`/profile/orders/${newOrderId}?from=checkout`),
+          router.push(`/pengaturan/orders/${newOrderId}?from=checkout`),
         onPending: () =>
-          router.push(`/profile/orders/${newOrderId}?from=checkout`),
+          router.push(`/pengaturan/orders/${newOrderId}?from=checkout`),
         onError: () => toast.error("Payment failed. Please try again."),
         onClose: () => {
-          toast.warn("Payment was not completed. You can find and pay for this order in your profile.");
-          router.push(`/profile/orders/${newOrderId}?from=checkout`);
+          toast.warn(
+            "Payment was not completed. You can find and pay for this order in your profile (pengaturan)."
+          );
+          router.push(`/pengaturan/orders/${newOrderId}?from=checkout`);
         },
       });
     }

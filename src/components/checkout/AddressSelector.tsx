@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { MapPin, Plus, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import AddAddressModal from "@/app/profile/address/AddAddressModal";
+import AddAddressModal from "@/app/pengaturan/address/AddAddressModal";
 import { UserAddress } from "../types";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -28,10 +28,11 @@ export default function AddressSelector({
   useEffect(() => {
     if (!selectedAddressId && addresses.length > 0) {
       const primaryAddress = addresses.find((addr) => addr.is_primary);
-      setSelectedAddressId(primaryAddress ? primaryAddress.id : addresses[0].id);
+      setSelectedAddressId(
+        primaryAddress ? primaryAddress.id : addresses[0].id
+      );
     }
   }, [addresses, selectedAddressId, setSelectedAddressId]);
-
 
   return (
     <>
@@ -65,7 +66,6 @@ export default function AddressSelector({
               value={selectedAddressId?.toString()}
               onValueChange={(value) => setSelectedAddressId(Number(value))}
             >
-
               <div className="space-y-3">
                 {addresses.map((address) => (
                   <Label
