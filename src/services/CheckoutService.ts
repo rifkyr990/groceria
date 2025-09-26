@@ -83,6 +83,10 @@ export const processOrderPlacement = async ({
         onPending: () =>
           router.push(`/profile/orders/${newOrderId}?from=checkout`),
         onError: () => toast.error("Payment failed. Please try again."),
+        onClose: () => {
+          toast.warn("Payment was not completed. You can find and pay for this order in your profile.");
+          router.push(`/profile/orders/${newOrderId}?from=checkout`);
+        },
       });
     }
   }
