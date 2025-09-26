@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
 import { useOrderStore } from "@/store/order-store";
 import { useAddressStore } from "@/store/address-store";
@@ -52,8 +53,16 @@ const checkoutStep = [
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { placeOrder, getMidtransToken, loading: isPlacingOrder } = useOrderStore();
-  const { addresses, loading: addressesLoading, fetchAddress,} = useAddressStore();
+  const {
+    placeOrder,
+    getMidtransToken,
+    loading: isPlacingOrder,
+  } = useOrderStore();
+  const {
+    addresses,
+    loading: addressesLoading,
+    fetchAddress,
+  } = useAddressStore();
   const {
     fetchOptions,
     options: shippingOptions,
@@ -65,6 +74,7 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
     null
   );
+
   const [selectedShipping, setSelectedShipping] =
     useState<ShippingOption | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
@@ -79,24 +89,46 @@ export default function CheckoutPage() {
     items,
     appliedPromo,
     storeName,
+    storeId,
     tryApplyPromoCode,
     removePromoCode,
     fetchCart,
   } = useCartStore();
 
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
+  const [isClient, setIsClient] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      fetchCart(token);
-      fetchAddress();
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) {
+      return;
     }
-  }, [token, fetchCart, fetchAddress]);
+
+    if (!token) {
+      toast.warn("You must be logged in to view the checkout page.");
+      router.replace("/login");
+      return;
+    }
+
+    if (!user?.is_verified) {
+      toast.warn("Please verify your email to proceed to checkout.");
+      router.replace("/");
+      return;
+    }
+
+    fetchAddress().then(() => {
+      setCheckingAuth(false);
+    });
+  }, [isClient, token, user, router, fetchAddress]);
 
   useEffect(() => {
-    if (selectedAddressId) {
+    if (!checkingAuth && selectedAddressId && storeId) {
       const getOptions = async () => {
-        const options = await fetchOptions(selectedAddressId);
+        const options = await fetchOptions(selectedAddressId, storeId);
         if (options && options.length > 0) {
           setSelectedShipping(options[0]);
         } else {
@@ -105,7 +137,7 @@ export default function CheckoutPage() {
       };
       getOptions();
     }
-  }, [selectedAddressId, fetchOptions]);
+  }, [checkingAuth, selectedAddressId, storeId, fetchOptions]);
 
   useEffect(() => {
     setPromoInputText(appliedPromo?.code || "");
@@ -181,12 +213,32 @@ export default function CheckoutPage() {
       return;
     }
 
+    const { storeId } = useCartStore.getState();
+    if (!storeId) {
+      toast.error(
+        "Could not identify the store. Please try re-adding an item to your cart."
+      );
+      return;
+    }
+
     const orderPayload = {
       addressId: selectedAddressId,
-      shippingCost: selectedShipping.cost, // This is now a string
+      storeId: storeId,
+      shippingCost: selectedShipping.cost,
       paymentMethodId,
       promoCode: appliedPromo?.code,
     };
+
+    if (total === 0) {
+      const orderResult = await placeOrder(orderPayload);
+      if (orderResult.success && orderResult.orderId) {
+        toast.success("Your free order has been placed successfully");
+        router.push(`/profile/orders/${orderResult.orderId}$from=checkout`);
+      } else {
+        toast.error("Failed to place your free order. Please try again.");
+      }
+      return;
+    }
 
     const orderResult = await placeOrder(orderPayload);
 
@@ -196,6 +248,12 @@ export default function CheckoutPage() {
     }
 
     const newOrderId = orderResult.orderId;
+
+    if (selectedPaymentMethod.id === "manual_transfer") {
+      toast.success("Order placed! Please upload your payment proof.");
+      router.push(`/profile/orders/${newOrderId}?from=checkout`);
+      return;
+    }
 
     if (selectedPaymentMethod.id === "payment_gateway") {
       const paymentResult = await getMidtransToken(newOrderId);
@@ -231,12 +289,16 @@ export default function CheckoutPage() {
           );
         },
       });
-    } else {
-      // Manual transfer flow
-      toast.success("Order placed! Please upload your payment proof.");
-      router.push(`/pengaturan/orders/${newOrderId}?from=checkout`);
     }
   };
+
+  if (checkingAuth) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -287,12 +349,14 @@ export default function CheckoutPage() {
                   onApply={handleApplyPromo}
                   onRemove={handleRemovePromo}
                 />
+                {/* Spacer div to push content up on mobile, preventing overlap with the fixed button bar */}
+                <div className="h-24 lg:hidden" />
                 <div className="hidden lg:block">
                   <CheckoutButton
                     mode="checkout"
                     onClick={handlePlaceOrder}
                     total={total.toString()}
-                    disabled={isPlacingOrder}
+                    disabled={isPlacingOrder || items.length === 0}
                   />
                 </div>
               </div>
@@ -320,7 +384,7 @@ export default function CheckoutPage() {
           mode="checkout"
           onClick={handlePlaceOrder}
           total={total.toString()}
-          disabled={isPlacingOrder}
+          disabled={isPlacingOrder || items.length === 0}
         />
       </div>
 

@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { apiCall } from "@/helper/apiCall";
+import { useAuthStore } from "@/store/auth-store";
+import { useStore } from "@/store/useStore";
 import { IProductProps } from "@/types/product";
 import { IStoreProps } from "@/types/store";
 import { formatIntlDate } from "@/utils/format";
@@ -44,11 +46,12 @@ export default function CreateNewDiscount({
   setOpen,
   onCreate,
 }: ICreateNewDiscount) {
-  // Store & Product List
-  const [storeList, setStoreList] = useState<IStoreProps[]>([]);
-  const [selectedStore, setSelectedStore] = useState("");
   const [productByStore, setProductByStore] = useState<IProductProps[]>([]);
   const [selectedProduct, setSelectedProduct] = useState("");
+  // get User Data
+  const { selectedStore, setSelectedStore, fetchAllStores, storesData } =
+    useStore();
+  const user = useAuthStore((state) => state.user);
 
   // Discount Info
   const [discountCode, setDiscountCode] = useState("");
@@ -65,15 +68,7 @@ export default function CreateNewDiscount({
 
   // GET Store List
   useEffect(() => {
-    const fetchStores = async () => {
-      try {
-        const res = await apiCall.get("/api/store/all");
-        setStoreList(res.data.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchStores();
+    fetchAllStores();
   }, []);
 
   // GET Products by Store
@@ -115,6 +110,7 @@ export default function CreateNewDiscount({
       type: discType,
       start_date: dateRange.from,
       end_date: dateRange.to,
+      user_id: user.id,
     };
 
     if (discType === "MANUAL") {
@@ -124,6 +120,8 @@ export default function CreateNewDiscount({
 
     if (discType === "MIN_PURCHASE") {
       payload.minPurch = Number(minPurch);
+      payload.valueType = valueType;
+      payload.discAmount = Number(discAmount);
     }
 
     console.log("Payload to submit:", payload);
@@ -132,10 +130,8 @@ export default function CreateNewDiscount({
       const res = await apiCall.post("/api/discount/new", { data: payload });
       if (!res) return;
       toast.success("Create New Discount Success");
-      // onCreate(res.data.data); //sementara off dulu
       setOpen(false);
       window.location.reload();
-
       // reset form
       setDiscType("");
       setSelectedStore("");
@@ -158,12 +154,16 @@ export default function CreateNewDiscount({
           <div>
             <DialogTitle>Create New Discount</DialogTitle>
           </div>
-          <Select value={selectedStore} onValueChange={setSelectedStore}>
+          <Select
+            value={selectedStore}
+            onValueChange={setSelectedStore}
+            disabled={user.role === "STORE_ADMIN"}
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select Store" />
             </SelectTrigger>
             <SelectContent>
-              {storeList.map((store) => (
+              {storesData.map((store) => (
                 <SelectItem key={store.id} value={store.id.toString()}>
                   {store.name}
                 </SelectItem>
@@ -260,6 +260,31 @@ export default function CreateNewDiscount({
                 value={minPurch}
                 onChange={(e) => setMinPurch(e.target.value)}
               />
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label>Value Type</label>
+                  <Select
+                    value={valueType.toUpperCase()}
+                    onValueChange={setValueType}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Value Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PERCENTAGE">Percentage (%)</SelectItem>
+                      <SelectItem value="NOMINAL">Nominal (Rp)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <label>Amount</label>
+                  <Input
+                    type="number"
+                    value={discAmount}
+                    onChange={(e) => setDiscAmount(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
           )}
 

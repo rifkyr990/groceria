@@ -44,7 +44,7 @@ const items = [
   {
     id: 6,
     icon: <ChartLine className="size-6" />,
-    url: "/dashboard/manage-reporting",
+    url: "/dashboard/manage-reporting/sales-report",
   },
 ];
 

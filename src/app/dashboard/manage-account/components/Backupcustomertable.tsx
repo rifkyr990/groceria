@@ -27,83 +27,58 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { apiCall } from "@/helper/apiCall";
-import { IStoreProps } from "@/types/store";
 import { IUserProps } from "@/types/user";
 import { FileSearch, Search, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import UserDetailsDialog from "./btndetails/UserDetailsDialog";
 import UsersDataCardStacks from "./CardStacksUsersData";
+import { IStoreProps } from "@/types/store";
 interface IUsersTable {
   className?: string;
+  customers: IUserProps[];
   stores: IStoreProps[];
 }
-function useDebounce(value: string, delay: number) {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-  return debouncedValue;
-}
 
-export default function CustomerTable({ className, stores }: IUsersTable) {
-  const [userList, setUserList] = useState<IUserProps[]>([]);
-  const [pagination, setPagination] = useState({
-    total: 0,
-    page: 1,
-    limit: 5,
-    totalPages: 1,
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  // control query
+export default function CustomerTable({
+  className,
+  customers,
+  stores,
+}: IUsersTable) {
+  const [userList, setUserList] = useState<IUserProps[]>(customers);
+  // console.log(userList);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all"); // diganti dari orderStatus
+  const [orderStatus, setOrderStatus] = useState<
+    "all" | "verified" | "unverified"
+  >("all");
+  const filteredUsers = userList.filter(
+    (user) =>
+      user.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    if (!orderStatus) return 0;
+    if (orderStatus === "verified") {
+      return Number(b.is_verified) - Number(a.is_verified);
+    }
+    if (orderStatus === "unverified") {
+      return Number(a.is_verified) - Number(b.is_verified);
+    }
+    return 0;
+  });
+
   const [currentPage, setCurrentPage] = useState(1);
-  // debounce per 500ms
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
-
-  const [refetchTrigger, setRefetchTrigger] = useState(0);
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setIsLoading(true);
-      try {
-        const params = new URLSearchParams({
-          page: String(currentPage),
-          limit: String(pagination.limit),
-          search: debouncedSearchQuery,
-          status: statusFilter,
-        });
-        const res = await apiCall.get(
-          `/api/user/customers?${params.toString()}`
-        );
-        setUserList(res.data.data.data);
-        setPagination(res.data.data.pagination);
-      } catch (error) {
-        console.error("Failed to fetch customers:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUsers();
-  }, [
-    currentPage,
-    debouncedSearchQuery,
-    statusFilter,
-    pagination.limit,
-    refetchTrigger,
-  ]);
-
   const [selectedUser, setSelectedUser] = useState<IUserProps | null>(null);
   const [deleteSelectedUser, setDeleteSelectedUser] =
     useState<IUserProps | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
-
+  const usersPerPage = 5;
+  const indexOfLast = currentPage * usersPerPage;
+  const indexOfFirst = indexOfLast - usersPerPage;
+  const currentUsers = sortedUsers.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(sortedUsers.length / usersPerPage);
   const btnDelete = (user: IUserProps) => {
     setDeleteSelectedUser(user);
     setDeleteConfirm((prev) => !prev);
@@ -113,7 +88,7 @@ export default function CustomerTable({ className, stores }: IUsersTable) {
       const userId = data.id;
       console.log(userId);
       try {
-        const res = await apiCall.patch(`/api/user/${userId}`);
+        const res = await apiCall.delete(`/api/user/${userId}`);
         console.log(res);
         toast.success("Delete User Data Success");
         setUserList((prev) => prev.filter((user) => user.id !== data.id));
@@ -125,19 +100,9 @@ export default function CustomerTable({ className, stores }: IUsersTable) {
     }
   };
 
-  // useEffect(() => {
-  //   setUserList(customers);
-  // }, [customers]);
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
-  };
-
-  const handleFilterChange = (value: string) => {
-    setStatusFilter(value);
-    setCurrentPage(1);
-  };
-
+  useEffect(() => {
+    setUserList(customers);
+  }, [customers]);
   return (
     <>
       <Card className={`${className} `}>
@@ -149,7 +114,7 @@ export default function CustomerTable({ className, stores }: IUsersTable) {
             <div id="searcbar" className="relative w-full">
               <Input
                 value={searchQuery}
-                onChange={handleSearchChange}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by first/last name or email."
                 className="text-xs"
               ></Input>
@@ -157,7 +122,12 @@ export default function CustomerTable({ className, stores }: IUsersTable) {
             </div>
             <div className="flex gap-x-2 max-lg:justify-between max-lg:mt-5">
               <div id="filter">
-                <Select value={statusFilter} onValueChange={handleFilterChange}>
+                <Select
+                  value={orderStatus}
+                  onValueChange={(value) =>
+                    setOrderStatus(value as "all" | "verified" | "unverified")
+                  }
+                >
                   <SelectTrigger className="">
                     <SelectValue placeholder="Order By" />
                   </SelectTrigger>
@@ -193,7 +163,7 @@ export default function CustomerTable({ className, stores }: IUsersTable) {
               </TableRow>
             </TableHeader>
             <TableBody className="text-center">
-              {userList.map((user) => (
+              {currentUsers.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>{user.first_name}</TableCell>
                   <TableCell>{user.last_name}</TableCell>
@@ -222,12 +192,12 @@ export default function CustomerTable({ className, stores }: IUsersTable) {
             </TableBody>
           </Table>
           {/* Mobile Version - Card Stacks */}
-          <UsersDataCardStacks users={userList} stores={stores} />
+          <UsersDataCardStacks users={currentUsers} stores={stores} />
         </CardContent>
         <CardFooter className="max-lg:hidden">
           <PaginationControls
-            currentPage={pagination.page}
-            totalPages={pagination.totalPages}
+            currentPage={currentPage}
+            totalPages={totalPages}
             onPageChange={setCurrentPage}
           />
         </CardFooter>

@@ -20,7 +20,7 @@ export default function DropDownProfile() {
     <DropdownMenuContent className="p-1">
       <DropdownMenuLabel>My Account</DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem>
+      <DropdownMenuItem onClick={() => router.replace("/profile")}>
         <Settings />
         Settings
       </DropdownMenuItem>

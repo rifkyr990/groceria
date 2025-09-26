@@ -162,14 +162,20 @@ export default function ProductList() {
     <DashboardLayout>
       <section className="bg-white p-5 rounded-md  shadow-sm">
         {/* Header */}
-        <div id="header" className="flex justify-between items-center">
+        <div
+          id="header"
+          className="flex max-lg:flex-col justify-between items-center"
+        >
           <div>
-            <h1 className="text-2xl font-semibold my-4">Product List</h1>
+            <h1 className="text-2xl font-semibold max-lg:my-4">Product List</h1>
           </div>
-          <div id="searchbar" className="relative w-[40%]">
+          <div
+            id="searchbar"
+            className="relative lg:w-[40%] w-full max-lg:my-5 lg:mr-3"
+          >
             <Input
               placeholder="Search product name . . . "
-              className="w-full "
+              className=" "
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             ></Input>
@@ -178,60 +184,68 @@ export default function ProductList() {
             "
             />
           </div>
-          <div className="flex gap-x-3 items-center">
-            <div id="newprdbtn">
-              <Button disabled={role ? true : false}>
-                <Link href="/dashboard/manage-product/new-product">
-                  + Add New Product
-                </Link>
-              </Button>
+          <div className="flex max-lg:flex-col gap-x-3 items-center">
+            <div className="flex gap-x-3 max-lg:mb-5 ">
+              <div id="newprdbtn">
+                <Button className="" hidden={role ? true : false}>
+                  <Link href="/dashboard/manage-product/new-product">
+                    + Add New Product
+                  </Link>
+                </Button>
+              </div>
+              <div id="edit-category">
+                <Button
+                  className="bg-blue-500 hover:bg-blue-600"
+                  onClick={() => setEditCategory((prev) => !prev)}
+                >
+                  Add/Edit Category
+                </Button>
+              </div>
             </div>
-            <div id="edit-category">
-              <Button
-                className="bg-blue-500 hover:bg-blue-600"
-                onClick={() => setEditCategory((prev) => !prev)}
-              >
-                Add/Edit Category
-              </Button>
-            </div>
-            <div id="filter-category">
-              <Select onValueChange={(value) => setSelectedCategory(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  {productCategories.map((category) => (
-                    <SelectGroup key={category.id}>
-                      <SelectItem value={category.category}>
-                        {upperFirstCharacter(category.category)}
+            <div className="flex items-center gap-x-5">
+              <div id="filter-category">
+                <Select onValueChange={(value) => setSelectedCategory(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    {productCategories.map((category) => (
+                      <SelectGroup key={category.id}>
+                        <SelectItem value={category.category}>
+                          {upperFirstCharacter(category.category)}
+                        </SelectItem>
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div id="filter-options">
+                <Select onValueChange={(value) => setSelectedSort(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter/Sort by"></SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="highest-price">
+                        Highest Price
+                      </SelectItem>
+                      <SelectItem value="lowest-price">Lowest Price</SelectItem>
+                      <SelectItem value="highest-stock">
+                        Highest Stock
+                      </SelectItem>
+                      <SelectItem value="lowest-stock">Lowest Stock</SelectItem>
+                      <SelectItem value="active-product">
+                        Active Product
+                      </SelectItem>
+                      <SelectItem value="inactive-product">
+                        Inactive Product
                       </SelectItem>
                     </SelectGroup>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div id="filter-options">
-              <Select onValueChange={(value) => setSelectedSort(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter/Sort by"></SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="highest-price">Highest Price</SelectItem>
-                    <SelectItem value="lowest-price">Lowest Price</SelectItem>
-                    <SelectItem value="highest-stock">Highest Stock</SelectItem>
-                    <SelectItem value="lowest-stock">Lowest Stock</SelectItem>
-                    <SelectItem value="active-product">
-                      Active Product
-                    </SelectItem>
-                    <SelectItem value="inactive-product">
-                      Inactive Product
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </div>
@@ -240,6 +254,7 @@ export default function ProductList() {
             variant={"destructive"}
             hidden={selectedProduct.length === 0}
             onClick={deleteSelectedProduct}
+            className="mt-5"
           >
             Delete Selected Product
           </Button>
@@ -252,7 +267,7 @@ export default function ProductList() {
                 <TableHead>
                   <Checkbox
                     className="rounded-full"
-                    disabled={role ? true : false}
+                    hidden={role ? true : false}
                     checked={selectedProduct.length === filteredProduct.length}
                     onCheckedChange={(checked) => {
                       if (checked) {
@@ -277,7 +292,7 @@ export default function ProductList() {
                   <TableCell>
                     <Checkbox
                       className="rounded-full"
-                      disabled={role ? true : false}
+                      hidden={role ? true : false}
                       checked={selectedProduct.includes(product.id)}
                       onCheckedChange={() => toggleSelectedProduct(product.id)}
                     />
@@ -286,7 +301,7 @@ export default function ProductList() {
                     id="product-profile"
                     className="flex items-center gap-x-5"
                   >
-                    <div id="picture">
+                    <div id="picture" className="max-lg:hidden">
                       <Image
                         src={
                           product.images?.[0].image_url ??
@@ -326,7 +341,7 @@ export default function ProductList() {
                   <TableCell className="text-center">
                     <div className="flex gap-x-2 justify-center items-center">
                       <Button
-                        disabled={role ? true : false}
+                        hidden={role ? true : false}
                         onClick={() => {
                           setSelectedProductDetails(product); // simpan produk yang dipilih ke Zustand
                           router.push(`/dashboard/manage-product/edit-product`); // pindah ke halaman edit

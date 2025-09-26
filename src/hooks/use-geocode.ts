@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 
 export function useGeocodeWilayah({
-    province,
-    city,
-    district,
-    subdistrict,
+  province,
+  city,
+  district,
+  subdistrict,
 }: {
-    province?: string;
-    city?: string;
-    district?: string;
-    subdistrict?: string;
+  province?: string;
+  city?: string;
+  district?: string;
+  subdistrict?: string;
 }) {
   const [coords, setCoords] = useState<[number, number] | null>(null);
 
@@ -23,9 +23,9 @@ export function useGeocodeWilayah({
 
       try {
         const res = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-                query
-            )}`
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            query
+          )}`
         );
         const data = await res.json();
 

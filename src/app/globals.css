@@ -2,8 +2,8 @@
 @import "tw-animate-css";
 @custom-variant dark (&: is(.dark *));
 
-
 html {
+  scroll-behavior: smooth;
   scrollbar-gutter: stable;
 }
 
@@ -20,12 +20,11 @@ html {
   --color-primary-green-300: #86efac;
   --color-primary-green-400: #4ade80;
   --color-primary-green-500: #22c55e;
-  --color-primary-green-600: #16a34a; 
+  --color-primary-green-600: #16a34a;
   --color-primary-green-700: #15803d;
   --color-primary-green-800: #166534;
   --color-primary-green-900: #14532d;
 }
-
 
 @theme inline {
   --color-background: var(--background);
@@ -149,10 +148,9 @@ body {
   body {
     @apply bg-background text-foreground;
   }
-  
+
   .leaflet-container {
     width: 100%;
     height: 100%;
   }
-
 }

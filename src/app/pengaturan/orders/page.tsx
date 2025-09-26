@@ -41,7 +41,7 @@ import OrderCard from "./OrderCard";
 
 const OrderListPage = () => {
   const router = useRouter();
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const {
     orders,
     pagination,
@@ -58,15 +58,32 @@ const OrderListPage = () => {
   const [localSearch, setLocalSearch] = useState(filters.searchTerm);
   const [localStatus, setLocalStatus] = useState(filters.statusFilter);
   const [localDateRange, setLocalDateRange] = useState(filters.dateRange);
+  const [isClient, setIsClient] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) {
+      return;
+    }
+
     if (!token) {
       toast.warn("Please log in to view your orders.");
       router.replace("/login");
-    } else {
-      fetchOrders(1);
+      return;
     }
-  }, [token, router]);
+
+    if (!user?.is_verified) {
+      toast.warn("Please verify your email to view your orders.");
+      router.replace("/");
+      return;
+    }
+
+    fetchOrders(1).finally(() => setCheckingAuth(false));
+  }, [isClient, token, user, router, fetchOrders]);
 
   const handlePageChange = (page: number) => {
     fetchOrders(page);
@@ -92,7 +109,7 @@ const OrderListPage = () => {
   };
 
   const renderContent = () => {
-    if (loading) {
+    if (checkingAuth || (loading && orders.length === 0)) {
       return (
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-8 h-8 animate-spin text-gray-500" />

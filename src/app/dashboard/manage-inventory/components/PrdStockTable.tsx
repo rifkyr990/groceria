@@ -55,8 +55,6 @@ export default function ProductStock({
 }: IProductStock) {
   const { storesData, fetchAllStores, selectedStore, setSelectedStore } =
     useStore();
-  const adminStoreId = adminStoreData?.store_id?.toString();
-  // const [selectedStore, setSelectedStore] = useState(adminStoreId ?? "all");
   const [stockStatusFilter, setStockStatusFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   useEffect(() => {

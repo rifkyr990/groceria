@@ -1,5 +1,6 @@
 import { IProductProps } from "./product";
 import { IStoreProps } from "./store";
+import { IUserProps } from "./user";
 
 export interface IDiscountProps {
   id: number;
@@ -19,6 +20,7 @@ export interface IDiscountProps {
   product: IProductProps;
   store: IStoreProps;
   usage: IDiscountUsageProps[];
+  creator: IUserProps;
 }
 
 export interface IDiscountUsageProps {

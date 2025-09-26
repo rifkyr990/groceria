@@ -2,28 +2,6 @@
 import { MonthYearPicker } from "@/components/MonthYearPicker";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { apiCall } from "@/helper/apiCall";
-import { IStoreProps } from "@/types/store";
-import { formatIDRCurrency, upperFirstCharacter } from "@/utils/format";
-import {
-  BadgeDollarSign,
-  Clipboard,
-  RefreshCcw,
-  Search,
-  ShoppingBag,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import DashboardLayout from "../../components/DashboardLayout";
-import {
   Card,
   CardContent,
   CardDescription,
@@ -33,6 +11,15 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -40,7 +27,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { unique } from "next/dist/build/utils";
+import { apiCall } from "@/helper/apiCall";
+import { IStoreProps } from "@/types/store";
+import { formatIDRCurrency, upperFirstCharacter } from "@/utils/format";
+import { BadgeDollarSign, Search, ShoppingBag } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import DashboardLayout from "../../components/DashboardLayout";
+import { useStore } from "@/store/useStore";
+import { useAuthStore } from "@/store/auth-store";
 interface Summary {
   totalSales: number;
   totalQuantity: number;
@@ -49,13 +44,25 @@ interface Summary {
 }
 
 export default function SalesReport() {
+  const [selectedStore, setSelectedStore] = useState("all");
+  // get store admin id
+  useEffect(() => {
+    const jsonData = JSON.parse(localStorage.getItem("user")!);
+    if (jsonData?.role === "STORE_ADMIN") {
+      const storeIdStr = jsonData.store_id?.toString();
+      if (storeIdStr) {
+        setSelectedStore(storeIdStr);
+        useStore.getState().setSelectedStore(storeIdStr);
+      }
+    }
+  }, []);
+  // get login user
+  const user = useAuthStore((state) => state.user);
   const router = useRouter();
-  const [allOrder, setAllOrder] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedProduct, setSelectedProduct] = useState("all");
   const [categories, setCategories] = useState<string[]>([]);
   const [products, setProducts] = useState<string[]>([]);
-  const [selectedStore, setSelectedStore] = useState("all");
   const [storeList, setStoreList] = useState<IStoreProps[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState<{
@@ -101,33 +108,34 @@ export default function SalesReport() {
 
       const result = res.data.data ?? [];
 
-      // kalau backend return array langsung
-      if (Array.isArray(result)) {
-        setOrders(result);
-        setSummary({
-          totalSales: result.reduce((a, b) => a + (b.totalSales ?? 0), 0),
-          totalQuantity: result.reduce((a, b) => a + (b.quantity ?? 0), 0),
-          totalOrder: result.length,
-          totalRefund: 0,
-        });
-      } else {
-        // kalau backend diubah pakai { orders, summary }
-        setOrders(result.orders ?? []);
-        setSummary({
-          totalSales: result.summary?.totalSales ?? 0,
-          totalQuantity: result.summary?.totalQuantity ?? 0,
-          totalOrder: result.summary?.totalOrder ?? 0,
-          totalRefund: result.summary?.totalRefund ?? 0,
-        });
-      }
+      const ordersData = Array.isArray(result) ? result : (result.orders ?? []);
 
-      // ambil daftar unik category & product
-      const uniqueCategories = Array.from(
-        new Set((result.orders ?? result).map((d: any) => d.category))
-      );
-      const uniqueProducts = Array.from(
-        new Set((result.orders ?? result).map((d: any) => d.product))
-      );
+      setOrders(ordersData);
+      setSummary({
+        totalSales:
+          result.summary?.totalSales ??
+          ordersData.reduce((a, b) => a + (b.totalSales ?? 0), 0),
+        totalQuantity:
+          result.summary?.totalQuantity ??
+          ordersData.reduce((a, b) => a + (b.quantity ?? 0), 0),
+        totalOrder: result.summary?.totalOrder ?? ordersData.length,
+        totalRefund: result.summary?.totalRefund ?? 0,
+      });
+
+      // Dapatkan unique values langsung dari 'ordersData' (BUKAN dari state 'orders')
+      const uniqueCategories = ordersData.reduce((acc: string[], curr: any) => {
+        if (!acc.includes(curr.category)) {
+          acc.push(curr.category);
+        }
+        return acc;
+      }, []);
+
+      const uniqueProducts = ordersData.reduce((acc: string[], curr: any) => {
+        if (!acc.includes(curr.product)) {
+          acc.push(curr.product);
+        }
+        return acc;
+      }, []);
 
       setCategories(uniqueCategories);
       setProducts(uniqueProducts);
@@ -140,13 +148,13 @@ export default function SalesReport() {
     getStoreList();
   }, []);
   // Filter berdasarkan store dan bulan/tahun
-  const filteredData = orders.filter((item) => {
-    const storeMatch =
-      selectedStore === "all" || item.storeId === Number(selectedStore);
-    const dateMatch =
-      item.month === selectedDate.month && item.year === selectedDate.year;
-    return storeMatch && dateMatch;
-  });
+  // const filteredData = orders.filter((item) => {
+  //   const storeMatch =
+  //     selectedStore === "all" || item.storeId === Number(selectedStore);
+  //   const dateMatch =
+  //     item.month === selectedDate.month && item.year === selectedDate.year;
+  //   return storeMatch && dateMatch;
+  // });
 
   const summaryCard = [
     {
@@ -159,7 +167,7 @@ export default function SalesReport() {
           {formatIDRCurrency(summary.totalSales)}
         </span>
       ),
-      desc: "this month",
+      desc: "this month  (by SHIPPED transaction status)",
     },
     {
       id: 2,
@@ -171,7 +179,7 @@ export default function SalesReport() {
           {summary.totalQuantity}
         </span>
       ),
-      desc: "products this month",
+      desc: "products this month (by SHIPPED transaction status)",
     },
     // {
     //   id: 3,
@@ -217,43 +225,49 @@ export default function SalesReport() {
     <DashboardLayout>
       <section
         id="store-selector"
-        className="flex items-center gap-5 mb-5 justify-end"
+        className="flex max-md:flex-col items-center gap-5 mb-5 justify-end"
       >
-        <div>
-          <Button
-            onClick={() =>
-              router.replace("/dashboard/manage-reporting/stock-report")
-            }
-          >
-            Stock Report
-          </Button>
-        </div>
-        <div>
-          <Select
-            value={selectedStore}
-            onValueChange={(value) => setSelectedStore(value)}
-          >
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Store Name"></SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Store Name</SelectLabel>
-                <SelectItem value="all">All Store</SelectItem>
-                {storeList.map((store, idx) => (
-                  <SelectItem key={idx} value={store.id.toString()}>
-                    {store.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+        <div className="flex gap-x-5">
+          <div>
+            <Button
+              onClick={() =>
+                router.replace("/dashboard/manage-reporting/stock-report")
+              }
+            >
+              Stock Report
+            </Button>
+          </div>
+          <div>
+            <Select
+              value={selectedStore}
+              onValueChange={(value) => setSelectedStore(value)}
+              disabled={user?.role === "STORE_ADMIN"}
+            >
+              <SelectTrigger className="bg-white">
+                <SelectValue placeholder="Store Name"></SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Store Name</SelectLabel>
+                  <SelectItem value="all">All Store</SelectItem>
+                  {storeList.map((store, idx) => (
+                    <SelectItem key={idx} value={store.id.toString()}>
+                      {store.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <div>
           <MonthYearPicker value={selectedDate} onChange={setSelectedDate} />
         </div>
       </section>
-      <section id="summary-card" className="grid grid-cols-4 gap-6 mb-5">
+      <section
+        id="summary-card"
+        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-5"
+      >
         {summaryCard.map((s, idx) => (
           <Card key={idx} className={`${s.border}`}>
             <CardHeader className="flex justify-between items-center">
@@ -263,7 +277,7 @@ export default function SalesReport() {
             <CardContent>
               <p className="text-center">{s.total}</p>
             </CardContent>
-            <CardFooter className="text-gray-400">{s.desc}</CardFooter>
+            <CardFooter className="text-gray-400 text-xs">{s.desc}</CardFooter>
           </Card>
         ))}
       </section>

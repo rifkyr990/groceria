@@ -85,13 +85,12 @@ export default function DesktopPrdDetails({
   const isLowStock = stock && stock <= 5;
   // Store
   const storeIdentity = selectedProductDetails?.stocks?.[0]?.store
-  ? {
-      name: selectedProductDetails.stocks[0].store.name,
-      city: selectedProductDetails.stocks[0].store.city,
-      province: selectedProductDetails.stocks[0].store.province,
-    }
-  : null;
-
+    ? {
+        name: selectedProductDetails.stocks[0].store.name,
+        city: selectedProductDetails.stocks[0].store.city,
+        province: selectedProductDetails.stocks[0].store.province,
+      }
+    : null;
 
   return (
     <section className={`${className}  `}>
@@ -193,6 +192,7 @@ export default function DesktopPrdDetails({
                   isOutOfStock ||
                   !user ||
                   !user.is_verified ||
+                  user.role !== "CUSTOMER" ||
                   quantityInCart >= (stock ?? 0)
                 }
                 title={
@@ -200,9 +200,11 @@ export default function DesktopPrdDetails({
                     ? "Please log in to add items"
                     : !user.is_verified
                       ? "Please verify your email to shop"
-                      : isOutOfStock || quantityInCart >= (stock ?? 0)
-                        ? "Out of stock"
-                        : ""
+                      : user.role !== "CUSTOMER"
+                        ? "Admin accounts cannot shop."
+                        : isOutOfStock || quantityInCart >= (stock ?? 0)
+                          ? "Out of stock"
+                          : ""
                 }
                 onClick={() => {
                   if (!selectedProductDetails || !storeIdentity || !stock)
@@ -231,7 +233,7 @@ export default function DesktopPrdDetails({
               </Button>
             </div>
           </div>
-          {/* <div id="share-prd" className="my-5 flex justify-between">
+          <div id="share-prd" className="my-5 flex justify-between">
             <div className="flex items-center">
               <p className="text-sm">Share:</p>
               <div id="icon-social" className="flex items-center">
@@ -258,7 +260,7 @@ export default function DesktopPrdDetails({
                 />
               </div>
             </div>
-          </div> */}
+          </div>
         </div>
       </section>
       <section id="store-profile" className=" mt-10 p-5 xl:w-[75%] mx-auto ">
@@ -346,7 +348,7 @@ export default function DesktopPrdDetails({
                   <CardContent className="p-3">
                     <p className="text-xs font-semibold">{product.name}</p>
                     <p className="mt-2 font-bold text-green-600">
-                      Rp.{product.price.toLocaleString()}
+                      {formatIDRCurrency(Math.trunc(product.price))}
                     </p>
                   </CardContent>
                   <Button className="text-xs h-7 w-[85%] mx-auto my-3 bg-green-600 hover:bg-green-700 ">

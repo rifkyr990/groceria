@@ -18,15 +18,17 @@ export default function InventoryHeader({ stocks }: IInventoryHeader) {
       ? stocks
       : stocks.filter((s) => s.store.id.toString() === selectedStore);
 
+  console.log(filteredStocks);
+
   const cardHeader = [
     {
       id: 1,
-      name: "Total Active Product",
+      name: "Total Normal Stock Product",
       icon: (
         <PackageCheck className="bg-green-500 text-white rounded-full p-2 size-10" />
       ),
       // qty: stocks.filter((e) => e.product.is_active === true).length,
-      qty: filteredStocks.filter((e) => e.product.is_active === true).length,
+      qty: filteredStocks.filter((e) => e.stock_quantity > e.min_stock).length,
     },
     {
       id: 2,

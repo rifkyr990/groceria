@@ -8,14 +8,8 @@ import { useState } from "react";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 
 export default function AddressList() {
-  const {
-    addresses,
-    fetchAddress,
-    deleteAddress,
-    setPrimary,
-    loading,
-    error,
-  } = useAddressStore();
+  const { addresses, fetchAddress, deleteAddress, setPrimary, loading, error } =
+    useAddressStore();
 
   useEffect(() => {
     fetchAddress();
@@ -54,11 +48,13 @@ export default function AddressList() {
                 className="text-red-600 hover:underline"
               >
                 Hapus
-            </button>
+              </button>
             </div>
           </div>
 
-          <p className="text-gray-600">{addr.street} ({addr.detail})</p>
+          <p className="text-gray-600">
+            {addr.street} ({addr.detail})
+          </p>
           <p className="text-gray-700">
             {addr.district}, {addr.city}, {addr.province}, ID,{" "}
             {addr.postal_code}
@@ -78,7 +74,7 @@ export default function AddressList() {
               </button>
             )}
             <span className="text-red-500 text-xs border border-red-500 px-2 py-0.5 rounded">
-                {addr.label}
+              {addr.label}
             </span>
           </div>
         </div>

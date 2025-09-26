@@ -29,26 +29,35 @@ export default function CartPage() {
     appliedPromo?.code || ""
   );
   const [promoStatus, setPromoStatus] = useState<"idle" | "invalid">("idle");
-  const { token, user } = useAuthStore();
   const router = useRouter();
-  const [isClient, setIsClient] = useState(false);
+
+  const { token, user } = useAuthStore();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isClient, setIsClient] = useState(true);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   useEffect(() => {
-    if (isClient && !token) {
+    if (!isClient) {
+      return;
+    }
+
+    if (!token) {
       toast.warn("You must be logged in to view your cart.");
       router.replace("/login");
+      return;
     }
-  }, [isClient, token, router]);
 
-  useEffect(() => {
-    if (token) {
-      fetchCart(token);
+    if (!user?.is_verified) {
+      toast.warn("Please verify your email to access your cart.");
+      router.replace("/");
+      return;
     }
-  }, [token, fetchCart]);
+
+    setCheckingAuth(false);
+  }, [token, user, router, isClient]);
 
   useEffect(() => {
     setPromoInputText(appliedPromo?.code || "");
