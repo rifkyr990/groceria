@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { MapPin, Plus, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import AddAddressModal from "@/app/profile/address/AddAddressModal";
+import AddAddressModal from "@/app/pengaturan/address/AddAddressModal";
 import { UserAddress } from "../types";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";

@@ -1,26 +1,10 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+import { Dialog,DialogContent,DialogDescription,DialogFooter,DialogHeader,DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup,SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { apiCall } from "@/helper/apiCall";
-import {
-  updateStoreSchema,
-  UpdateStoreSchema,
-} from "@/helper/updateStoreSchema";
+import { updateStoreSchema,UpdateStoreSchema } from "@/helper/updateStoreSchema";
 import { IStoreProps } from "@/types/store";
 import dynamic from "next/dynamic";
 import { useState } from "react";
@@ -91,7 +75,6 @@ export default function StoreDetailsDialog({
       const res = await apiCall.patch(`/api/store/${store_id}`, { payload });
       if (res.data) {
         toast.success("Update Store Success");
-        console.log(res.data);
         setOpen(false);
         window.location.reload();
       }
@@ -213,7 +196,7 @@ export default function StoreDetailsDialog({
             </div>
             <div id="map-picker" className="w-full max-w-md h-40 mx-auto my-4">
               <MapPicker
-                disabled={!edit}
+                disabled={false}
                 defaultLocation={{
                   lat: store.latitude !== 0 ? store.latitude : -6.2,
                   long: store.longitude !== 0 ? store.longitude : 106.816666,

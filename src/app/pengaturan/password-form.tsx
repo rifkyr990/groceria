@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
-import PasswordInput from "@/components/PasswordInput"; // gunakan komponen reusable
+import PasswordInput from "@/components/PasswordInput";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 

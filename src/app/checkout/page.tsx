@@ -267,12 +267,12 @@ export default function CheckoutPage() {
         onSuccess: function (result: any) {
           console.log("Midtrans success:", result);
           toast.success("Payment successful!");
-          router.push(`/profile/orders/${newOrderId}?from=checkout`);
+          router.push(`/pengaturan/orders/${newOrderId}?from=checkout`);
         },
         onPending: function (result: any) {
           console.log("Midtrans pending:", result);
           toast.info("Your payment is pending. We will update you soon.");
-          router.push(`/profile/orders/${newOrderId}?from=checkout`);
+          router.push(`/pengaturan/orders/${newOrderId}?from=checkout`);
         },
         onError: function (result: any) {
           console.error("Midtrans error:", result);
