@@ -64,7 +64,8 @@ export default function CheckoutSidebar({
           mode="checkout"
           onClick={handlePlaceOrder}
           total={total}
-          disabled={isPlacingOrder || items.length === 0}
+          isLoading={isPlacingOrder}
+          disabled={items.length === 0}
         />
       </div>
     </div>

@@ -38,7 +38,7 @@ export default function OrderDetailHeader({
         <div className="flex items-center gap-4">
           {!cameFromCheckout && (
             <Button asChild variant="outline" size="icon" className="flex-shrink-0">
-              <Link href="/profile/orders" aria-label="Back to My Orders">
+              <Link href="/orders" aria-label="Back to My Orders">
                 <ArrowLeft className="w-4 h-4" />
               </Link>
             </Button>

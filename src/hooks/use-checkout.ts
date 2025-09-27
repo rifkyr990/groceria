@@ -26,11 +26,9 @@ const MockPaymentMethods: PaymentMethod[] = [
 
 export function useCheckout() {
   const router = useRouter();
-  const {
-    placeOrder,
-    getMidtransToken,
-    loading: isPlacingOrder,
-  } = useOrderStore();
+  const { placeOrder, getMidtransToken } = useOrderStore();
+  const [isProcessing, setIsProcessing] = useState(false); // Local state for UX flow
+
   const {
     addresses,
     loading: addressesLoading,
@@ -131,8 +129,10 @@ export function useCheckout() {
   }, [items, appliedPromo, selectedShipping]);
 
   const handlePlaceOrder = async () => {
-    await processOrderPlacement({
-      router,
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const result = await processOrderPlacement({
       selectedAddressId,
       selectedShipping,
       selectedPaymentMethod,
@@ -142,11 +142,35 @@ export function useCheckout() {
       placeOrder,
       getMidtransToken,
     });
+
+    if (result.success) {
+      await new Promise((resolve) => setTimeout(resolve, 1200)); // Delay for UX
+      if (result.paymentMethod === "payment_gateway" && result.token) {
+        window.snap.pay(result.token, {
+          onSuccess: () => router.push(`/orders/${result.orderId}?from=checkout`),
+          onPending: () => router.push(`/orders/${result.orderId}?from=checkout`),
+          onError: () => {
+            toast.error("Payment failed. Please try again.");
+            setIsProcessing(false); // Snap back on payment failure
+          },
+          onClose: () => {
+            toast.warn(
+              "Payment was not completed. You can find and pay for this order in your order history."
+            );
+            router.push(`/orders/${result.orderId}?from=checkout`);
+          },
+        });
+      } else {
+        router.push(`/orders/${result.orderId}?from=checkout`);
+      }
+    } else {
+      setIsProcessing(false); // Snap back on failure
+    }
   };
 
   return {
     checkingAuth,
-    isPlacingOrder,
+    isPlacingOrder: isProcessing,
     addresses,
     addressesLoading,
     selectedAddressId,

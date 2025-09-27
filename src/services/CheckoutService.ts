@@ -9,7 +9,6 @@ type OrderStoreActions = Pick<
 >;
 
 interface ProcessOrderPlacementArgs extends OrderStoreActions {
-  router: AppRouterInstance;
   selectedAddressId: number | null;
   selectedShipping: ShippingOption | null;
   selectedPaymentMethod: PaymentMethod | null;
@@ -19,7 +18,6 @@ interface ProcessOrderPlacementArgs extends OrderStoreActions {
 }
 
 export const processOrderPlacement = async ({
-  router,
   selectedAddressId,
   selectedShipping,
   selectedPaymentMethod,
@@ -28,7 +26,12 @@ export const processOrderPlacement = async ({
   appliedPromo,
   placeOrder,
   getMidtransToken,
-}: ProcessOrderPlacementArgs): Promise<void> => {
+}: ProcessOrderPlacementArgs): Promise<{
+  success: boolean;
+  orderId?: number;
+  token?: string;
+  paymentMethod?: string;
+}> => {
   if (
     !selectedAddressId ||
     !selectedShipping ||
@@ -36,7 +39,7 @@ export const processOrderPlacement = async ({
     !storeId
   ) {
     toast.error("Please ensure all selections are made.");
-    return;
+    return { success: false };
   }
 
   const paymentMethodIdMap: { [key: string]: number } = {
@@ -46,7 +49,7 @@ export const processOrderPlacement = async ({
   const paymentMethodId = paymentMethodIdMap[selectedPaymentMethod.id];
   if (!paymentMethodId) {
     toast.error("Invalid payment method.");
-    return;
+    return { success: false };
   }
 
   const orderPayload = {
@@ -60,36 +63,26 @@ export const processOrderPlacement = async ({
   if (total === 0) {
     const orderResult = await placeOrder(orderPayload);
     if (orderResult.success && orderResult.orderId) {
-      router.push(`/pengaturan/orders/${orderResult.orderId}?from=checkout`);
+      return { success: true, orderId: orderResult.orderId, paymentMethod: 'free' };
     }
-    return;
+    return { success: false };
   }
 
   const orderResult = await placeOrder(orderPayload);
   if (!orderResult.success || !orderResult.orderId) {
-    return;
+    return { success: false };
   }
 
   const newOrderId = orderResult.orderId;
 
   if (selectedPaymentMethod.id === "manual_transfer") {
-    router.push(`/pengaturan/orders/${newOrderId}?from=checkout`);
+    return { success: true, orderId: newOrderId, paymentMethod: 'manual_transfer' };
   } else if (selectedPaymentMethod.id === "payment_gateway") {
     const paymentResult = await getMidtransToken(newOrderId);
     if (paymentResult.success && paymentResult.token) {
-      window.snap.pay(paymentResult.token, {
-        onSuccess: () =>
-          router.push(`/pengaturan/orders/${newOrderId}?from=checkout`),
-        onPending: () =>
-          router.push(`/pengaturan/orders/${newOrderId}?from=checkout`),
-        onError: () => toast.error("Payment failed. Please try again."),
-        onClose: () => {
-          toast.warn(
-            "Payment was not completed. You can find and pay for this order in your profile (pengaturan)."
-          );
-          router.push(`/pengaturan/orders/${newOrderId}?from=checkout`);
-        },
-      });
+      return { success: true, orderId: newOrderId, token: paymentResult.token, paymentMethod: 'payment_gateway' };
     }
   }
+  
+  return { success: false }; // Fallback for any failed payment gateway token fetch
 };
