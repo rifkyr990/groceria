@@ -28,10 +28,11 @@ export default function AddressSelector({
   useEffect(() => {
     if (!selectedAddressId && addresses.length > 0) {
       const primaryAddress = addresses.find((addr) => addr.is_primary);
-      setSelectedAddressId(primaryAddress ? primaryAddress.id : addresses[0].id);
+      setSelectedAddressId(
+        primaryAddress ? primaryAddress.id : addresses[0].id
+      );
     }
   }, [addresses, selectedAddressId, setSelectedAddressId]);
-
 
   return (
     <>
@@ -65,7 +66,6 @@ export default function AddressSelector({
               value={selectedAddressId?.toString()}
               onValueChange={(value) => setSelectedAddressId(Number(value))}
             >
-
               <div className="space-y-3">
                 {addresses.map((address) => (
                   <Label

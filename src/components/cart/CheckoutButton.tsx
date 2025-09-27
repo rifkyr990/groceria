@@ -11,6 +11,7 @@ interface CheckoutButtonProps {
   onClick: () => Promise<void> | void;
   mode: "cart" | "checkout";
   disabled?: boolean;
+  isLoading?: boolean;
 }
 
 export default function CheckoutButton({
@@ -18,9 +19,11 @@ export default function CheckoutButton({
   onClick,
   mode,
   disabled = false,
+  isLoading = false,
 }: CheckoutButtonProps) {
-  const [loading, setLoading] = useState(false);
-  const [text, setText] = useState("");
+  const [cartButtonState, setCartButtonState] = useState<
+    "idle" | "processing" | "redirecting"
+  >("idle");
 
   const config = useMemo(() => {
     switch (mode) {
@@ -47,43 +50,55 @@ export default function CheckoutButton({
   }, [mode]);
 
   const handleClick = async () => {
-    if (loading || disabled) return;
+    if (disabled) return;
 
-    setLoading(true);
-    setText(config.loadingText);
-
-    try {
-      if (mode === "cart") {
-        await new Promise((res) => setTimeout(res, 1500));
-        setText("Redirecting...");
+    if (mode === "cart") {
+      if (cartButtonState !== "idle") return;
+      try {
+        setCartButtonState("processing");
+        await new Promise((res) => setTimeout(res, 750));
+        setCartButtonState("redirecting");
+        await onClick();
+      } catch (error) {
+        console.error("Cart navigation failed:", error);
+        setCartButtonState("idle"); // Snap back on failure
       }
+    } else {
+      // Checkout mode
+      if (isLoading) return;
       await onClick();
-    } catch (error) {
-      console.error("Action failed", error);
-      setLoading(false);
     }
   };
+
+  const showLoading = mode === "cart" ? cartButtonState !== "idle" : isLoading;
+  let buttonText = config.text;
+  if (mode === "cart") {
+    if (cartButtonState === "processing") buttonText = config.loadingText;
+    if (cartButtonState === "redirecting") buttonText = "Redirecting...";
+  } else if (isLoading) {
+    buttonText = config.loadingText;
+  }
 
   return (
     <Button
       onClick={handleClick}
-      disabled={loading || disabled}
+      disabled={showLoading || disabled}
       className={cn(
         "w-full p-6 py-7 sm:p-6 sm:py-7 rounded-xl flex items-center justify-between transform transition-all shadow-lg",
         "hover:scale-105 hover:shadow-xl active:scale-95",
-        "disabled:bg-gray-400 disabled:shadow-none disabled:scale-100 disabled:cursor-not-allowed",
-        loading
+        "disabled:shadow-none disabled:scale-100 disabled:cursor-not-allowed",
+        showLoading
           ? "bg-gradient-to-r from-primary-green-600 to-primary-green-500 cursor-not-allowed animate-pulse-subtle disabled:opacity-100"
-          : config.style,
+          : [config.style, !disabled ? "" : "bg-gray-400"],
         "text-white font-bold"
       )}
     >
       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-        {loading && (
+        {showLoading && (
           <span className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-black rounded-full animate-spin flex-shrink-0"></span>
         )}
         <span className="text-sm sm:text-lg font-sans truncate">
-          {loading ? text : config.text}
+          {buttonText}
         </span>
       </div>
 

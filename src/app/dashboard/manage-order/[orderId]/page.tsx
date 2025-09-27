@@ -7,7 +7,7 @@ interface PageProps {
   };
 }
 
-export default function AdminOrderDetailPage({ params }: PageProps) {
+export default async function AdminOrderDetailPage({ params }: PageProps) {
   const orderId = parseInt(params.orderId, 10);
 
   return (

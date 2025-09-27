@@ -24,7 +24,7 @@ export const useAdminOrderDetailStore = create<AdminOrderDetailState>(
     fetchOrder: async (orderId) => {
       set({ loading: true, error: null });
       try {
-        const res = await apiCall.get(`/api/orders/admin/${orderId}`);
+        const res = await apiCall.get(`/api/admin/orders/${orderId}`);
         set({ order: res.data.data, loading: false });
       } catch (err: any) {
         const msg = err.response?.data?.message || "Failed to fetch order.";
@@ -36,7 +36,7 @@ export const useAdminOrderDetailStore = create<AdminOrderDetailState>(
     confirmPayment: async (orderId) => {
       set({ loading: true });
       try {
-        await apiCall.patch(`/api/orders/admin/${orderId}/confirm-payment`);
+        await apiCall.patch(`/api/admin/orders/${orderId}/confirm-payment`);
         toast.success("Payment confirmed!");
         get().fetchOrder(orderId);
       } catch (err: any) {
@@ -50,7 +50,7 @@ export const useAdminOrderDetailStore = create<AdminOrderDetailState>(
     rejectPayment: async (orderId) => {
       set({ loading: true });
       try {
-        await apiCall.patch(`/api/orders/admin/${orderId}/reject-payment`);
+        await apiCall.patch(`/api/admin/orders/${orderId}/reject-payment`);
         toast.warn("Payment rejected.");
         get().fetchOrder(orderId);
       } catch (err: any) {
@@ -62,7 +62,7 @@ export const useAdminOrderDetailStore = create<AdminOrderDetailState>(
     sendOrder: async (orderId) => {
       set({ loading: true });
       try {
-        await apiCall.patch(`/api/orders/admin/${orderId}/send-order`);
+        await apiCall.patch(`/api/admin/orders/${orderId}/send-order`);
         toast.info("Order marked as shipped.");
         get().fetchOrder(orderId);
       } catch (err: any) {
@@ -76,7 +76,7 @@ export const useAdminOrderDetailStore = create<AdminOrderDetailState>(
     cancelOrder: async (orderId) => {
       set({ loading: true });
       try {
-        await apiCall.patch(`/api/orders/admin/${orderId}/cancel`);
+        await apiCall.patch(`/api/admin/orders/${orderId}/cancel`);
         toast.error("Order has been cancelled.");
         get().fetchOrder(orderId);
       } catch (err: any) {
@@ -88,7 +88,7 @@ export const useAdminOrderDetailStore = create<AdminOrderDetailState>(
     markAsRefunded: async (orderId) => {
       set({ loading: true });
       try {
-        await apiCall.patch(`/api/orders/admin/${orderId}/mark-refunded`);
+        await apiCall.patch(`/api/admin/orders/${orderId}/mark-refunded`);
         toast.info("Order marked as refunded.");
         get().fetchOrder(orderId);
       } catch (err: any) {
