@@ -47,7 +47,7 @@ export default function ShippingMethodModal({
         <DialogHeader>
           <DialogTitle>Select Delivery Method</DialogTitle>
         </DialogHeader>
-        <div className="py-4 min-h-[200px]">
+        <div className="py-4 min-h-[200px] max-h-[60vh] overflow-y-auto pr-4">
           {loading ? (
             <div className="flex items-center justify-center h-full p-8">
               <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
@@ -83,11 +83,11 @@ export default function ShippingMethodModal({
                       id={`ship-${option.id}`}
                     />
                     <div className="flex-1">
-                      <div className="flex justify-between items-center">
-                        <p className="font-semibold text-gray-800">
+                      <div className="flex justify-between items-start gap-2">
+                        <p className="font-semibold text-gray-800 leading-normal">
                           {option.courier} - {option.service}
                         </p>
-                        <p className="font-bold text-gray-800">
+                        <p className="font-bold text-gray-800 leading-normal text-right">
                           {formatIDRCurrency(Number(option.cost))}
                         </p>
                       </div>

@@ -159,7 +159,20 @@ export default function Navbar() {
                       )}
                     </Menu.Item>
                   )}
-                  
+                  {user?.role === "CUSTOMER" && (
+                    <Menu.Item>
+                      {({ active }) => (
+                        <Link
+                          href="/orders"
+                          className={`flex items-center gap-2 px-4 py-2 text-sm ${
+                            active ? "bg-gray-100 dark:bg-gray-700" : ""
+                          } text-gray-700 dark:text-gray-200`}
+                        >
+                          <ShoppingCart className="w-4 h-4" /> Pesanan Saya
+                        </Link>
+                      )}
+                    </Menu.Item>
+                  )}
                   <Menu.Item>
                     {({ active }) => (
                       <Link
@@ -248,8 +261,17 @@ export default function Navbar() {
                     <LayoutDashboard className="w-4 h-4" /> Dashboard
                   </Link>
                 )}
+                {user?.role === "CUSTOMER" && (
+                  <Link
+                    href="/orders"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2"
+                  >
+                    <ShoppingCart className="w-4 h-4" /> Pesanan Saya
+                  </Link>
+                )}
                 <Link
-                  href="/settings"
+                  href="/pengaturan"
                   onClick={() => setMobileOpen(false)}
                   className="flex items-center gap-2"
                 >
