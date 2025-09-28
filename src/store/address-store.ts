@@ -31,25 +31,11 @@ interface Address {
   detail: string;
   label: "RUMAH" | "KANTOR";
   is_primary: boolean;
+  latitude: number;
+  longitude: number;
 }
 
 interface AddressFormValues {
-  name: string;
-  phone: string;
-  province: string;
-  city: string;
-  district: string;
-  subdistrict: string;
-  postal_code: string;
-  street: string;
-  detail: string;
-  label: "RUMAH" | "KANTOR";
-  is_primary: boolean;
-}
-
-// sesuai schema prisma
-interface Address {
-  id: number;
   name: string;
   phone: string;
   province: string;
@@ -72,12 +58,16 @@ interface AddressState {
   updateAddress: (id: number, data: Partial<Address>) => Promise<boolean>;
   deleteAddress: (id: number) => Promise<void>;
   setPrimary: (id: number) => Promise<void>;
+  suggestedPhone: string | null;
+  fetchSuggestedPhone: () => Promise<void>;
+  setSuggestedPhone: (phone: string | null) => void;
 }
 
 export const useAddressStore = create<AddressState>((set, get) => ({
   addresses: [],
   loading: false,
   error: null,
+  suggestedPhone: null,
 
   fetchAddress: async () => {
     try {
@@ -89,6 +79,15 @@ export const useAddressStore = create<AddressState>((set, get) => ({
         error: error.response?.data?.message || "Gagal mengambil alamat",
         loading: false,
       });
+    }
+  },
+
+  fetchSuggestedPhone: async () => {
+    try {
+      const res = await apiCall.get("/api/user/phone-suggestion");
+      set({ suggestedPhone: res.data.data.phone });
+    } catch (error) {
+      set({ suggestedPhone: null });
     }
   },
 
@@ -138,6 +137,7 @@ export const useAddressStore = create<AddressState>((set, get) => ({
     }
   },
 
+  setSuggestedPhone: (phone) => set({ suggestedPhone: phone }),
   setPrimary: async (id) => {
     try {
       const res = await apiCall.patch(`/api/address/${id}/primary`);

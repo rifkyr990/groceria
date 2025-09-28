@@ -17,24 +17,36 @@ export default function VerifyEmailPage() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
+    const getValidationError = (): string | null => {
+        if (!token) return "Token tidak ditemukan. Silakan cek kembali link verifikasi Anda.";
+        if (!password) return "Password tidak boleh kosong.";
+        if (!confirmPassword) return "Konfirmasi password harus diisi.";
+        if (password !== confirmPassword) return "Konfirmasi password tidak cocok.";
+        if (password.length < 8) return "Password minimal harus 8 karakter.";
+        return null;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!token) {
-            toast.error("Token tidak ditemukan. Silakan cek kembali link verifikasi Anda.");
+
+        const error = getValidationError();
+        if (error) {
+            toast.error(error);
             return;
         }
 
-        const success = await verifyEmail(token, password);
+        const success = await verifyEmail(token!, password);
+
         if (success) {
             toast.success("Email berhasil diverifikasi! Silahkan login.");
             setPassword("");
-            setTimeout(() => {
-                router.push("/login");
-            });
+            setConfirmPassword("");
+            setTimeout(() => router.push("/login"), 1500);
         } else {
-            toast.error("Verifikasi gagal.")
+            toast.error("Verifikasi gagal.");
         }
     };
+
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 px-4">

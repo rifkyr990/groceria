@@ -34,7 +34,7 @@ export default function Navbar() {
 
   useEffect(() => setMounted(true), []);
 
-  const allowedRoles = ["TENANT", "STORE_ADMIN", "SUPER_ADMIN"];
+  const allowedRoles = ["CUSTOMER", "STORE_ADMIN", "SUPER_ADMIN"];
 
   const NavLinks = () => (
     <>
@@ -42,16 +42,13 @@ export default function Navbar() {
         <Link href="/">Home</Link>
       </li>
       <li>
-        <Link href="/products">Products</Link>
+        <Link href="#products">Products</Link>
       </li>
       <li>
-        <Link href="/stores">Stores</Link>
+        <Link href="#about">About Us</Link>
       </li>
       <li>
-        <Link href="/about">About Us</Link>
-      </li>
-      <li>
-        <Link href="/contact">Contact</Link>
+        <Link href="#footer">Contact</Link>
       </li>
     </>
   );

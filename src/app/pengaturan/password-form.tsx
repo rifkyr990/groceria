@@ -33,13 +33,18 @@ export default function PasswordForm() {
         }
 
         const success = await changePassword(data.oldPassword, data.newPassword);
-        if (success) {
-            toast.success("Password berhasil diubah, silakan login kembali.");
-            reset();
-            logout();
-            router.push("/login");
+
+        if (!success) {
+            toast.error("Password lama salah. Silakan coba lagi.");
+            return;
         }
+
+        toast.success("Password berhasil diubah, silakan login kembali.");
+        reset();
+        logout();
+        router.push("/login");
     };
+
 
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow">

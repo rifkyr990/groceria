@@ -233,7 +233,7 @@ export default function CheckoutPage() {
       const orderResult = await placeOrder(orderPayload);
       if (orderResult.success && orderResult.orderId) {
         toast.success("Your free order has been placed successfully");
-        router.push(`/profile/orders/${orderResult.orderId}$from=checkout`);
+        router.push(`/pengaturan/orders/${orderResult.orderId}$from=checkout`);
       } else {
         toast.error("Failed to place your free order. Please try again.");
       }
@@ -251,7 +251,7 @@ export default function CheckoutPage() {
 
     if (selectedPaymentMethod.id === "manual_transfer") {
       toast.success("Order placed! Please upload your payment proof.");
-      router.push(`/profile/orders/${newOrderId}?from=checkout`);
+      router.push(`/pengaturan/orders/${newOrderId}?from=checkout`);
       return;
     }
 
