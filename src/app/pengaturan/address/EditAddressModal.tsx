@@ -20,21 +20,7 @@ import AddressSelect from "../component/AddressSelect";
 import MapPickerWrapper from "../component/MapPickerWrapper";
 import { mapToWilayahId, mapIdToName } from "@/utils/wilayahHelpers";
 
-interface AddressFormValues {
-  name: string;
-  phone: string;
-  province: string;
-  city: string;
-  district: string;
-  subdistrict: string;
-  postal_code: string;
-  street: string;
-  detail: string;
-  label: "RUMAH" | "KANTOR";
-  is_primary: boolean;
-  latitude: number;
-  longitude: number;
-}
+interface AddressFormValues { name: string; phone: string; province: string; city: string; district: string; subdistrict: string; postal_code: string; street: string; detail: string; label: "RUMAH" | "KANTOR"; is_primary: boolean; latitude: number; longitude: number;}
 
 interface EditAddressModalProps {
   address: AddressFormValues & { id: number };
@@ -86,16 +72,9 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
 
   const onSubmit = async (data: AddressFormValues) => {
     const { provinceName, cityName, districtName, subdistrictName } = mapIdToName( data,provinces,cities,districts,subdistricts);
-
-    const payload = {
-      ...data,
-      province: provinceName,
-      city: cityName,
-      district: districtName,
-      subdistrict: subdistrictName,
-    };
-
+    const payload = { ...data,province: provinceName, city: cityName, district: districtName, subdistrict: subdistrictName };
     const success = await updateAddress(Number(address.id), payload);
+
     if (success) {
       toast.success("Alamat berhasil diperbarui!");
       setOpen(false);

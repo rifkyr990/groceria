@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -25,104 +24,52 @@ import { formatIDRCurrency, upperFirstCharacter } from "@/utils/format";
 import { Eye, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { useEffect, useState } from "react";
+import { useShallow } from "zustand/shallow";
 import DashboardLayout from "../../components/DashboardLayout";
 import EditProductCategory from "../components/EditProductCategory";
+import { Switch } from "@/components/ui/switch";
 import EditProductDetails from "../components/EditProductDetails";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 export default function ProductList() {
   // check role
   const [role, setRole] = useState("");
-  const [products, setProducts] = useState<any[]>([]);
-
-  // filter & pagination state
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedSort, setSelectedSort] = useState("all");
-  // const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(5);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-
-  const [loading, setLoading] = useState(false);
-  const [editCategory, setEditCategory] = useState(false);
-  const [editDetails, setEditDetails] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<number[]>([]);
-  const router = useRouter();
-
-  const { setSelectedProductDetails } = useProduct();
-  const productCategories = Array.isArray(products)
-    ? products.reduce((acc, product) => {
-        // Tambahkan pengecekan null/undefined untuk category
-        if (
-          product?.category &&
-          !acc.some((item) => item.id === product.category.id)
-        ) {
-          acc.push(product.category);
-        }
-        return acc;
-      }, [] as any[])
-    : []; // Jika 'products' bukan array, jadikan array kosong
-  // const [editCategory, setEditCategory] = useState(false);
-  // const [editDetails, setEditDetails] = useState(false);
-  // const [searchQuery, setSearchQuery] = useState("");
-  // const [selectedCategory, setSelectedCategory] = useState<string | null>(
-  //   "all"
-  // );
-  // const [selectedSort, setSelectedSort] = useState<string | null>(null);
-  // const [selectedProduct, setSelectedProduct] = useState<number[]>([]);
-  // // router
-  // const router = useRouter();
-  const getProductList = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await apiCall.get("/api/product/all", {
-        params: {
-          page,
-          limit,
-          search: searchQuery || undefined,
-          category: selectedCategory !== "all" ? selectedCategory : undefined,
-          sort: selectedSort !== "all" ? selectedSort : undefined,
-        },
-      });
-      console.log(res);
-      setProducts(res.data.data.data);
-      setTotalPages(res.data.data.totalPages);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to fetch product list");
-    } finally {
-      setLoading(false);
-    }
-  }, [page, limit, searchQuery, selectedCategory, selectedSort]);
-
   useEffect(() => {
-    getProductList();
-  }, [page, limit, searchQuery, selectedCategory, selectedSort]);
-  console.log(products);
-
-  // useEffect ke-2: HANYA untuk cek role.
-  // Hanya berjalan SEKALI saat halaman pertama kali dibuka.
-  useEffect(() => {
-    const userJson = localStorage.getItem("user");
-    if (userJson) {
-      const userData = JSON.parse(userJson);
-      if (userData.role === "STORE_ADMIN") {
-        setRole(userData.role);
-      }
+    const jsonData = JSON.parse(localStorage.getItem("user")!);
+    if (!jsonData) return;
+    if (jsonData.role === "STORE_ADMIN") {
+      setRole(jsonData.role);
     }
   }, []);
+  const { products, getProductList } = useProduct(
+    useShallow((state) => ({
+      products: state.products,
+      getProductList: state.getProductList,
+    }))
+  );
+
+  const { setSelectedProductDetails } = useProduct();
+  const productCategories = products.reduce(
+    (acc, product) => {
+      if (!acc.some((item) => item.id === product.category.id)) {
+        acc.push(product.category);
+      }
+      return acc;
+    },
+    [] as (typeof products)[0]["category"][]
+  );
+  const [editCategory, setEditCategory] = useState(false);
+  const [editDetails, setEditDetails] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    "all"
+  );
+  const [selectedSort, setSelectedSort] = useState<string | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<number[]>([]);
+  // router
+  const router = useRouter();
 
   const toggleActiveStatus = async (productId: number, newStatus: boolean) => {
     try {
@@ -154,40 +101,40 @@ export default function ProductList() {
     );
   };
 
-  // const filteredProduct = products
-  //   .filter((product) =>
-  //     product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  //   )
-  //   .filter((product) => {
-  //     if (!selectedCategory || selectedCategory === "all") return true;
-  //     return product.category.category === selectedCategory;
-  //   })
-  //   .filter((product) => {
-  //     if (selectedSort === "active-product") return product.is_active === true;
-  //     if (selectedSort === "inactive-product")
-  //       return product.is_active === false;
-  //     return true;
-  //   })
-  //   .sort((a, b) => {
-  //     switch (selectedSort) {
-  //       case "highest-price":
-  //         return b.price - a.price;
-  //       case "lowest-price":
-  //         return a.price - b.price;
-  //       case "highest-stock":
-  //         return (
-  //           b.stocks.reduce((acc, s) => acc + s.stock_quantity, 0) -
-  //           a.stocks.reduce((acc, s) => acc + s.stock_quantity, 0)
-  //         );
-  //       case "highest-stock":
-  //         return (
-  //           a.stocks.reduce((acc, s) => acc + s.stock_quantity, 0) -
-  //           b.stocks.reduce((acc, s) => acc + s.stock_quantity, 0)
-  //         );
-  //       default:
-  //         return 0;
-  //     }
-  //   });
+  const filteredProduct = products
+    .filter((product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .filter((product) => {
+      if (!selectedCategory || selectedCategory === "all") return true;
+      return product.category.category === selectedCategory;
+    })
+    .filter((product) => {
+      if (selectedSort === "active-product") return product.is_active === true;
+      if (selectedSort === "inactive-product")
+        return product.is_active === false;
+      return true;
+    })
+    .sort((a, b) => {
+      switch (selectedSort) {
+        case "highest-price":
+          return b.price - a.price;
+        case "lowest-price":
+          return a.price - b.price;
+        case "highest-stock":
+          return (
+            b.stocks.reduce((acc, s) => acc + s.stock_quantity, 0) -
+            a.stocks.reduce((acc, s) => acc + s.stock_quantity, 0)
+          );
+        case "highest-stock":
+          return (
+            a.stocks.reduce((acc, s) => acc + s.stock_quantity, 0) -
+            b.stocks.reduce((acc, s) => acc + s.stock_quantity, 0)
+          );
+        default:
+          return 0;
+      }
+    });
 
   const deleteSelectedProduct = async () => {
     try {
@@ -205,9 +152,12 @@ export default function ProductList() {
     }
   };
 
-  // useEffect(() => {
-  //   console.log(selectedProduct);
-  // }, [selectedProduct]); // debugging selected
+  useEffect(() => {
+    getProductList();
+  }, []);
+  useEffect(() => {
+    console.log(selectedProduct);
+  }, [selectedProduct]); // debugging selected
 
   return (
     <DashboardLayout>
@@ -261,7 +211,7 @@ export default function ProductList() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
-                    {productCategories.map((category: any) => (
+                    {productCategories.map((category) => (
                       <SelectGroup key={category.id}>
                         <SelectItem value={category.category}>
                           {upperFirstCharacter(category.category)}
@@ -319,13 +269,10 @@ export default function ProductList() {
                   <Checkbox
                     className="rounded-full"
                     hidden={role ? true : false}
-                    checked={
-                      selectedProduct.length > 0 &&
-                      selectedProduct.length === products.length
-                    }
+                    checked={selectedProduct.length === filteredProduct.length}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        setSelectedProduct(products.map((p) => p.id));
+                        setSelectedProduct(filteredProduct.map((p) => p.id));
                       } else {
                         setSelectedProduct([]);
                       }
@@ -341,7 +288,7 @@ export default function ProductList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.map((product) => (
+              {filteredProduct.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell>
                     <Checkbox
@@ -419,78 +366,7 @@ export default function ProductList() {
             </TableBody>
           </Table>
         </div>
-        <Pagination className="mt-5">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                className={page === 1 ? "pointer-events-none opacity-50" : ""}
-              />
-            </PaginationItem>
-
-            {(() => {
-              // Logika untuk menentukan nomor halaman mana yang akan ditampilkan
-              const pageNumbers = [];
-              if (totalPages <= 7) {
-                // Jika halaman sedikit (<=7), tampilkan semua
-                for (let i = 1; i <= totalPages; i++) {
-                  pageNumbers.push(i);
-                }
-              } else {
-                // Jika halaman banyak, gunakan elipsis
-                pageNumbers.push(1); // Halaman pertama
-                if (page > 3) {
-                  pageNumbers.push("...");
-                }
-                if (page > 2) {
-                  pageNumbers.push(page - 1);
-                }
-                if (page > 1 && page < totalPages) {
-                  pageNumbers.push(page);
-                }
-                if (page < totalPages - 1) {
-                  pageNumbers.push(page + 1);
-                }
-                if (page < totalPages - 2) {
-                  pageNumbers.push("...");
-                }
-                pageNumbers.push(totalPages); // Halaman terakhir
-              }
-
-              // Render nomor halaman dan elipsis
-              return [...new Set(pageNumbers)].map((p, index) =>
-                p === "..." ? (
-                  <PaginationItem key={`ellipsis-${index}`}>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                ) : (
-                  <PaginationItem key={index}>
-                    <PaginationLink
-                      isActive={page === p}
-                      onClick={() => setPage(p as number)}
-                    >
-                      {p}
-                    </PaginationLink>
-                  </PaginationItem>
-                )
-              );
-            })()}
-
-            <PaginationItem>
-              <PaginationNext
-                onClick={() =>
-                  setPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                className={
-                  page === totalPages ? "pointer-events-none opacity-50" : ""
-                }
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
       </section>
-      {/* Pagination */}
-
       {/* Add/Edit Category Dialog */}
       <EditProductCategory open={editCategory} setOpen={setEditCategory} />
       <EditProductDetails open={editDetails} setOpen={setEditDetails} />

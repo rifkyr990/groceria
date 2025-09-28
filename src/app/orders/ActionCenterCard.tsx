@@ -1,11 +1,10 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { OrderDetail } from "@/components/types";
-import { cn } from "@/lib/utils";
 import {
   Bolt,
   CreditCard,
@@ -22,6 +21,7 @@ interface ActionCenterCardProps {
   onCancel: () => void;
   onConfirm: () => void;
   onPay: () => void;
+  isLoading: boolean;
 }
 
 export default function ActionCenterCard({
@@ -29,8 +29,9 @@ export default function ActionCenterCard({
   onCancel,
   onConfirm,
   onPay,
+  isLoading,
 }: ActionCenterCardProps) {
-  const { file, previewUrl, loading, error, setFile, uploadProof, reset } =
+  const { file, previewUrl, loading: isUploading, error, setFile, uploadProof, reset } =
     useUploadProofStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,9 +64,9 @@ export default function ActionCenterCard({
               <div className="w-8 h-8 flex items-center justify-center bg-primary-green-100 rounded-full">
                 <Bolt className="w-4 h-4 text-primary-green-600" />
               </div>
-              <CardTitle className="text-base sm:text-lg font-bold">
+              <h3 className="text-base sm:text-lg font-bold">
                 Complete Your Payment
-              </CardTitle>
+              </h3>
             </div>
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-sm text-orange-800 text-center">
               <p className="font-semibold text-orange-900">Bank BCA</p>
@@ -121,10 +122,10 @@ export default function ActionCenterCard({
                   <div className="flex gap-2">
                     <Button
                       onClick={handleSubmitProof}
-                      disabled={loading}
+                      disabled={isUploading}
                       className="bg-primary-green-600 hover:bg-primary-green-700 h-10 text-sm px-4"
                     >
-                      {loading ? (
+                      {isUploading ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
                       ) : (
                         "Submit Proof"
@@ -133,7 +134,7 @@ export default function ActionCenterCard({
                     <Button
                       variant="outline"
                       onClick={() => setFile(null)}
-                      disabled={loading}
+                      disabled={isUploading}
                     >
                       Cancel
                     </Button>
@@ -145,10 +146,15 @@ export default function ActionCenterCard({
             <div className="border-t border-dashed pt-4">
               <Button
                 onClick={onCancel}
+                disabled={isLoading}
                 variant="outline"
                 className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-10 text-sm px-4"
               >
-                <XCircle className="w-4 h-4 mr-2" />
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <XCircle className="w-4 h-4 mr-2" />
+                )}
                 Cancel Order
               </Button>
             </div>
@@ -162,17 +168,27 @@ export default function ActionCenterCard({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Button
                 onClick={onPay}
+                disabled={isLoading}
                 className="w-full bg-primary-green-600 hover:bg-primary-green-700 h-10 text-sm px-4"
               >
-                <CreditCard className="w-4 h-4 mr-2" />
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <CreditCard className="w-4 h-4 mr-2" />
+                )}
                 Pay Now
               </Button>
               <Button
                 onClick={onCancel}
+                disabled={isLoading}
                 variant="outline"
                 className="w-full text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 h-10 text-sm px-4"
               >
-                <XCircle className="w-4 h-4 mr-2" />
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <XCircle className="w-4 h-4 mr-2" />
+                )}
                 Cancel Order
               </Button>
             </div>
@@ -188,9 +204,14 @@ export default function ActionCenterCard({
         <CardContent className="p-4 sm:p-6">
           <Button
             onClick={onConfirm}
+            disabled={isLoading}
             className="w-full bg-primary-green-600 hover:bg-primary-green-700 h-10 text-sm px-4"
           >
-            <Truck className="w-4 h-4 mr-2" />
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Truck className="w-4 h-4 mr-2" />
+            )}
             I've Received My Order
           </Button>
         </CardContent>

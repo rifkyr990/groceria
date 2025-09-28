@@ -150,7 +150,7 @@ const OrderCard = ({ order }: { order: OrderSummary }) => {
               </p>
             </div>
             <Link
-              href={`/profile/orders/${order.id}`}
+              href={`/orders/${order.id}`}
               className="flex flex-1 items-center justify-end self-stretch py-2 px-3 rounded-lg bg-gradient-to-l from-primary-green-50/80 via-primary-green-50/50 to-transparent hover:from-primary-green-100 hover:via-primary-green-100/70 transition-colors duration-200 group"
             >
               <div className="flex items-center gap-1 text-sm font-semibold text-primary-green-700">

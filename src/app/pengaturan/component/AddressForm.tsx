@@ -117,8 +117,6 @@ export default function AddressForm({ formMethods, onSubmit }: AddressFormProps)
               className="w-full border rounded p-2"
             ></textarea>
           </div>
-
-      {/* Input dan select lainnya... */}
       
       {/* MapPicker */}
       <div className="w-full max-w-md h-40 mx-auto my-4">

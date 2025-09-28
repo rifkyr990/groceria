@@ -272,7 +272,7 @@ export default function NewProduct() {
           className="bg-white basis-1/3 w-full h-[80vh] overflow-auto rounded-md shadow-sm max-xl:hidden  "
         >
           <h1 className="text-xl font-semibold my-5 px-5 py-2">
-            Product Preview
+            Live Product Preview
           </h1>
           <div id="banner-preview" className="relative w-full h-[250px] ">
             {previews[0] ? (

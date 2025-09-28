@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import dynamic from "next/dynamic";
 import {
   Dialog,
@@ -16,50 +16,27 @@ import { useAddressStore } from "@/store/address-store";
 import useWilayah, { Wilayah } from "@/hooks/use-wilayah";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { InputGroup, SelectGroup, Radio } from "../component/FormParts";
 
-// import MapPickerInner secara dinamis
-const MapPicker = dynamic(() => import("@/components/MapPickerInner"), {
-  ssr: false,
-});
 
-interface AddressFormValues {
-  name: string;
-  phone: string;
-  province: string;
-  city: string;
-  district: string;
-  subdistrict: string;
-  postal_code: string;
-  street: string;
-  detail: string;
-  label: "RUMAH" | "KANTOR";
-  is_primary: boolean;
-  latitude: number;
-  longitude: number;
-}
+// Dynamic import map
+const MapPicker = dynamic(() => import("@/components/MapPickerInner"), { ssr: false });
+
+interface AddressFormValues { name: string; phone: string; province: string; city: string; district: string; subdistrict: string; postal_code: string; street: string; detail: string; label: "RUMAH" | "KANTOR"; is_primary: boolean; latitude: number; longitude: number; }
 
 export default function AddAddressModal() {
   const { addAddress } = useAddressStore();
-  const { register, handleSubmit, watch, reset, setValue } =
-    useForm<AddressFormValues>({
-      defaultValues: {
-        name: "",
-        phone: "",
-        province: "",
-        city: "",
-        district: "",
-        subdistrict: "",
-        postal_code: "",
-        street: "",
-        detail: "",
-        label: "RUMAH",
-        is_primary: false,
-        latitude: -6.2,
-        longitude: 106.816666,
-      },
-    });
-
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const { register, handleSubmit, watch, reset, setValue } = useForm<AddressFormValues>({
+    defaultValues: {
+      name: "", phone: "", province: "", city: "", district: "",
+      subdistrict: "", postal_code: "", street: "", detail: "",
+      label: "RUMAH", is_primary: false,
+      latitude: -6.2, longitude: 106.816666,
+    },
+  });
 
   const { provinces, cities, districts, subdistricts } = useWilayah({
     provinceId: watch("province"),
@@ -67,104 +44,65 @@ export default function AddAddressModal() {
     districtId: watch("district"),
   });
 
-  const selectedSub = subdistricts.find(
-    (s) => s.subdistrict_id === watch("subdistrict")
+  const selectedSub = useMemo(
+    () => subdistricts.find(s => s.subdistrict_id === watch("subdistrict")),
+    [subdistricts, watch("subdistrict")]
   );
+
   useEffect(() => {
-    if (selectedSub?.zip_code) {
-      setValue("postal_code", selectedSub.zip_code);
-    } else {
-      setValue("postal_code", "");
-    }
+    setValue("postal_code", selectedSub?.zip_code ?? "");
   }, [selectedSub, setValue]);
 
-  useEffect(() => {
-    const provinceName = provinces.find(
-      (p) => p.province_id === watch("province")
-    )?.province;
-    const cityName = cities.find((c) => c.city_id === watch("city"))?.city_name;
-    const districtName = districts.find(
-      (d) => d.district_id === watch("district")
-    )?.district_name;
-    const subdistrictName = subdistricts.find(
-      (s) => s.subdistrict_id === watch("subdistrict")
-    )?.subdistrict_name;
-
-    const fullAddress = [
-      subdistrictName,
-      districtName,
-      cityName,
-      provinceName,
+  const fetchCoordinates = useCallback(async () => {
+    const names = [
+      subdistricts.find(s => s.subdistrict_id === watch("subdistrict"))?.subdistrict_name,
+      districts.find(d => d.district_id === watch("district"))?.district_name,
+      cities.find(c => c.city_id === watch("city"))?.city_name,
+      provinces.find(p => p.province_id === watch("province"))?.province,
       "Indonesia",
-    ]
-      .filter(Boolean)
-      .join(", ");
+    ].filter(Boolean).join(", ");
 
-    if (fullAddress) {
-      const fetchCoords = async () => {
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}`
-          );
-          const data = await res.json();
-          if (data && data.length > 0) {
-            setValue("latitude", parseFloat(data[0].lat));
-            setValue("longitude", parseFloat(data[0].lon));
-          }
-        } catch (err) {
-          console.error("Gagal fetch koordinat:", err);
-        }
-      };
-      fetchCoords();
+    if (!names) return;
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(names)}`);
+      const data = await res.json();
+      if (data.length) {
+        setValue("latitude", parseFloat(data[0].lat));
+        setValue("longitude", parseFloat(data[0].lon));
+      }
+    } catch (err) {
+      console.error("Failed to fetch coordinates:", err);
     }
-  }, [
-    watch("province"),
-    watch("city"),
-    watch("district"),
-    watch("subdistrict"),
-  ]);
+  }, [provinces, cities, districts, subdistricts, watch, setValue]);
 
-  const onSubmit = async (data: AddressFormValues) => {
-    const provinceName =
-      provinces.find((p) => p.province_id === data.province)?.province || "";
-    const cityName =
-      cities.find((c) => c.city_id === data.city)?.city_name || "";
-    const districtName =
-      districts.find((d) => d.district_id === data.district)?.district_name ||
-      "";
-    const subdistrictName =
-      subdistricts.find((s) => s.subdistrict_id === data.subdistrict)
-        ?.subdistrict_name || "";
+  useEffect(() => {
+    fetchCoordinates();
+  }, [fetchCoordinates]);
 
-    const payload = {
-      ...data,
-      province: provinceName,
-      city: cityName,
-      district: districtName,
-      subdistrict: subdistrictName,
-      province_id: data.province,
-      city_id: data.city,
-      district_id: data.district,
-      subdistrict_id: data.subdistrict,
-    };
+  const handleSave = async (data: AddressFormValues) => {
+    setLoading(true);
+    const provinceName = provinces.find(p => p.province_id === data.province)?.province || "";
+    const cityName = cities.find(c => c.city_id === data.city)?.city_name || "";
+    const districtName = districts.find(d => d.district_id === data.district)?.district_name || "";
+    const subdistrictName = subdistricts.find(s => s.subdistrict_id === data.subdistrict)?.subdistrict_name || "";
 
+    const payload = { ...data, province: provinceName, city: cityName, district: districtName, subdistrict: subdistrictName,province_id: data.province, city_id: data.city, district_id: data.district, subdistrict_id: data.subdistrict,};
     const success = await addAddress(payload);
+    setLoading(false);
+
     if (success) {
       toast.success("Alamat berhasil ditambahkan!");
-      setOpen(false);
       reset();
+      setOpen(false);
+    } else {
+      toast.error("Gagal menambahkan alamat");
     }
   };
 
-  const renderOptions = (
-    items: Wilayah[],
-    valueKey: keyof Wilayah,
-    labelKey: keyof Wilayah,
-    placeholder: string
-  ) => (
+  const renderOptions = (items: Wilayah[], valueKey: keyof Wilayah, labelKey: keyof Wilayah, placeholder: string) => (
     <>
       <option value="">{placeholder}</option>
-      {items.map((item) => (
+      {items.map(item => (
         <option key={String(item[valueKey])} value={String(item[valueKey])}>
           {String(item[labelKey])}
         </option>
@@ -177,100 +115,38 @@ export default function AddAddressModal() {
       <DialogTrigger asChild>
         <Button className="bg-green-600 text-white">+ Tambah Alamat</Button>
       </DialogTrigger>
+
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl scrollbar-thin scrollbar-thumb-gray-400 hover:scrollbar-thumb-gray-500">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold">
-            Tambah Alamat Baru
-          </DialogTitle>
+          <DialogTitle className="text-lg font-semibold">Tambah Alamat Baru</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
-          <div>
-            <Label className="mb-3">Nama</Label>
-            <Input {...register("name")} placeholder="Nama penerima" />
-          </div>
+        <form onSubmit={handleSubmit(handleSave)} className="space-y-4 mt-4">
+          {/* Basic Inputs */}
+          <InputGroup label="Nama" reg={register("name")} placeholder="Nama penerima" />
+          <InputGroup label="Nomor Telepon" reg={register("phone")} placeholder="08xxxx" />
 
-          <div>
-            <Label className="mb-3">Nomor Telepon</Label>
-            <Input {...register("phone")} placeholder="08xxxx" />
+          {/* Dropdowns */}
+          <div className="grid grid-cols-2 gap-3">
+            <SelectGroup label="Provinsi" reg={register("province")} options={renderOptions(provinces, "province_id", "province", "Pilih Provinsi")} />
+            <SelectGroup label="Kota/Kabupaten" reg={register("city")} disabled={!watch("province")} options={renderOptions(cities, "city_id", "city_name", "Pilih Kota")} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="mb-3">Provinsi</Label>
-              <select {...register("province")} className="input w-full">
-                {renderOptions(
-                  provinces,
-                  "province_id",
-                  "province",
-                  "Pilih Provinsi"
-                )}
-              </select>
-            </div>
-
-            <div>
-              <Label className="mb-3">Kota/Kabupaten</Label>
-              <select
-                {...register("city")}
-                className="input w-full"
-                disabled={!watch("province")}
-              >
-                {renderOptions(cities, "city_id", "city_name", "Pilih Kota")}
-              </select>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="mb-3">Kecamatan</Label>
-              <select
-                {...register("district")}
-                className="input w-full"
-                disabled={!watch("city")}
-              >
-                {renderOptions(
-                  districts,
-                  "district_id",
-                  "district_name",
-                  "Pilih Kecamatan"
-                )}
-              </select>
-            </div>
-            {/* Kelurahan/Desa */}
-            <div>
-              <Label className="mb-3">Kelurahan/Desa</Label>
-              <select
-                {...register("subdistrict")}
-                className="input w-full"
-                disabled={!watch("district")}
-              >
-                {renderOptions(
-                  subdistricts,
-                  "subdistrict_id",
-                  "subdistrict_name",
-                  "Pilih Kelurahan/Desa"
-                )}
-              </select>
-            </div>
-          </div>
-          {/* Kecamatan */}
-          <div>
-            <Label className="mb-3">Kode Pos</Label>
-            <Input {...register("postal_code")} readOnly />
+            <SelectGroup label="Kecamatan" reg={register("district")} disabled={!watch("city")} options={renderOptions(districts, "district_id", "district_name", "Pilih Kecamatan")} />
+            <SelectGroup label="Kelurahan/Desa" reg={register("subdistrict")} disabled={!watch("district")} options={renderOptions(subdistricts, "subdistrict_id", "subdistrict_name", "Pilih Kelurahan/Desa")} />
           </div>
 
+          <InputGroup label="Kode Pos" reg={register("postal_code")} readOnly />
+          <InputGroup label="Nama Jalan" reg={register("street")} placeholder="Jl. Contoh No. 123" />
+
+          {/* Detail Alamat */}
           <div>
-            <Label className="mb-3">Nama Jalan</Label>
-            <Input {...register("street")} placeholder="Jl. Contoh No. 123" />
+            <Label>Detail Alamat</Label>
+            <textarea {...register("detail")} placeholder="Blok, RT/RW, patokan, dll" className="w-full border rounded p-2" />
           </div>
 
-          <div>
-            <Label className="mb-3">Detail Alamat</Label>
-            <textarea
-              {...register("detail")}
-              placeholder="Blok, RT/RW, patokan, dll"
-              className="w-full border rounded p-2"
-            ></textarea>
-          </div>
+          {/* Map */}
           <div className="w-full max-w-md h-40 mx-auto my-4">
             <MapPicker
               disabled={false}
@@ -281,41 +157,33 @@ export default function AddAddressModal() {
                 city: watch("city"),
                 province: watch("province"),
               }}
-              onLocationSelect={(data) => {
-                setValue("latitude", data.lat);
-                setValue("longitude", data.long);
+              onLocationSelect={(loc) => {
+                setValue("latitude", loc.lat);
+                setValue("longitude", loc.long);
               }}
             />
           </div>
+
+          {/* Label Alamat */}
           <div>
-            <Label className="mb-3">Label Alamat</Label>
+            <Label>Label Alamat</Label>
             <div className="flex gap-6 mt-1">
-              <label className="flex items-center gap-2">
-                <input type="radio" value="RUMAH" {...register("label")} />
-                Rumah
-              </label>
-              <label className="flex items-center gap-2">
-                <input type="radio" value="KANTOR" {...register("label")} />
-                Kantor
-              </label>
+              <Radio label="Rumah" value="RUMAH" reg={register("label")} />
+              <Radio label="Kantor" value="KANTOR" reg={register("label")} />
             </div>
           </div>
 
+          {/* Primary Checkbox */}
           <div className="flex items-center gap-2">
             <input type="checkbox" {...register("is_primary")} />
             <span>Jadikan alamat utama</span>
           </div>
 
+          {/* Buttons */}
           <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="bg-gray-500 text-white"
-            >
-              Batal
-            </Button>
-            <Button type="submit" className="bg-green-600 text-white">
-              Simpan
+            <Button type="button" onClick={() => setOpen(false)} className="bg-gray-500 text-white">Batal</Button>
+            <Button type="submit" className="bg-green-600 text-white" disabled={loading}>
+              {loading ? "Menyimpan..." : "Simpan"}
             </Button>
           </div>
         </form>
@@ -323,3 +191,4 @@ export default function AddAddressModal() {
     </Dialog>
   );
 }
+

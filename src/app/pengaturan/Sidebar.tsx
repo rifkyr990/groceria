@@ -35,18 +35,6 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
         >
           Alamat Saya
         </button>
-
-        <Link
-          href="/pengaturan/orders"
-          className={`block w-full text-left px-3 py-2 rounded ${
-            pathname.startsWith("/pengaturan/orders")
-              ? "bg-green-600 text-white"
-              : "hover:bg-gray-100 dark:hover:bg-gray-700"
-          }`}
-        >
-          Pesanan Saya
-        </Link>
-
         <button
           onClick={() => setActiveTab("password")}
           className={`block w-full text-left px-3 py-2 rounded ${
