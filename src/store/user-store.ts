@@ -130,7 +130,7 @@ export const useUserStore = create<UserState>((set) => ({
 
 
     changePassword: async (oldPassword: string, newPassword: string) => {
-        set({ loading: true, error: null });
+      set({ loading: true, error: null });
         try {
             const token = useAuthStore.getState().token;
             await apiCall.put("/api/user/change-password", { oldPassword, newPassword }, {

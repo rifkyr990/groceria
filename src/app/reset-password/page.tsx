@@ -63,39 +63,21 @@ export default function ResetPasswordPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        {/* <label className="block text-gray-700 text-sm mb-1 dark:text-gray-300">Password Baru</label> */}
-                        {/* <input
-                            type="password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            placeholder="Masukkan password baru"
-                            required
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none"
-                        /> */}
                         <PasswordInput
-                                                    label="Password Baru"
-                                                    value={newPassword}
-                                                    onChange={setNewPassword}
-                                                    placeholder="Minimal 8 karakter"
-                                                />
+                            label="Password Baru"
+                            value={newPassword}
+                            onChange={setNewPassword}
+                            placeholder="Minimal 8 karakter"
+                        />
                     </div>
 
                     <div>
-                        {/* <label className="block text-gray-700 text-sm mb-1 dark:text-gray-300">Konfirmasi Password</label> */}
-                        {/* <input
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            placeholder="Ulangi password baru"
-                            required
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none"
-                        /> */}
                         <PasswordInput
-                                                    label="Konfirmasi Password"
-                                                    value={confirmPassword}
-                                                    onChange={setConfirmPassword}
-                                                    placeholder="Minimal 8 karakter"
-                                                />
+                            label="Konfirmasi Password"
+                            value={confirmPassword}
+                            onChange={setConfirmPassword}
+                            placeholder="Minimal 8 karakter"
+                        />
                     </div>
 
                     <button

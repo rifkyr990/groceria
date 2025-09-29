@@ -59,7 +59,6 @@ export default function PasswordInput({
             </button>
         </div>
 
-      {/* Indikator Strength */}
         {value && (
             <p
                 className={clsx(

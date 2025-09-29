@@ -18,7 +18,7 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
         <button
           onClick={() => setActiveTab("profile")}
           className={`block w-full text-left px-3 py-2 rounded ${
-            activeTab === "profile" && pathname === "/profile"
+            activeTab === "profile" && pathname === "/pengaturan"
               ? "bg-green-600 text-white"
               : "hover:bg-gray-100 dark:hover:bg-gray-700"
           }`}
@@ -28,20 +28,17 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
         <button
           onClick={() => setActiveTab("address")}
           className={`block w-full text-left px-3 py-2 rounded ${
-            activeTab === "address" && pathname === "/profile"
+            activeTab === "address" && pathname === "/pengaturan"
               ? "bg-green-600 text-white"
               : "hover:bg-gray-100 dark:hover:bg-gray-700"
           }`}
         >
           Alamat Saya
         </button>
-
-        
-
         <button
           onClick={() => setActiveTab("password")}
           className={`block w-full text-left px-3 py-2 rounded ${
-            activeTab === "password" && pathname === "/profile"
+            activeTab === "password" && pathname === "/pengaturan"
               ? "bg-green-600 text-white"
               : "hover:bg-gray-100 dark:hover:bg-gray-700"
           }`}

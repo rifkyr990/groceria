@@ -5,7 +5,7 @@ import Image from "next/image";
 
 export default function AboutSection() {
     return (
-        <section className="bg-gray-50 py-16 dark:bg-gray-900">
+        <section className="bg-gray-50 py-16 dark:bg-gray-900" id="about">
             <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                 <motion.div
                     initial={{ opacity: 0, x: -50 }}

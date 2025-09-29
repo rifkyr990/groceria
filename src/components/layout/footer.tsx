@@ -8,7 +8,7 @@ interface IFooterProps {
 }
 export default function Footer({ className }: IFooterProps) {
   return (
-    <footer className={`bg-white border-t dark:bg-gray-900 ${className}`}>
+    <footer className={`bg-white border-t dark:bg-gray-900 ${className}`} id="footer">
       <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Brand */}
         <div>
