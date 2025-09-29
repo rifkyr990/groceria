@@ -1,8 +1,3 @@
-// ==========================================================
-// New File: checkout-store.ts
-// Path: src/store/checkout-store.ts
-// Stack: frontend
-// ==========================================================
 import { create } from "zustand";
 import { ShippingOption, PaymentMethod } from "@/components/types";
 
