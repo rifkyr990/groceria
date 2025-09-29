@@ -8,7 +8,6 @@ import { useCartStore } from "@/store/cart-store";
 import { useAuthStore } from "@/store/auth-store";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
-import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function CartPage() {
@@ -21,7 +20,6 @@ export default function CartPage() {
     tryApplyPromoCode,
     storeName,
     removePromoCode,
-    fetchCart,
     saveCart,
     loading,
   } = useCartStore();
@@ -73,7 +71,6 @@ export default function CartPage() {
 
     const debounceTimer = setTimeout(() => {
       if (token) {
-        console.log("User stopped making changes. Saving cart...");
         saveCart(token);
       }
     }, 1000);
