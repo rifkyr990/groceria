@@ -60,8 +60,7 @@ export default function RelocateAdmin({
         <DialogHeader>
           <DialogTitle>Store Admin Relocation</DialogTitle>
           <DialogDescription className="text-justify">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Obcaecati,
-            doloribus!
+            Pemindahan/penempatan store admin
           </DialogDescription>
         </DialogHeader>
         {/* Store Selector  */}

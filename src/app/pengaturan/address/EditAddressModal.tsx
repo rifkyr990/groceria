@@ -16,8 +16,7 @@ import useWilayah, { Wilayah } from "@/hooks/use-wilayah";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import dynamic from "next/dynamic";
-
-const MapPicker = dynamic(() => import("../component/MapPicker"), { ssr: false });
+import MapPickerWrapper from "../component/MapPickerWrapper";
 
 interface AddressFormValues {
   name: string;
@@ -62,21 +61,27 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
 
   // reset form saat modal dibuka
   useEffect(() => {
-    if (!address) return;
-    const provinceId =
-      provinces.find((p) => p.province === address.province)?.province_id || "";
-    const cityId =
-      cities.find((c) => c.city_name === address.city)?.city_id || "";
-    const districtId =
-      districts.find((d) => d.district_name === address.district)?.district_id ||
-      "";
-    const subdistrictId =
-      subdistricts.find((s) => s.subdistrict_name === address.subdistrict)
-        ?.subdistrict_id || "";
+  if (!open) return;
 
-    reset({ ...address, province: provinceId, city: cityId, district: districtId, subdistrict: subdistrictId });
-    if (address.latitude && address.longitude) setCoords([address.latitude, address.longitude]);
-  }, [address, provinces, cities, districts, subdistricts, reset]);
+  const provinceId = provinces.find((p) => p.province === address.province)?.province_id || "";
+  const cityId = cities.find((c) => c.city_name === address.city)?.city_id || "";
+  const districtId = districts.find((d) => d.district_name === address.district)?.district_id || "";
+  const subdistrictId = subdistricts.find((s) => s.subdistrict_name === address.subdistrict)?.subdistrict_id || "";
+
+  reset({
+    ...address,
+    province: provinceId,
+    city: cityId,
+    district: districtId,
+    subdistrict: subdistrictId,
+    latitude: address.latitude ?? 0,
+    longitude: address.longitude ?? 0,
+  });
+
+  if (address.latitude && address.longitude) {
+    setCoords([address.latitude, address.longitude]);
+  }
+}, [open]); // ✅ hanya jalankan saat modal dibuka
 
   const onSubmit = async (data: AddressFormValues) => {
     const payload = {
@@ -163,10 +168,21 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
             <textarea {...register("detail")} className="w-full border rounded p-2" />
           </div>
 
-          <div>
-            <Label>Pin Lokasi</Label>
-            <MapPicker coords={coords} onChange={setCoords} />
+         <div>
+            <Label className="mb-2 block">Pin Lokasi</Label>
+            <MapPickerWrapper
+              lat={watch("latitude") ?? coords?.[0] ?? 0}
+              long={watch("longitude") ?? coords?.[1] ?? 0}
+              street={watch("street")}
+              city={watch("city")}
+              province={watch("province")}
+              onLocationSelect={(data) => {
+                setValue("latitude", data.lat);
+                setValue("longitude", data.long);
+              }}
+            />
           </div>
+
 
           <div>
             <Label>Label</Label>

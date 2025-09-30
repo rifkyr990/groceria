@@ -20,13 +20,13 @@ export default function DropDownProfile() {
     <DropdownMenuContent className="p-1">
       <DropdownMenuLabel>My Account</DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={() => router.replace("/profile")}>
+      <DropdownMenuItem onClick={() => router.replace("/pengaturan")}>
         <Settings />
         Settings
       </DropdownMenuItem>
       <DropdownMenuItem onClick={handleLogout}>
         <LogOut />
-        Logout
+          Logout
       </DropdownMenuItem>
     </DropdownMenuContent>
   );

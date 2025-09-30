@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
         if (success) {
             toast.success("Link reset password sudah dikirim ke email Anda.");
         } else {
-            toast.error("Gagal, coba lagi.");
+            toast.error("Email salah atau belum terdaftar.");
         }
     };
 

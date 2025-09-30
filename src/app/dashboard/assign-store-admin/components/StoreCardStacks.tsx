@@ -39,16 +39,6 @@ export default function StoreCardStacks({ stores, className }: IStoreCard) {
         return (
           <Card key={store.id} className="p-1">
             <CardContent className="flex items-center gap-x-2 p-2">
-              {/* <div id="storelogo">
-                <div className="relative w-25 h-25 rounded-md overflow-hidden">
-                  <Image
-                    src={"https://picsum.photos/id/237/500/300"}
-                    alt="store-banner"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div> */}
               <div className="flex flex-col">
                 <div id="profile">
                   <p className="font-semibold">{store.name}</p>
