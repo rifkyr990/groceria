@@ -70,7 +70,6 @@ export default function CartPage() {
 
     const debounceTimer = setTimeout(() => {
       if (token) {
-        console.log("User stopped making changes. Saving cart...");
         saveCart(token);
       }
     }, 1000);
