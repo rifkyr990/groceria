@@ -180,12 +180,6 @@ export default function ProfilePage() {
             />
         </div>
 
-        {/* Bio */}
-        <div>
-            <label className="block text-sm mb-1">Bio</label>
-            <textarea {...register("bio")} className="w-full border rounded p-2" />
-        </div>
-
         <div className="flex justify-end gap-4 mt-10">
             <button
                 className="w-45 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700"

@@ -31,9 +31,7 @@ export default function PasswordForm() {
             toast.error("Password baru dan konfirmasi tidak cocok.");
             return;
         }
-
         const success = await changePassword(data.oldPassword, data.newPassword);
-
         if (!success) {
             toast.error("Password lama salah. Silakan coba lagi.");
             return;

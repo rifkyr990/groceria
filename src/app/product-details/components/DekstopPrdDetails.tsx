@@ -17,7 +17,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
-import { toast } from "react-toastify";
 
 interface IDesktopPrdDetails {
   allProduct: IProductProps[] | null;

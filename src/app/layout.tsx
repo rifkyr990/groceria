@@ -35,9 +35,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      {/* <body
-        className={`${geistSans.variable} ${geistMono.variable} ${PoppinsFont.variable} antialiased`}
-      > */}
       <body className={` ${PoppinsFont.variable} antialiased`}>
         <Script
           id="midtrans-snap"
@@ -63,7 +60,7 @@ export default function RootLayout({
             />
           </ClientWrapper>
         </ThemeProvider>
-        <div id="map-portal-root"></div> {/* <--- ADD THIS LINE */}
+        <div id="map-portal-root"></div>
       </body>
     </html>
   );

@@ -11,7 +11,7 @@ export default function VerifyNewEmailPage() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const router = useRouter();
-  const { verifyNewEmail, loading } = useAuthStore();
+  const { verifyNewEmail } = useAuthStore();
 
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
 

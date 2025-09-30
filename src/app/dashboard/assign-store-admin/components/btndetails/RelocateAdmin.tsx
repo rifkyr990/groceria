@@ -19,8 +19,6 @@ import {
 } from "@/components/ui/select";
 import { apiCall } from "@/helper/apiCall";
 import { IRelocateAdminData } from "@/types/relocate_admin";
-import { IStoreProps } from "@/types/store";
-import { IUserProps } from "@/types/user";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
@@ -40,9 +38,6 @@ export default function RelocateAdmin({
   const [selectedStoreId, setSelectedStoreId] = useState<string>(
     adminData?.storeId ? adminData.storeId.toString() : ""
   );
-  //   console.log(adminData);
-  //   console.log(selectedStoreId);
-  //   console.log(storeList);
   const handlerChangeStore = async () => {
     if (!adminData?.adminId) return;
     try {

@@ -5,7 +5,6 @@ import StoreData from "./components/StoreData";
 import { useEffect, useState } from "react";
 import { apiCall } from "@/helper/apiCall";
 import { IStoreProps } from "@/types/store";
-import StoreAdminData from "./components/StoreAdminTable";
 import { useRouter } from "next/navigation";
 
 export default function AccountPage() {

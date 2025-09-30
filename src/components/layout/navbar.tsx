@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import {
-  ShoppingCart, UserRoundCog, Sun, Moon, LogOut, Settings,
+  ShoppingCart, Sun, Moon, LogOut, Settings,
   LayoutDashboard, Menu as MenuIcon, X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -48,6 +48,9 @@ const CartButton = ({ totalItems }: { totalItems: number }) => (
   </Link>
 );
 
+/* ===========================
+   Menu Items utk Desktop (headlessui Menu)
+=========================== */
 const UserMenuItems = ({ user, logout }: any) => {
   const menuLinks = [];
 
@@ -95,6 +98,51 @@ const UserMenuItems = ({ user, logout }: any) => {
   ));
 };
 
+/* ===========================
+   Menu Items utk Mobile (plain <li>)
+=========================== */
+const UserMenuItemsMobile = ({ user, logout, close }: any) => {
+  const menuLinks = [];
+
+  if (["STORE_ADMIN", "SUPER_ADMIN"].includes(user.role)) {
+    menuLinks.push({
+      href: user.role === "STORE_ADMIN" ? "/dashboard/manage-order" : "/dashboard/manage-store",
+      icon: LayoutDashboard,
+      label: "Dashboard",
+    });
+  }
+
+  if (user.role === "CUSTOMER") {
+    menuLinks.push({ href: "/orders", icon: ShoppingCart, label: "Pesanan Saya" });
+  }
+
+  menuLinks.push(
+    { href: "/pengaturan", icon: Settings, label: "Pengaturan" },
+    { href: "#", icon: LogOut, label: "Logout", onClick: logout }
+  );
+
+  return menuLinks.map(({ href, icon: Icon, label, onClick }, idx) => (
+    <li key={idx}>
+      {onClick ? (
+        <button
+          onClick={() => { onClick(); close(); }}
+          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 w-full text-left"
+        >
+          <Icon className="w-4 h-4" /> {label}
+        </button>
+      ) : (
+        <Link
+          href={href}
+          onClick={close}
+          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200"
+        >
+          <Icon className="w-4 h-4" /> {label}
+        </Link>
+      )}
+    </li>
+  ));
+};
+
 const MobileMenu = ({ user, logout, totalItems, close }: any) => (
   <div className="absolute top-16 left-0 w-full bg-white dark:bg-gray-900 shadow-lg md:hidden z-50">
     <ul className="flex flex-col gap-4 px-6 py-4 text-gray-600 dark:text-gray-200">
@@ -118,9 +166,7 @@ const MobileMenu = ({ user, logout, totalItems, close }: any) => (
           </Link>
         </>
       ) : (
-        <>
-          <UserMenuItems user={user} logout={() => { logout(); close(); }} />
-        </>
+        <UserMenuItemsMobile user={user} logout={logout} close={close} />
       )}
     </ul>
   </div>

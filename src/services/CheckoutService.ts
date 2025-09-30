@@ -1,5 +1,4 @@
 import { toast } from "react-toastify";
-import { type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ShippingOption, PaymentMethod, PromoCode } from "@/components/types";
 import { useOrderStore } from "@/store/order-store";
 

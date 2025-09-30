@@ -15,7 +15,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { apiCall } from "@/helper/apiCall";
-import { useProduct } from "@/store/useProduct";
 import { IProductProps } from "@/types/product";
 import { upperFirstCharacter } from "@/utils/format";
 import { Edit, Trash } from "lucide-react";

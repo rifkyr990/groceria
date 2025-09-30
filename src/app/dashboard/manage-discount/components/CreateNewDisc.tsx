@@ -29,9 +29,7 @@ import { apiCall } from "@/helper/apiCall";
 import { useAuthStore } from "@/store/auth-store";
 import { useStore } from "@/store/useStore";
 import { IProductProps } from "@/types/product";
-import { IStoreProps } from "@/types/store";
 import { formatIntlDate } from "@/utils/format";
-import { Calendar } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -44,16 +42,11 @@ interface ICreateNewDiscount {
 export default function CreateNewDiscount({
   open,
   setOpen,
-  onCreate,
 }: ICreateNewDiscount) {
   const [productByStore, setProductByStore] = useState<IProductProps[]>([]);
   const [selectedProduct, setSelectedProduct] = useState("");
-  // get User Data
-  const { selectedStore, setSelectedStore, fetchAllStores, storesData } =
-    useStore();
+  const { selectedStore, setSelectedStore, fetchAllStores, storesData } = useStore();
   const user = useAuthStore((state) => state.user);
-
-  // Discount Info
   const [discountCode, setDiscountCode] = useState("");
   const [dateRange, setDateRange] = useState<{
     from: Date | undefined;

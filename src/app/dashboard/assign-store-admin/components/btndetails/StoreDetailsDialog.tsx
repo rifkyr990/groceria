@@ -63,7 +63,6 @@ export default function StoreDetailsDialog({
       is_active: storeStatus,
     },
   });
-  const address = watch("address");
   const [edit, setEdit] = useState(false);
 
   const onBtnSubmit = async (data: any) => {

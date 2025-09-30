@@ -1,13 +1,10 @@
 "use client";
 import Footer from "@/components/layout/footer";
 import Navbar from "@/components/layout/navbar";
-import { useLocationStore } from "@/store/use-location-store";
-import { useProduct } from "@/store/useProduct";
 import { IProductProps } from "@/types/product";
-import { use, useEffect, useState } from "react";
+import { use, useState } from "react";
 import DesktopPrdDetails from "../components/DekstopPrdDetails";
 import MobilePrdDetails from "../components/MobilePrdDetails";
-import { apiCall } from "@/helper/apiCall";
 
 interface IProductDetailPageProps {
   params: Promise<{ id: number }>;
@@ -17,14 +14,6 @@ export default function ProductDetailPage({ params }: IProductDetailPageProps) {
   const { id } = use(params);
   const [product, setProduct] = useState<IProductProps | null>(null);
   const [allProduct, setAllProduct] = useState<IProductProps[] | null>([]);
-  const {
-    products,
-    getProductList,
-    selectedProductDetails,
-    setSelectedProductDetails,
-  } = useProduct();
-  const { city, province, latitude, longitude } = useLocationStore();
-  console.log(id);
 
   return (
     <section>

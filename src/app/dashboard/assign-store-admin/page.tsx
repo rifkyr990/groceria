@@ -1,7 +1,6 @@
 "use client";
 import { IUserProps } from "@/types/user";
 import DashboardLayout from "../components/DashboardLayout";
-import StoreData from "./components/StoreData";
 import { useEffect, useState } from "react";
 import { apiCall } from "@/helper/apiCall";
 import { IStoreProps } from "@/types/store";

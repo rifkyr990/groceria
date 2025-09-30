@@ -6,7 +6,6 @@ import {
   Package,
   Store,
   UserRoundPen,
-  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "motion/react";

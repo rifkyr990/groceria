@@ -307,6 +307,7 @@ export const useCartStore = create<CartState>((set, get) => {
           set({ appliedPromo: savedPromo });
         } catch (e) {
           localStorage.removeItem("applied_promo");
+          console.error(e);
         }
       }
     },
