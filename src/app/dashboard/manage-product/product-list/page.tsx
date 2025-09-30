@@ -66,7 +66,7 @@ export default function ProductList() {
     ? products.reduce((acc, product) => {
         if (
           product?.category &&
-          !acc.some((item) => item.id === product.category.id)
+          !acc.some((item: any) => item.id === product.category.id)
         ) {
           acc.push(product.category);
         }
@@ -328,7 +328,7 @@ export default function ProductList() {
                   </TableCell>
                   <TableCell className="text-center">
                     {product.stocks.reduce(
-                      (acc, stock) => acc + stock.stock_quantity,
+                      (acc: any, stock: any) => acc + stock.stock_quantity,
                       0
                     )}
                   </TableCell>

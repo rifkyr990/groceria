@@ -114,10 +114,10 @@ export default function SalesReport() {
       setSummary({
         totalSales:
           result.summary?.totalSales ??
-          ordersData.reduce((a, b) => a + (b.totalSales ?? 0), 0),
+          ordersData.reduce((a: any, b: any) => a + (b.totalSales ?? 0), 0),
         totalQuantity:
           result.summary?.totalQuantity ??
-          ordersData.reduce((a, b) => a + (b.quantity ?? 0), 0),
+          ordersData.reduce((a: any, b: any) => a + (b.quantity ?? 0), 0),
         totalOrder: result.summary?.totalOrder ?? ordersData.length,
         totalRefund: result.summary?.totalRefund ?? 0,
       });

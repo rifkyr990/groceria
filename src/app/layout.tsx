@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+// import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 // import { GeistSans } from "geist/font/sans";
 // import { GeistMono } from "geist/font/mono";
@@ -9,6 +9,8 @@ import StoreInitializer from "@/components/StoreInitializer";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Script from "next/script";
+// import type { Metadata } from "next";
+// import type { Metadata } from "next";
 
 // const geistSans = GeistSans;
 
@@ -20,7 +22,7 @@ const PoppinsFont = Poppins({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Groceria App",
   icons: {
     icon: "/assets/logo-short.svg",

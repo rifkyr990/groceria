@@ -39,7 +39,7 @@ export default function CartItem({
               </p>
             </div>
             <p className="font-bold text-sm sm:text-base lg:text-lg text-text-dark whitespace-nowrap flex-shrink-0">
-              {formatIDRCurrency(price)}
+              {formatIDRCurrency(Number(price))}
             </p>
           </div>
 
