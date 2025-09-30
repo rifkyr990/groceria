@@ -64,7 +64,6 @@ export default function ProductList() {
   const { setSelectedProductDetails } = useProduct();
   const productCategories = Array.isArray(products)
     ? products.reduce((acc, product) => {
-        // Tambahkan pengecekan null/undefined untuk category
         if (
           product?.category &&
           !acc.some((item) => item.id === product.category.id)
