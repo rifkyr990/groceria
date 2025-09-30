@@ -147,14 +147,6 @@ export default function SalesReport() {
   useEffect(() => {
     getStoreList();
   }, []);
-  // Filter berdasarkan store dan bulan/tahun
-  // const filteredData = orders.filter((item) => {
-  //   const storeMatch =
-  //     selectedStore === "all" || item.storeId === Number(selectedStore);
-  //   const dateMatch =
-  //     item.month === selectedDate.month && item.year === selectedDate.year;
-  //   return storeMatch && dateMatch;
-  // });
 
   const summaryCard = [
     {
@@ -181,30 +173,6 @@ export default function SalesReport() {
       ),
       desc: "products this month (by SHIPPED transaction status)",
     },
-    // {
-    //   id: 3,
-    //   name: "Total Order",
-    //   icon: <Clipboard className="text-purple-500" />,
-    //   border: "border-l-purple-500 border-4",
-    //   total: (
-    //     <span className="text-purple-500 text-4xl font-bold ">
-    //       {summary.totalOrder}
-    //     </span>
-    //   ),
-    //   desc: "orders this month",
-    // },
-    // {
-    //   id: 4,
-    //   name: "Total Refund",
-    //   icon: <RefreshCcw className="text-red-500" />,
-    //   border: "border-l-red-500 border-4",
-    //   total: (
-    //     <span className="text-red-500 text-4xl font-bold ">
-    //       {formatIDRCurrency(0)}
-    //     </span>
-    //   ),
-    //   desc: "per month",
-    // },
   ];
 
   // filter orders sesuai category, product, search

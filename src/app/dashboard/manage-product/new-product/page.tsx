@@ -99,21 +99,6 @@ export default function NewProduct() {
     }
   };
   const arrCategories = categories.map((cat) => cat.category);
-
-  // const {
-  //   register,
-  //   handleSubmit,
-  //   control,watch
-  // } = useForm<ProductFormValues>({
-  //   resolver: zodResolver(productFormSchema),
-  //   defaultValues: {
-  //     name: "",
-  //     description: "",
-  //     category: "",
-  //     images: undefined,
-  //   },
-  // });
-
   const handleSubmit = async () => {
     if (!prdName || !prdPrice || !prdCategory) {
       alert("Please fill all fields!");

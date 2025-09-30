@@ -73,17 +73,8 @@ export default function ProductList() {
         }
         return acc;
       }, [] as any[])
-    : []; // Jika 'products' bukan array, jadikan array kosong
-  // const [editCategory, setEditCategory] = useState(false);
-  // const [editDetails, setEditDetails] = useState(false);
-  // const [searchQuery, setSearchQuery] = useState("");
-  // const [selectedCategory, setSelectedCategory] = useState<string | null>(
-  //   "all"
-  // );
-  // const [selectedSort, setSelectedSort] = useState<string | null>(null);
-  // const [selectedProduct, setSelectedProduct] = useState<number[]>([]);
-  // // router
-  // const router = useRouter();
+    : [];
+
   const getProductList = useCallback(async () => {
     setLoading(true);
     try {
@@ -112,8 +103,6 @@ export default function ProductList() {
   }, [page, limit, searchQuery, selectedCategory, selectedSort]);
   console.log(products);
 
-  // useEffect ke-2: HANYA untuk cek role.
-  // Hanya berjalan SEKALI saat halaman pertama kali dibuka.
   useEffect(() => {
     const userJson = localStorage.getItem("user");
     if (userJson) {
@@ -154,41 +143,6 @@ export default function ProductList() {
     );
   };
 
-  // const filteredProduct = products
-  //   .filter((product) =>
-  //     product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  //   )
-  //   .filter((product) => {
-  //     if (!selectedCategory || selectedCategory === "all") return true;
-  //     return product.category.category === selectedCategory;
-  //   })
-  //   .filter((product) => {
-  //     if (selectedSort === "active-product") return product.is_active === true;
-  //     if (selectedSort === "inactive-product")
-  //       return product.is_active === false;
-  //     return true;
-  //   })
-  //   .sort((a, b) => {
-  //     switch (selectedSort) {
-  //       case "highest-price":
-  //         return b.price - a.price;
-  //       case "lowest-price":
-  //         return a.price - b.price;
-  //       case "highest-stock":
-  //         return (
-  //           b.stocks.reduce((acc, s) => acc + s.stock_quantity, 0) -
-  //           a.stocks.reduce((acc, s) => acc + s.stock_quantity, 0)
-  //         );
-  //       case "highest-stock":
-  //         return (
-  //           a.stocks.reduce((acc, s) => acc + s.stock_quantity, 0) -
-  //           b.stocks.reduce((acc, s) => acc + s.stock_quantity, 0)
-  //         );
-  //       default:
-  //         return 0;
-  //     }
-  //   });
-
   const deleteSelectedProduct = async () => {
     try {
       const confirm = window.confirm(
@@ -204,10 +158,6 @@ export default function ProductList() {
       console.log(error);
     }
   };
-
-  // useEffect(() => {
-  //   console.log(selectedProduct);
-  // }, [selectedProduct]); // debugging selected
 
   return (
     <DashboardLayout>
