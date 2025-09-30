@@ -1,7 +1,6 @@
 "use client";
 
 import { Facebook, Instagram, Twitter, Mail } from "lucide-react";
-import Link from "next/link";
 
 interface IFooterProps {
   className?: string;

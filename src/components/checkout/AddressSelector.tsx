@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { MapPin, Plus, Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import { MapPin, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AddAddressModal from "@/app/pengaturan/address/AddAddressModal";
 import { UserAddress } from "../types";
-import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";

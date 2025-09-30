@@ -125,7 +125,6 @@ const items = [
 ];
 
 export function AppSidebar({ className }: IAppSidebar) {
-  const defaultOpenId = items.find((item) => item.subMenu)?.id ?? null;
   const [openItems, setOpenItems] = useState<number[]>([]);
   const { open } = useSidebar();
   const pathname = usePathname();

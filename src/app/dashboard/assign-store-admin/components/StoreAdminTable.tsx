@@ -1,29 +1,9 @@
 import PaginationControls from "@/components/PaginationControls";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card,CardContent,CardFooter,CardHeader,} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Select, SelectContent, SelectGroup, SelectItem,SelectLabel, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
 import { apiCall } from "@/helper/apiCall";
 import { IStoreProps } from "@/types/store";
 import { MapPinPen, RotateCcw, Search } from "lucide-react";
@@ -35,11 +15,7 @@ import { IUserProps } from "@/types/user";
 
 interface IStoreAdminData {
   className?: string;
-
-  storeAdmins: {
-    withStore: IStoreProps[];
-    withoutStore: IUserProps[];
-  };
+  storeAdmins: { withStore: IStoreProps[]; withoutStore: IUserProps[];};
 }
 
 export default function StoreAdminData({
@@ -69,26 +45,18 @@ export default function StoreAdminData({
       adminPhone: admin.phone,
     })) ?? []),
   ];
-  const storeList =
-    storeAdmins?.withStore?.map((store) => ({
-      id: store.id,
-      name: store.name,
-    })) ?? [];
-  // search query - search bar
+  const storeList = storeAdmins?.withStore?.map((store) => ({ id: store.id, name: store.name,})) ?? [];
   const [searchQuery, setSearchQuery] = useState("");
-  // filter store
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   const filteredAdmin = storeAdminData.filter((admin) => {
     const matchesSearch =
       admin?.adminFirstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       admin?.adminLastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       admin?.storeName.toLowerCase().includes(searchQuery.toLowerCase());
-
     const matchesStore = !selectedStore || admin?.storeName === selectedStore;
     return matchesSearch && matchesStore;
   });
 
-  // pagination
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 5;
   const indexOfLast = currentPage * usersPerPage;
@@ -96,37 +64,24 @@ export default function StoreAdminData({
   const currentUsers = filteredAdmin.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredAdmin.length / usersPerPage);
 
-  // revert store admin to cust
   const handlerRevertAdmin = async (
-    id: string,
-    role: string,
-    store_id: number
+    id: string, role: string, store_id: number
   ) => {
     try {
       const confirmAlert = confirm("Are you sure revert this store admin?");
       if (!confirmAlert) return;
       const res = await apiCall.patch(`/api/user/revert-admin/${id}`, {
-        role,
-        store_id,
+        role,store_id,
       });
       if (!res) toast.error("Revert Store Admin Error");
       toast.success("Revert Admin Success");
       window.location.reload();
-      console.log(res.data.data);
     } catch (error) {
-      console.log(error);
+      toast.error("error");
     }
   };
   // change store
-  const [openStoreTf, setOpenStoreTf] = useState<{
-    adminData: IRelocateAdminData | null;
-    storeList: { id: number; name: string }[];
-    open: boolean;
-  }>({
-    adminData: null,
-    storeList: storeList,
-    open: false,
-  });
+  const [openStoreTf, setOpenStoreTf] = useState<{ adminData: IRelocateAdminData | null; storeList: { id: number; name: string }[]; open: boolean;}>({ adminData: null,storeList: storeList,open: false,});
 
   return (
     <div>
@@ -203,11 +158,7 @@ export default function StoreAdminData({
                   "
                       onClick={() =>
                         setOpenStoreTf({
-                          adminData: {
-                            adminId: admin?.adminId,
-                            storeId: admin?.storeId ?? 0,
-                            storeName: admin?.storeName,
-                          },
+                          adminData: { adminId: admin?.adminId, storeId: admin?.storeId ?? 0, storeName: admin?.storeName,},
                           storeList: storeList,
                           open: true,
                         })
@@ -217,14 +168,7 @@ export default function StoreAdminData({
                     </Button>
                     <Button
                       variant={"destructive"}
-                      onClick={() =>
-                        handlerRevertAdmin(
-                          admin?.adminId ?? "",
-                          admin?.adminRole ?? "CUSTOMER",
-                          admin?.storeId ?? 0
-                        )
-                      }
-                    >
+                      onClick={() => handlerRevertAdmin( admin?.adminId ?? "", admin?.adminRole ?? "CUSTOMER", admin?.storeId ?? 0) }>
                       <RotateCcw />
                     </Button>
                   </TableCell>
@@ -235,11 +179,7 @@ export default function StoreAdminData({
         </CardContent>
         <CardFooter className="max-lg:hidden">
           {/* Pagination */}
-          <PaginationControls
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
+          <PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}/>
           {/* Dialog Change Store */}
           <RelocateAdmin
             open={openStoreTf.open}

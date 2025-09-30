@@ -6,12 +6,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/auth-store";
-import { Bell, ChevronDown, Search, Store, Sun } from "lucide-react";
+import { ChevronDown, Search, Store } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import DropDownProfile from "./DropDownProfile";
 import { useRouter } from "next/navigation";
-import { Popover } from "@/components/ui/popover";
 import PopoverNotification from "./PopoverNotifications";
 
 export default function DashboardNavbar() {

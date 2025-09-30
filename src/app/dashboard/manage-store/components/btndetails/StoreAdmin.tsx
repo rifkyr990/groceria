@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/table";
 import { IStoreProps } from "@/types/store";
 import { IUserProps } from "@/types/user";
-import { Mail } from "lucide-react";
 import Image from "next/image";
 
 interface IStoreAdminList {

@@ -4,7 +4,6 @@ import { IStoreProps } from "@/types/store";
 import { IUserProps } from "@/types/user";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import DashboardLayout from "../components/DashboardLayout";
 import CustomerTable from "./components/CustomerTable";
 import StoreAdminData from "./components/StoreAdminTable";

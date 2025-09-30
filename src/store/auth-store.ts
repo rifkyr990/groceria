@@ -1,7 +1,5 @@
-import { email } from "zod";
 import { create } from "zustand";
 import { apiCall } from "@/helper/apiCall";
-import { toast } from "react-toastify";
 import { useCartStore } from "./cart-store";
 
 interface AuthState {
@@ -60,7 +58,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ user, token, loading: false });
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", token);
-
       useCartStore.getState().fetchCart(token);
 
       return true;
@@ -79,7 +76,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("applied_promo");
-    sessionStorage.removeItem("token"); // arco
+    sessionStorage.removeItem("token");
 
     set({ user: null, token: null });
   },
@@ -102,12 +99,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isHydrated: true });
     }
   },
+
   loginWithGoogle: async (idToken) => {
     set({ loading: true, error: null });
     try {
-      const res = await apiCall.post("/api/auth/google-login", {
-        idToken,
-      });
+      const res = await apiCall.post("/api/auth/google-login", { idToken,});
       const { user, token } = res.data.data;
       set({ user, token, loading: false });
       localStorage.setItem("token", token);
@@ -188,5 +184,5 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return false;
     }
   },
-  clearAuth: () => set({ user: null, token: null }), // arco
+  clearAuth: () => set({ user: null, token: null }),
 }));

@@ -36,25 +36,24 @@ export default function AddressForm({ formMethods, onSubmit }: AddressFormProps)
     }
   }, [selectedSub, setValue]);
 
-  // ... logic fetch koordinat juga bisa dibuat custom hook tersendiri atau dipindah di sini
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
-      {/* Semua input dan select */}
-      {/* Contoh: */}
-      <div>
-        <Label className="mb-3">Nama</Label>
-        <Input {...register("name")} placeholder="Nama penerima" />
-      </div>
-      
-      {/* select provinsi */}
-      <div>
-        <Label className="mb-3">Provinsi</Label>
-        <select {...register("province")} className="input w-full">
-          {renderOptions(provinces, "province_id", "province", "Pilih Provinsi")}
-        </select>
-      </div>
-      <div>
+          {/* Semua input dan select */}
+          {/* Contoh: */}
+          <div>
+            <Label className="mb-3">Nama</Label>
+            <Input {...register("name")} placeholder="Nama penerima" />
+          </div>
+          
+          {/* select provinsi */}
+          <div>
+            <Label className="mb-3">Provinsi</Label>
+            <select {...register("province")} className="input w-full">
+              {renderOptions(provinces, "province_id", "province", "Pilih Provinsi")}
+            </select>
+          </div>
+          <div>
               <Label className="mb-3">Kota/Kabupaten</Label>
               <select
                 {...register("city")}

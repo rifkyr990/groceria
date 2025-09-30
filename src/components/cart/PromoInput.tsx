@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PromoCode, PromoInputProps } from "@/components/types";
+import { PromoInputProps } from "@/components/types";
 
 export default function PromoInput({
   inputText,

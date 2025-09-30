@@ -1,4 +1,3 @@
-import { Images } from "lucide-react";
 import { z } from "zod";
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // maksimal 1 mb gambar

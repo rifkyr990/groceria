@@ -8,7 +8,6 @@ import { useCartStore } from "@/store/cart-store";
 import { useAuthStore } from "@/store/auth-store";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
-import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function CartPage() {
@@ -21,10 +20,9 @@ export default function CartPage() {
     tryApplyPromoCode,
     storeName,
     removePromoCode,
-    fetchCart,
     saveCart,
-    loading,
   } = useCartStore();
+
   const [promoInputText, setPromoInputText] = useState(
     appliedPromo?.code || ""
   );
@@ -32,7 +30,6 @@ export default function CartPage() {
   const router = useRouter();
 
   const { token, user } = useAuthStore();
-  const [checkingAuth, setCheckingAuth] = useState(true);
   const [isClient, setIsClient] = useState(true);
 
   useEffect(() => {
@@ -56,7 +53,7 @@ export default function CartPage() {
       return;
     }
 
-    setCheckingAuth(false);
+    // Auth check complete — no need for checkingAuth anymore
   }, [token, user, router, isClient]);
 
   useEffect(() => {

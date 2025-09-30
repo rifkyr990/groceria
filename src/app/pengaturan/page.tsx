@@ -11,49 +11,88 @@ import Footer from "@/components/layout/footer";
 import { useAuthStore } from "@/store/auth-store"; // pastikan ini mengandung { user, hydrate }
 
 export default function ProfilePage() {
-    const [activeTab, setActiveTab] = useState<"profile" | "address" | "password">("profile");
-    const { user, hydrate } = useAuthStore();
-    const router = useRouter();
-    const [checkingAuth, setCheckingAuth] = useState(true);
+  const [activeTab, setActiveTab] = useState<"profile" | "address" | "password">("profile");
+  const { user, hydrate } = useAuthStore();
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-    useEffect(() => {
-        hydrate();
-    }, [hydrate]);
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
 
-    useEffect(() => {
-        // Cek status autentikasi
-        if (user === null) {
-            router.replace("/");
-        } else {
-            setCheckingAuth(false);
-        }
-    }, [user, router]);
-
-    if (checkingAuth) {
-        return null;
+  useEffect(() => {
+    if (user === null) {
+      router.replace("/");
+    } else {
+      setCheckingAuth(false);
     }
+  }, [user, router]);
 
-    return (
-        <div className="flex flex-col min-h-screen">
-            <div className="w-full flex-shrink-0">
-                <Navbar />
+  if (checkingAuth) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <div className="w-full flex-shrink-0">
+        <Navbar />
+      </div>
+
+      {/* Konten utama */}
+      <div className="flex-1 max-w-7xl mx-auto p-6 w-full">
+        <div className="flex gap-6">
+          {/* Sidebar hanya muncul di desktop */}
+          <aside className="hidden md:block w-64 sticky top-6 self-start h-fit">
+            <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+          </aside>
+
+          {/* Konten */}
+          <main className="flex-1">
+            {/* Mobile Tabs */}
+            <div className="md:hidden mb-4 flex justify-around border-b border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => setActiveTab("profile")}
+                className={`flex-1 py-2 text-sm font-medium ${
+                  activeTab === "profile"
+                    ? "text-green-600 border-b-2 border-green-600"
+                    : "text-gray-500"
+                }`}
+              >
+                Profile
+              </button>
+              <button
+                onClick={() => setActiveTab("address")}
+                className={`flex-1 py-2 text-sm font-medium ${
+                  activeTab === "address"
+                    ? "text-green-600 border-b-2 border-green-600"
+                    : "text-gray-500"
+                }`}
+              >
+                Address
+              </button>
+              <button
+                onClick={() => setActiveTab("password")}
+                className={`flex-1 py-2 text-sm font-medium ${
+                  activeTab === "password"
+                    ? "text-green-600 border-b-2 border-green-600"
+                    : "text-gray-500"
+                }`}
+              >
+                Password
+              </button>
             </div>
 
-            {/* Konten utama */}
-            <div className="flex-1 max-w-7xl mx-auto p-6 flex gap-6 w-full">
-                <aside className="w-64 sticky top-6 self-start h-fit">
-                    <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-                </aside>
-                <main className="flex-1">
-                    {activeTab === "profile" && <ProfileForm />}
-                    {activeTab === "address" && <AddressForm />}
-                    {activeTab === "password" && <PasswordForm />}
-                </main>
-            </div>
-
-            <div className="w-full flex-shrink-0">
-                <Footer />
-            </div>
+            {/* Form aktif */}
+            {activeTab === "profile" && <ProfileForm />}
+            {activeTab === "address" && <AddressForm />}
+            {activeTab === "password" && <PasswordForm />}
+          </main>
         </div>
-    );
+      </div>
+
+      <div className="w-full flex-shrink-0">
+        <Footer />
+      </div>
+    </div>
+  );
 }

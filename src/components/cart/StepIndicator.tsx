@@ -1,7 +1,5 @@
 "use client";
 import { AiOutlineShoppingCart } from "react-icons/ai";
-import { FiCreditCard } from "react-icons/fi";
-import { FiCheckCircle } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 import React from "react";
 
@@ -24,17 +22,6 @@ export default function StepIndicator({
       label: "Shopping Cart",
       icon: <AiOutlineShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />,
     },
-    // Uncomment these for multi-step checkout
-    // {
-    //   id: "payment",
-    //   label: "Payment",
-    //   icon: <FiCreditCard className="w-4 h-4 sm:w-5 sm:h-5" />,
-    // },
-    // {
-    //   id: "confirmation",
-    //   label: "Confirmation",
-    //   icon: <FiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />,
-    // },
   ],
   currentStep = 0,
   variant = "timeline",

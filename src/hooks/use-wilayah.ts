@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { apiCall } from "@/helper/apiCall";
 
 export interface Wilayah {

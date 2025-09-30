@@ -1,5 +1,4 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,22 +7,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-} from "@/components/ui/select";
-import { apiCall } from "@/helper/apiCall";
+
 import { IStoreProps } from "@/types/store";
 import { IUserProps } from "@/types/user";
 import { IUserAddressProps } from "@/types/user_address";
-import { SelectValue } from "@radix-ui/react-select";
-import { Mail, User } from "lucide-react";
-import { useState } from "react";
-import { toast } from "react-toastify";
 
 interface IUserDetailsDialog {
   open: boolean;
@@ -35,7 +22,6 @@ export default function UserDetailsDialog({
   open,
   setOpen,
   users,
-  stores,
 }: IUserDetailsDialog) {
   console.log(users);
   const main_address =

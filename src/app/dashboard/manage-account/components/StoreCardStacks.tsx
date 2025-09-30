@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { IStoreProps } from "@/types/store";
 import { Check, Store, Trash, Users, X } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
 import StoreAdminList from "./btndetails/StoreAdmin";
 import StoreDetailsDialog from "./btndetails/StoreDetailsDialog";

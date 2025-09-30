@@ -81,8 +81,6 @@ export default function EditStockProduct({
       min_stock: minStock,
       reason,
     };
-    console.log("Data anda:", payload);
-    // console.log(`Data anda`, JSON.stringify(payload, null, 2));
     const res = await apiCall.post(
       `/api/stock/change-stock/store/${store_id}`,
       payload

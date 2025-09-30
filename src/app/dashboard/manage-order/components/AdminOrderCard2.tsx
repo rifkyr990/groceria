@@ -9,7 +9,6 @@ import {
   Truck,
   Loader2,
   ChevronRight,
-  User,
 } from "lucide-react";
 import { formatIDRCurrency } from "@/utils/format";
 import { cn } from "@/lib/utils";

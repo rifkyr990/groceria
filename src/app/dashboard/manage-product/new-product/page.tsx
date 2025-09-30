@@ -26,12 +26,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import DashboardLayout from "../../components/DashboardLayout";
-import {
-  productFormSchema,
-  ProductFormValues,
-} from "@/helper/createProductSchema";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 interface CategoryWithProducts {
   category: string;

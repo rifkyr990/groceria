@@ -9,13 +9,12 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import { IProductProps } from "@/types/product";
-import { ChevronDown, Headset, Phone, ShoppingCart, Store } from "lucide-react";
+import { Headset, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Autoplay from "embla-carousel-autoplay";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
-import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import {
   Accordion,
@@ -25,7 +24,6 @@ import {
 } from "@/components/ui/accordion";
 import { useProduct } from "@/store/useProduct";
 import { formatIDRCurrency } from "@/utils/format";
-import { motion, AnimatePresence } from "motion/react";
 
 interface IMobilePrdDetails {
   allProduct: IProductProps[] | null;
@@ -65,8 +63,6 @@ export default function MobilePrdDetails({
     };
   })[0];
 
-  // console.log(filteredCategory);
-  // increment/decrement purchasement handler
   const [value, setValue] = useState(1);
   const handlerValue = (type: "inc" | "dec") => {
     if (type === "inc") {

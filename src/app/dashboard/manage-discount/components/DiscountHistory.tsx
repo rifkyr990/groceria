@@ -22,7 +22,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { useDiscountStore } from "@/store/useDiscount";
 import { useStore } from "@/store/useStore";
 import { Search, Trash } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "react-toastify";
 
 interface IDiscountHistory {

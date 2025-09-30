@@ -144,13 +144,6 @@ export default function EditProduct() {
       toast.success("Edit Product Success");
       //   Gas ke manage product bos
       router.replace("/dashboard/manage-product/product-list");
-      // Reset semua data bos
-      //   setPrdName("");
-      //   setPrdDesc("");
-      //   setPrdPrice("");
-      //   setPrdCategory("");
-      //   setImages([null, null, null, null]);
-      //   setPreviews([null, null, null, null]);
     } catch (error) {
       console.log(error);
     }

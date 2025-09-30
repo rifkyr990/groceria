@@ -5,7 +5,7 @@ import { useAdminOrderStore } from "@/store/admin-order-store";
 import { useAuthStore } from "@/store/auth-store";
 import { apiCall } from "@/helper/apiCall";
 import PaginationControls from "@/components/PaginationControls";
-import { AlertCircle, Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { AlertCircle, Calendar as Loader2 } from "lucide-react";
 import { IStoreProps } from "@/types/store";
 import AdminOrderCard from "./AdminOrderCard";
 import SummaryCards from "./SummaryCards";

@@ -15,12 +15,25 @@ import { useAddressStore } from "@/store/address-store";
 import useWilayah, { Wilayah } from "@/hooks/use-wilayah";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import dynamic from "next/dynamic";
 
-import AddressSelect from "../component/AddressSelect";
-import MapPickerWrapper from "../component/MapPickerWrapper";
-import { mapToWilayahId, mapIdToName } from "@/utils/wilayahHelpers";
+const MapPicker = dynamic(() => import("../component/MapPicker"), { ssr: false });
 
-interface AddressFormValues { name: string; phone: string; province: string; city: string; district: string; subdistrict: string; postal_code: string; street: string; detail: string; label: "RUMAH" | "KANTOR"; is_primary: boolean; latitude: number; longitude: number;}
+interface AddressFormValues {
+  name: string;
+  phone: string;
+  province: string;
+  city: string;
+  district: string;
+  subdistrict: string;
+  postal_code: string;
+  street: string;
+  detail: string;
+  label: "RUMAH" | "KANTOR";
+  is_primary: boolean;
+  latitude?: number;
+  longitude?: number;
+}
 
 interface EditAddressModalProps {
   address: AddressFormValues & { id: number };
@@ -29,11 +42,10 @@ interface EditAddressModalProps {
 export default function EditAddressModal({ address }: EditAddressModalProps) {
   const { updateAddress } = useAddressStore();
   const { register, handleSubmit, watch, reset, setValue } =
-    useForm<AddressFormValues>({
-      defaultValues: address,
-    });
+    useForm<AddressFormValues>({ defaultValues: address });
 
   const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState<[number, number] | null>(null);
 
   const { provinces, cities, districts, subdistricts } = useWilayah({
     provinceId: watch("province"),
@@ -44,37 +56,39 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
   const selectedSub = subdistricts.find(
     (s) => s.subdistrict_id === watch("subdistrict")
   );
-
   useEffect(() => {
-    if (selectedSub?.zip_code) {
-      setValue("postal_code", selectedSub.zip_code);
-    } else {
-      setValue("postal_code", "");
-    }
+    setValue("postal_code", selectedSub?.zip_code || "");
   }, [selectedSub, setValue]);
 
-  const onOpenChange = (isOpen: boolean) => {
-    setOpen(isOpen);
-    if (isOpen) {
-      const { provinceId, cityId, districtId, subdistrictId } = mapToWilayahId(address,provinces,cities,districts,subdistricts);
+  // reset form saat modal dibuka
+  useEffect(() => {
+    if (!address) return;
+    const provinceId =
+      provinces.find((p) => p.province === address.province)?.province_id || "";
+    const cityId =
+      cities.find((c) => c.city_name === address.city)?.city_id || "";
+    const districtId =
+      districts.find((d) => d.district_name === address.district)?.district_id ||
+      "";
+    const subdistrictId =
+      subdistricts.find((s) => s.subdistrict_name === address.subdistrict)
+        ?.subdistrict_id || "";
 
-      reset({
-        ...address,
-        province: provinceId,
-        city: cityId,
-        district: districtId,
-        subdistrict: subdistrictId,
-        latitude: address.latitude,
-        longitude: address.longitude,
-      });
-    }
-  };
+    reset({ ...address, province: provinceId, city: cityId, district: districtId, subdistrict: subdistrictId });
+    if (address.latitude && address.longitude) setCoords([address.latitude, address.longitude]);
+  }, [address, provinces, cities, districts, subdistricts, reset]);
 
   const onSubmit = async (data: AddressFormValues) => {
-    const { provinceName, cityName, districtName, subdistrictName } = mapIdToName( data,provinces,cities,districts,subdistricts);
-    const payload = { ...data,province: provinceName, city: cityName, district: districtName, subdistrict: subdistrictName };
+    const payload = {
+      ...data,
+      province: provinces.find((p) => p.province_id === data.province)?.province || "",
+      city: cities.find((c) => c.city_id === data.city)?.city_name || "",
+      district: districts.find((d) => d.district_id === data.district)?.district_name || "",
+      subdistrict: subdistricts.find((s) => s.subdistrict_id === data.subdistrict)?.subdistrict_name || "",
+      latitude: coords?.[0],
+      longitude: coords?.[1],
+    };
     const success = await updateAddress(Number(address.id), payload);
-
     if (success) {
       toast.success("Alamat berhasil diperbarui!");
       setOpen(false);
@@ -82,70 +96,86 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
     }
   };
 
+  const renderOptions = (
+    items: Wilayah[],
+    valueKey: keyof Wilayah,
+    labelKey: keyof Wilayah,
+    placeholder: string
+  ) => (
+    <>
+      <option value="">{placeholder}</option>
+      {items.map((i) => (
+        <option key={String(i[valueKey])} value={String(i[valueKey])}>
+          {String(i[labelKey])}
+        </option>
+      ))}
+    </>
+  );
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-blue-600 text-white">Edit</Button>
       </DialogTrigger>
-
-      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl scrollbar-thin scrollbar-thumb-gray-400 hover:scrollbar-thumb-gray-500">
+      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">Edit Alamat</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
-          <div>
-            <Label>Nama</Label>
-            <Input {...register("name")} placeholder="Nama penerima" />
-          </div>
+          <div><Label>Nama</Label><Input {...register("name")} /></div>
+          <div><Label>Nomor Telepon</Label><Input {...register("phone")} /></div>
 
-          <div>
-            <Label>Nomor Telepon</Label>
-            <Input {...register("phone")} placeholder="08xxxx" />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Provinsi</Label>
+              <select {...register("province")} className="input w-full">
+                {renderOptions(provinces, "province_id", "province", "Pilih Provinsi")}
+              </select>
+            </div>
+            <div>
+              <Label>Kota</Label>
+              <select {...register("city")} className="input w-full" disabled={!watch("province")}>
+                {renderOptions(cities, "city_id", "city_name", "Pilih Kota")}
+              </select>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <AddressSelect label="Provinsi" items={provinces} valueKey="province_id" labelKey="province" placeholder="Pilih Provinsi" value={watch("province")} onChange={(val) => setValue("province", val)}/>
-            <AddressSelect label="Kota/Kabupaten" items={cities} valueKey="city_id" labelKey="city_name" placeholder="Pilih Kota" disabled={!watch("province")} value={watch("city")} onChange={(val) => setValue("city", val)}/>
+            <div>
+              <Label>Kecamatan</Label>
+              <select {...register("district")} className="input w-full" disabled={!watch("city")}>
+                {renderOptions(districts, "district_id", "district_name", "Pilih Kecamatan")}
+              </select>
+            </div>
+            <div>
+              <Label>Kelurahan</Label>
+              <select {...register("subdistrict")} className="input w-full" disabled={!watch("district")}>
+                {renderOptions(subdistricts, "subdistrict_id", "subdistrict_name", "Pilih Kelurahan")}
+              </select>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <AddressSelect label="Kecamatan" items={districts} valueKey="district_id" labelKey="district_name" placeholder="Pilih Kecamatan" disabled={!watch("city")} value={watch("district")} onChange={(val) => setValue("district", val)}/>
-            <AddressSelect label="Kelurahan/Desa" items={subdistricts} valueKey="subdistrict_id" labelKey="subdistrict_name" placeholder="Pilih Kelurahan/Desa" disabled={!watch("district")} value={watch("subdistrict")} onChange={(val) => setValue("subdistrict", val)}/>
-          </div>
-
-          <div>
-            <Label>Kode Pos</Label>
-            <Input {...register("postal_code")} readOnly />
-          </div>
-
-          <div>
-            <Label>Nama Jalan</Label>
-            <Input {...register("street")} placeholder="Jl. Contoh No. 123" />
-          </div>
-
+          <div><Label>Kode Pos</Label><Input {...register("postal_code")} readOnly /></div>
+          <div><Label>Nama Jalan</Label><Input {...register("street")} /></div>
           <div>
             <Label>Detail Alamat</Label>
-            <textarea
-              {...register("detail")}
-              placeholder="Blok, RT/RW, patokan, dll"
-              className="w-full border rounded p-2"
-            ></textarea>
+            <textarea {...register("detail")} className="w-full border rounded p-2" />
           </div>
 
-          <MapPickerWrapper lat={watch("latitude")} long={watch("longitude")} street={watch("street")} city={watch("city")} province={watch("province")} onLocationSelect={(data) => { setValue("latitude", data.lat); setValue("longitude", data.long);}}
-          />
+          <div>
+            <Label>Pin Lokasi</Label>
+            <MapPicker coords={coords} onChange={setCoords} />
+          </div>
 
           <div>
-            <Label>Label Alamat</Label>
+            <Label>Label</Label>
             <div className="flex gap-6 mt-1">
               <label className="flex items-center gap-2">
-                <input type="radio" value="RUMAH" {...register("label")} />
-                Rumah
+                <input type="radio" value="RUMAH" {...register("label")} /> Rumah
               </label>
               <label className="flex items-center gap-2">
-                <input type="radio" value="KANTOR" {...register("label")} />
-                Kantor
+                <input type="radio" value="KANTOR" {...register("label")} /> Kantor
               </label>
             </div>
           </div>
@@ -156,16 +186,10 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="bg-gray-500 text-white"
-            >
+            <Button type="button" onClick={() => setOpen(false)} className="bg-gray-500 text-white">
               Batal
             </Button>
-            <Button type="submit" className="bg-blue-600 text-white">
-              Simpan Perubahan
-            </Button>
+            <Button type="submit" className="bg-blue-600 text-white">Simpan</Button>
           </div>
         </form>
       </DialogContent>

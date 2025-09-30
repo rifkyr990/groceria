@@ -58,9 +58,6 @@ interface AddressState {
   updateAddress: (id: number, data: Partial<Address>) => Promise<boolean>;
   deleteAddress: (id: number) => Promise<void>;
   setPrimary: (id: number) => Promise<void>;
-  suggestedPhone: string | null;
-  fetchSuggestedPhone: () => Promise<void>;
-  setSuggestedPhone: (phone: string | null) => void;
 }
 
 export const useAddressStore = create<AddressState>((set, get) => ({
@@ -79,15 +76,6 @@ export const useAddressStore = create<AddressState>((set, get) => ({
         error: error.response?.data?.message || "Gagal mengambil alamat",
         loading: false,
       });
-    }
-  },
-
-  fetchSuggestedPhone: async () => {
-    try {
-      const res = await apiCall.get("/api/user/phone-suggestion");
-      set({ suggestedPhone: res.data.data.phone });
-    } catch (error) {
-      set({ suggestedPhone: null });
     }
   },
 
@@ -136,8 +124,7 @@ export const useAddressStore = create<AddressState>((set, get) => ({
       });
     }
   },
-
-  setSuggestedPhone: (phone) => set({ suggestedPhone: phone }),
+  
   setPrimary: async (id) => {
     try {
       const res = await apiCall.patch(`/api/address/${id}/primary`);
