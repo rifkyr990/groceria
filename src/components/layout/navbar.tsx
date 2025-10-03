@@ -3,20 +3,31 @@
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import {
-  ShoppingCart, Sun, Moon, LogOut, Settings,
-  LayoutDashboard, Menu as MenuIcon, X,
+  ShoppingCart,
+  Sun,
+  Moon,
+  LogOut,
+  Settings,
+  LayoutDashboard,
+  Menu as MenuIcon,
+  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 import { Menu, Transition } from "@headlessui/react";
 import { useShallow } from "zustand/shallow";
+import Image from "next/image";
 
 const NavLinks = () => (
   <>
     {["Home", "Products", "About Us", "Contact"].map((label, idx) => (
       <li key={idx}>
-        <Link href={label === "Home" ? "/" : `#${label.toLowerCase().replace(" ", "")}`}>
+        <Link
+          href={
+            label === "Home" ? "/" : `#${label.toLowerCase().replace(" ", "")}`
+          }
+        >
           {label}
         </Link>
       </li>
@@ -38,7 +49,10 @@ const ThemeToggle = ({ theme, setTheme }: any) => (
 );
 
 const CartButton = ({ totalItems }: { totalItems: number }) => (
-  <Link href="/cart" className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+  <Link
+    href="/cart"
+    className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+  >
     <ShoppingCart className="w-5 h-5 text-gray-600 dark:text-gray-300" />
     {totalItems > 0 && (
       <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
@@ -56,14 +70,21 @@ const UserMenuItems = ({ user, logout }: any) => {
 
   if (["STORE_ADMIN", "SUPER_ADMIN"].includes(user.role)) {
     menuLinks.push({
-      href: user.role === "STORE_ADMIN" ? "/dashboard/manage-order" : "/dashboard/manage-store",
+      href:
+        user.role === "STORE_ADMIN"
+          ? "/dashboard/manage-order"
+          : "/dashboard/manage-store",
       icon: LayoutDashboard,
       label: "Dashboard",
     });
   }
 
   if (user.role === "CUSTOMER") {
-    menuLinks.push({ href: "/orders", icon: ShoppingCart, label: "Pesanan Saya" });
+    menuLinks.push({
+      href: "/orders",
+      icon: ShoppingCart,
+      label: "Pesanan Saya",
+    });
   }
 
   menuLinks.push(
@@ -106,14 +127,21 @@ const UserMenuItemsMobile = ({ user, logout, close }: any) => {
 
   if (["STORE_ADMIN", "SUPER_ADMIN"].includes(user.role)) {
     menuLinks.push({
-      href: user.role === "STORE_ADMIN" ? "/dashboard/manage-order" : "/dashboard/manage-store",
+      href:
+        user.role === "STORE_ADMIN"
+          ? "/dashboard/manage-order"
+          : "/dashboard/manage-store",
       icon: LayoutDashboard,
       label: "Dashboard",
     });
   }
 
   if (user.role === "CUSTOMER") {
-    menuLinks.push({ href: "/orders", icon: ShoppingCart, label: "Pesanan Saya" });
+    menuLinks.push({
+      href: "/orders",
+      icon: ShoppingCart,
+      label: "Pesanan Saya",
+    });
   }
 
   menuLinks.push(
@@ -125,7 +153,10 @@ const UserMenuItemsMobile = ({ user, logout, close }: any) => {
     <li key={idx}>
       {onClick ? (
         <button
-          onClick={() => { onClick(); close(); }}
+          onClick={() => {
+            onClick();
+            close();
+          }}
           className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 w-full text-left"
         >
           <Icon className="w-4 h-4" /> {label}
@@ -160,8 +191,14 @@ const MobileMenu = ({ user, logout, totalItems, close }: any) => (
       </li>
       {!user ? (
         <>
-          <Link href="/login" onClick={close}>Login</Link>
-          <Link href="/register" onClick={close} className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold w-fit">
+          <Link href="/login" onClick={close}>
+            Login
+          </Link>
+          <Link
+            href="/register"
+            onClick={close}
+            className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold w-fit"
+          >
             Register
           </Link>
         </>
@@ -177,7 +214,9 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, logout } = useAuthStore();
-  const { items } = useCartStore(useShallow((state) => ({ items: state.items })));
+  const { items } = useCartStore(
+    useShallow((state) => ({ items: state.items }))
+  );
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   useEffect(() => setMounted(true), []);
@@ -186,7 +225,13 @@ export default function Navbar() {
     <nav className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between bg-white dark:bg-gray-900">
       {/* Logo */}
       <div className="flex items-center gap-2">
-        <img src="/assets/logo-long.svg" alt="logo" className="w-40" />
+        {/* <img src="/assets/logo-long.png" alt="logo" className="w-40" /> */}
+        <Image
+          src={"/assets/logo-long.png"}
+          alt={"logo"}
+          width={150}
+          height={150}
+        />
       </div>
 
       {/* Menu utama (desktop) */}
@@ -201,13 +246,27 @@ export default function Navbar() {
 
         {!user ? (
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/login" className="text-gray-600 dark:text-gray-200 hover:underline">Login</Link>
-            <Link href="/register" className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold">Register</Link>
+            <Link
+              href="/login"
+              className="text-gray-600 dark:text-gray-200 hover:underline"
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold"
+            >
+              Register
+            </Link>
           </div>
         ) : (
           <Menu as="div" className="relative hidden md:block">
             <Menu.Button className="flex items-center gap-2 focus:outline-none">
-              <img src={user.image_url || "/assets/user.png"} alt="avatar" className="w-8 h-8 rounded-full object-cover" />
+              <img
+                src={user.image_url || "/assets/user.png"}
+                alt="avatar"
+                className="w-8 h-8 rounded-full object-cover"
+              />
               <span className="text-gray-700 dark:text-gray-200 font-medium">
                 {user.first_name} {user.last_name}
               </span>
@@ -230,12 +289,26 @@ export default function Navbar() {
         )}
 
         {/* Hamburger */}
-        <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-          {mobileOpen ? <X className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+        >
+          {mobileOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <MenuIcon className="w-6 h-6" />
+          )}
         </button>
       </div>
 
-      {mobileOpen && <MobileMenu user={user} logout={logout} totalItems={totalItems} close={() => setMobileOpen(false)} />}
+      {mobileOpen && (
+        <MobileMenu
+          user={user}
+          logout={logout}
+          totalItems={totalItems}
+          close={() => setMobileOpen(false)}
+        />
+      )}
     </nav>
   );
 }
