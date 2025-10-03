@@ -9,12 +9,6 @@ import StoreInitializer from "@/components/StoreInitializer";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Script from "next/script";
-// import type { Metadata } from "next";
-// import type { Metadata } from "next";
-
-// const geistSans = GeistSans;
-
-// const geistMono = GeistMono;
 
 const PoppinsFont = Poppins({
   variable: "--font-poppins",
