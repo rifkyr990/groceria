@@ -180,16 +180,20 @@ export const useCartStore = create<CartState>((set, get) => {
 
     incrementItem: (cartItemId) => {
       const { productsByLoc } = useProduct.getState();
-      const itemToIncrement = get().items.find(
-        (item) => item.id === cartItemId
-      );
+      const { items, storeId } = get();
+      const itemToIncrement = items.find((item) => item.id === cartItemId);
 
-      if (!itemToIncrement) return;
+      if (!itemToIncrement || !storeId) return;
 
       const productInfo = productsByLoc.find(
         (p) => p.id === itemToIncrement.productId
       );
-      const availableStock = productInfo?.stocks[0]?.stock_quantity ?? 0;
+
+      const stockInfo = productInfo?.stocks.find(
+        (s: any) => s.store.id === storeId
+      );
+
+      const availableStock = stockInfo?.stock_quantity ?? 0;
 
       if (itemToIncrement.quantity >= availableStock) {
         toast.warn("No more stock available for this item.");
@@ -222,28 +226,35 @@ export const useCartStore = create<CartState>((set, get) => {
       debouncedSaveAndRevalidate(updatedItems);
     },
 
-    tryApplyPromoCode: async (code, itemsOverride) => {
-      const itemsToValidate = itemsOverride || get().items;
-      const subtotal = itemsToValidate.reduce(
-        (sum, item) => sum + Number(item.price) * item.quantity,
-        0
-      );
+tryApplyPromoCode: async (code, itemsOverride) => {
+    const { storeId } = get();
+    const itemsToValidate = itemsOverride || get().items;
+    const subtotal = itemsToValidate.reduce(
+      (sum, item) => sum + Number(item.price) * item.quantity,
+      0
+    );
 
-      if (!itemsOverride) {
-        set({ loading: false, error: null });
-      }
+    if (!storeId) {
+      toast.error("Cannot apply promo: store not selected.");
+      return false;
+    }
 
-      try {
-        const response = await apiCall.post("/api/discount/verify", {
-          code,
-          subtotal,
-          items: itemsToValidate.map((item) => ({
-            productId: item.productId,
-            price: item.price,
-            quantity: item.quantity,
-          })),
-        });
-        const promoData: PromoCode = response.data.data;
+    if (!itemsOverride) {
+      set({ loading: false, error: null });
+    }
+
+    try {
+      const response = await apiCall.post("/api/discount/verify", {
+        code,
+        subtotal,
+        storeId,
+        items: itemsToValidate.map((item) => ({
+          productId: item.productId,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+      });
+      const promoData: PromoCode = response.data.data;
 
         localStorage.setItem("applied_promo", JSON.stringify(promoData));
         set((state) => ({
