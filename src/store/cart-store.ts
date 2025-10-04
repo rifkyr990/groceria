@@ -105,42 +105,54 @@ export const useCartStore = create<CartState>((set, get) => {
     loading: false,
     error: null,
 
-    addItem: (product, storeId, storeName, availableStock, quantity = 1) => {
-      const { user } = useAuthStore.getState();
+addItem: (
+    product: Omit<CartItem, "quantity" | "id"> & { id: number },
+    storeId: number,
+    storeName: string,
+    availableStock: number,
+    quantity = 1
+  ) => {
+    const { user } = useAuthStore.getState();
+    const { appliedPromo } = get();
 
-      if (!user) {
-        toast.error("Please log in to add items to your cart.");
-        return;
+    if (!user) {
+      toast.error("Please log in to add items to your cart.");
+      return;
+    }
+
+    if (!user.is_verified) {
+      toast.warn("Please verify your email to start shopping.");
+      return;
+    }
+
+    set((state) => {
+      const isNewStore = state.storeId !== null && state.storeId !== storeId;
+      if (isNewStore) {
+        toast.info(`Cart cleared. Now shopping at ${storeName}.`);
       }
+      const initialItems = isNewStore ? [] : state.items;
+      const existing = initialItems.find(
+        (item) => item.productId === product.id
+      );
+      const currentQuantityInCart = existing ? existing.quantity : 0;
 
-      if (!user.is_verified) {
-        toast.warn("Please verify your email to start shopping.");
-        return;
-      }
+      // --- CRITICAL STOCK VALIDATION ---
+      const isB1G1 =
+        appliedPromo?.type === "b1g1" &&
+        appliedPromo.productId === product.id;
+      const requiredStock = isB1G1
+        ? (currentQuantityInCart + quantity) * 2
+        : currentQuantityInCart + quantity;
 
-      set((state) => {
-        const isNewStore = state.storeId !== null && state.storeId !== storeId;
-
-        if (isNewStore) {
-          toast.info(`Cart cleared. Now shopping at ${storeName}.`);
-        }
-
-        const initialItems = isNewStore ? [] : state.items;
-
-        const existing = initialItems.find(
-          (item) => item.productId === product.id
+      if (requiredStock > availableStock) {
+        toast.warn(
+          `Not enough stock for promotion. Only ${availableStock} total units available.`
         );
+        return state; // Abort update
+      }
+      // --- END VALIDATION ---
 
-        const currentQuantityInCart = existing ? existing.quantity : 0;
-
-        if (currentQuantityInCart + quantity > availableStock) {
-          toast.warn(
-            `You can't add more of this item. Only ${availableStock} available.`
-          );
-          return state; // Abort update
-        }
-
-        let updatedItems;
+      let updatedItems;
         if (existing) {
           updatedItems = initialItems.map((item) =>
             item.productId === product.id
@@ -180,7 +192,7 @@ export const useCartStore = create<CartState>((set, get) => {
 
     incrementItem: (cartItemId) => {
       const { productsByLoc } = useProduct.getState();
-      const { items, storeId } = get();
+      const { items, storeId, appliedPromo } = get();
       const itemToIncrement = items.find((item) => item.id === cartItemId);
 
       if (!itemToIncrement || !storeId) return;
@@ -188,17 +200,26 @@ export const useCartStore = create<CartState>((set, get) => {
       const productInfo = productsByLoc.find(
         (p) => p.id === itemToIncrement.productId
       );
-
       const stockInfo = productInfo?.stocks.find(
         (s: any) => s.store.id === storeId
       );
-
       const availableStock = stockInfo?.stock_quantity ?? 0;
 
-      if (itemToIncrement.quantity >= availableStock) {
-        toast.warn("No more stock available for this item.");
+      // --- CRITICAL STOCK VALIDATION ---
+      const isB1G1 =
+        appliedPromo?.type === "b1g1" &&
+        appliedPromo.productId === itemToIncrement.productId;
+      const requiredStock = isB1G1
+        ? (itemToIncrement.quantity + 1) * 2
+        : itemToIncrement.quantity + 1;
+
+      if (requiredStock > availableStock) {
+        toast.warn(
+          `Not enough stock for promotion. Only ${availableStock} total units available.`
+        );
         return; // Abort update
       }
+      // --- END VALIDATION ---
 
       const updatedItems = get().items.map((item) =>
         item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item
