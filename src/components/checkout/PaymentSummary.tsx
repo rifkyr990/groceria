@@ -24,18 +24,18 @@ export default function PaymentSummary({
       (sum, item) => sum + Number(item.price) * item.quantity,
       0
     );
-
     const isFreeShipping = appliedPromo?.type === "free_shipping";
 
     const discountCut =
-      appliedPromo && appliedPromo.type !== "free_shipping"
+      appliedPromo &&
+      appliedPromo.type !== "free_shipping" &&
+      appliedPromo.type !== "b1g1"
         ? appliedPromo.type === "percentage"
           ? Math.round((subtotal * appliedPromo.value) / 100)
           : appliedPromo.value
         : 0;
 
     const finalShippingCost = isFreeShipping ? 0 : Number(shippingCost);
-
     const total = Math.max(0, subtotal - discountCut + finalShippingCost);
     return { subtotal, discountCut, finalShippingCost, total };
   }, [items, appliedPromo, shippingCost]);
@@ -89,9 +89,9 @@ export default function PaymentSummary({
           )}
 
           {typeof discountCut === "number" && discountCut > 0 && (
-            <div className="flex justify-between text-green-600">
-              <span>Discount</span>
-              <span className="font-medium">
+            <div className="flex justify-between text-primary-green-600">
+              <span className="font-semibold">Discount</span>
+              <span className="font-semibold">
                 - {formatIDRCurrency(discountCut)}
               </span>
             </div>

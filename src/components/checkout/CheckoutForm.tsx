@@ -8,6 +8,7 @@ import {
   ShippingOption,
   PaymentMethod,
   CartItemProps,
+  PromoCode,
 } from "@/components/types";
 
 interface CheckoutFormProps {
@@ -22,6 +23,7 @@ interface CheckoutFormProps {
   paymentMethods: PaymentMethod[];
   selectedPaymentMethod: PaymentMethod | null;
   onSelectMethod: (method: PaymentMethod | null) => void;
+  appliedPromo: PromoCode | null;
 }
 
 export default function CheckoutForm({
@@ -36,6 +38,7 @@ export default function CheckoutForm({
   paymentMethods,
   selectedPaymentMethod,
   onSelectMethod,
+  appliedPromo,
 }: CheckoutFormProps) {
   return (
     <div className="lg:col-span-2 space-y-4 sm:space-y-6">
@@ -53,6 +56,7 @@ export default function CheckoutForm({
         storeName={storeName}
         selectedShipping={selectedShipping}
         onOpenModal={onOpenModal}
+        appliedPromo={appliedPromo}
       />
       <div className="hidden lg:block">
         <PaymentMethodSelector

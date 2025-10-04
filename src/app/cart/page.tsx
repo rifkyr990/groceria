@@ -114,6 +114,7 @@ export default function CartPage() {
                 onIncrement={incrementItem}
                 onRemove={removeItem}
                 storeName={storeName}
+                appliedPromo={appliedPromo}
               />
             </div>
 

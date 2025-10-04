@@ -22,6 +22,7 @@ import SharedOrderItemsCard from "@/components/shared/order/SharedOrderItemsCard
 import { ClipboardList, CreditCard } from "lucide-react";
 import SharedPricingDetails from "@/components/shared/order/SharedPricingDetails";
 import SharedCustomerInfoCard from "@/components/shared/order/SharedCustomerInfoCard";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function OrderDetailPage() {
   const {
@@ -42,10 +43,13 @@ export default function OrderDetailPage() {
     quantity: item.quantity,
     price: item.priceAtPurchase,
     imageUrl: item.product.imageUrl,
+    isB1G1Item: item.isB1G1Item,
   }));
 
   const pricingInfo = order
     ? {
+        isB1G1Order: order.isB1G1Order,
+        items: formattedItems || [],
         subtotal: order.subtotal,
         shippingCost: order.shippingCost,
         discountAmount: order.discountAmount,
@@ -54,6 +58,10 @@ export default function OrderDetailPage() {
         shippingMethod: "JNE Express (Placeholder)",
       }
     : null;
+
+  if (loading && !order) {
+    return <LoadingScreen />;
+  }
 
   if (error) {
     return (
@@ -124,15 +132,15 @@ export default function OrderDetailPage() {
           </Card>
 
           {(!cameFromCheckout ||
-(cameFromCheckout && order.status === "PENDING_PAYMENT")) && (
-                <ActionCenterCard
-                  order={order}
-                  onCancel={() => setIsCancelAlertOpen(true)}
-                  onConfirm={handleConfirmReceipt}
-                  onPay={handlePayNow}
-                  isLoading={loading}
-                />
-              )}
+            (cameFromCheckout && order.status === "PENDING_PAYMENT")) && (
+            <ActionCenterCard
+              order={order}
+              onCancel={() => setIsCancelAlertOpen(true)}
+              onConfirm={handleConfirmReceipt}
+              onPay={handlePayNow}
+              isLoading={loading}
+            />
+          )}
 
           <div className="text-center mt-6">
             {cameFromCheckout && (

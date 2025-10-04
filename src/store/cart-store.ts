@@ -105,42 +105,54 @@ export const useCartStore = create<CartState>((set, get) => {
     loading: false,
     error: null,
 
-    addItem: (product, storeId, storeName, availableStock, quantity = 1) => {
-      const { user } = useAuthStore.getState();
+addItem: (
+    product: Omit<CartItem, "quantity" | "id"> & { id: number },
+    storeId: number,
+    storeName: string,
+    availableStock: number,
+    quantity = 1
+  ) => {
+    const { user } = useAuthStore.getState();
+    const { appliedPromo } = get();
 
-      if (!user) {
-        toast.error("Please log in to add items to your cart.");
-        return;
+    if (!user) {
+      toast.error("Please log in to add items to your cart.");
+      return;
+    }
+
+    if (!user.is_verified) {
+      toast.warn("Please verify your email to start shopping.");
+      return;
+    }
+
+    set((state) => {
+      const isNewStore = state.storeId !== null && state.storeId !== storeId;
+      if (isNewStore) {
+        toast.info(`Cart cleared. Now shopping at ${storeName}.`);
       }
+      const initialItems = isNewStore ? [] : state.items;
+      const existing = initialItems.find(
+        (item) => item.productId === product.id
+      );
+      const currentQuantityInCart = existing ? existing.quantity : 0;
 
-      if (!user.is_verified) {
-        toast.warn("Please verify your email to start shopping.");
-        return;
-      }
+      // --- CRITICAL STOCK VALIDATION ---
+      const isB1G1 =
+        appliedPromo?.type === "b1g1" &&
+        appliedPromo.productId === product.id;
+      const requiredStock = isB1G1
+        ? (currentQuantityInCart + quantity) * 2
+        : currentQuantityInCart + quantity;
 
-      set((state) => {
-        const isNewStore = state.storeId !== null && state.storeId !== storeId;
-
-        if (isNewStore) {
-          toast.info(`Cart cleared. Now shopping at ${storeName}.`);
-        }
-
-        const initialItems = isNewStore ? [] : state.items;
-
-        const existing = initialItems.find(
-          (item) => item.productId === product.id
+      if (requiredStock > availableStock) {
+        toast.warn(
+          `Not enough stock for promotion. Only ${availableStock} total units available.`
         );
+        return state; // Abort update
+      }
+      // --- END VALIDATION ---
 
-        const currentQuantityInCart = existing ? existing.quantity : 0;
-
-        if (currentQuantityInCart + quantity > availableStock) {
-          toast.warn(
-            `You can't add more of this item. Only ${availableStock} available.`
-          );
-          return state; // Abort update
-        }
-
-        let updatedItems;
+      let updatedItems;
         if (existing) {
           updatedItems = initialItems.map((item) =>
             item.productId === product.id
@@ -180,21 +192,34 @@ export const useCartStore = create<CartState>((set, get) => {
 
     incrementItem: (cartItemId) => {
       const { productsByLoc } = useProduct.getState();
-      const itemToIncrement = get().items.find(
-        (item) => item.id === cartItemId
-      );
+      const { items, storeId, appliedPromo } = get();
+      const itemToIncrement = items.find((item) => item.id === cartItemId);
 
-      if (!itemToIncrement) return;
+      if (!itemToIncrement || !storeId) return;
 
       const productInfo = productsByLoc.find(
         (p) => p.id === itemToIncrement.productId
       );
-      const availableStock = productInfo?.stocks[0]?.stock_quantity ?? 0;
+      const stockInfo = productInfo?.stocks.find(
+        (s: any) => s.store.id === storeId
+      );
+      const availableStock = stockInfo?.stock_quantity ?? 0;
 
-      if (itemToIncrement.quantity >= availableStock) {
-        toast.warn("No more stock available for this item.");
+      // --- CRITICAL STOCK VALIDATION ---
+      const isB1G1 =
+        appliedPromo?.type === "b1g1" &&
+        appliedPromo.productId === itemToIncrement.productId;
+      const requiredStock = isB1G1
+        ? (itemToIncrement.quantity + 1) * 2
+        : itemToIncrement.quantity + 1;
+
+      if (requiredStock > availableStock) {
+        toast.warn(
+          `Not enough stock for promotion. Only ${availableStock} total units available.`
+        );
         return; // Abort update
       }
+      // --- END VALIDATION ---
 
       const updatedItems = get().items.map((item) =>
         item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item
@@ -222,28 +247,35 @@ export const useCartStore = create<CartState>((set, get) => {
       debouncedSaveAndRevalidate(updatedItems);
     },
 
-    tryApplyPromoCode: async (code, itemsOverride) => {
-      const itemsToValidate = itemsOverride || get().items;
-      const subtotal = itemsToValidate.reduce(
-        (sum, item) => sum + Number(item.price) * item.quantity,
-        0
-      );
+tryApplyPromoCode: async (code, itemsOverride) => {
+    const { storeId } = get();
+    const itemsToValidate = itemsOverride || get().items;
+    const subtotal = itemsToValidate.reduce(
+      (sum, item) => sum + Number(item.price) * item.quantity,
+      0
+    );
 
-      if (!itemsOverride) {
-        set({ loading: false, error: null });
-      }
+    if (!storeId) {
+      toast.error("Cannot apply promo: store not selected.");
+      return false;
+    }
 
-      try {
-        const response = await apiCall.post("/api/discount/verify", {
-          code,
-          subtotal,
-          items: itemsToValidate.map((item) => ({
-            productId: item.productId,
-            price: item.price,
-            quantity: item.quantity,
-          })),
-        });
-        const promoData: PromoCode = response.data.data;
+    if (!itemsOverride) {
+      set({ loading: false, error: null });
+    }
+
+    try {
+      const response = await apiCall.post("/api/discount/verify", {
+        code,
+        subtotal,
+        storeId,
+        items: itemsToValidate.map((item) => ({
+          productId: item.productId,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+      });
+      const promoData: PromoCode = response.data.data;
 
         localStorage.setItem("applied_promo", JSON.stringify(promoData));
         set((state) => ({
