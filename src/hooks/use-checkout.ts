@@ -118,9 +118,7 @@ export function useCheckout() {
     const cost = selectedShipping?.cost || "0";
     const isFreeShipping = appliedPromo?.type === "free_shipping";
     const discountCut =
-      appliedPromo &&
-      appliedPromo.type !== "free_shipping" &&
-      appliedPromo.type !== "b1g1"
+      appliedPromo && appliedPromo.type !== "free_shipping"
         ? appliedPromo.type === "percentage"
           ? Math.round((subtotal * appliedPromo.value) / 100)
           : appliedPromo.value

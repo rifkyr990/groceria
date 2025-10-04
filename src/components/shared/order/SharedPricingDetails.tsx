@@ -8,15 +8,6 @@ interface SharedPricingDetailsProps {
 export default function SharedPricingDetails({
   pricing,
 }: SharedPricingDetailsProps) {
-  // Recalculate B1G1 value based on the final item list
-  const b1g1Item = pricing.items?.find((item) => item.isB1G1Item);
-  const b1g1Value = b1g1Item
-    ? (b1g1Item.quantity / 2) * Number(b1g1Item.price)
-    : 0;
-  
-  // A regular discount is one that has a value and is NOT a B1G1 offer
-  const hasRegularDiscount = Number(pricing.discountAmount) > 0;
-
   return (
     <div className="space-y-2">
       {pricing.paymentMethod && (
@@ -62,17 +53,7 @@ export default function SharedPricingDetails({
           {formatIDRCurrency(Number(pricing.shippingCost))}
         </span>
       </div>
-      
-      {b1g1Value > 0 && (
-        <div className="flex justify-between text-sm text-primary-green-600">
-          <span className="font-semibold">Free Items (B1G1)</span>
-          <span className="font-semibold line-through">
-            {formatIDRCurrency(b1g1Value)}
-          </span>
-        </div>
-      )}
-
-      {hasRegularDiscount && (
+      {Number(pricing.discountAmount) > 0 && (
         <div className="flex justify-between text-sm text-primary-green-600">
           <span className="font-semibold">Discount</span>
           <span className="font-semibold">
@@ -80,7 +61,6 @@ export default function SharedPricingDetails({
           </span>
         </div>
       )}
-
       <div className="border-t border-dashed my-2"></div>
       <div className="flex justify-between items-center text-lg font-bold text-gray-800 bg-primary-green-50 p-3 rounded-lg">
         <span>Total</span>

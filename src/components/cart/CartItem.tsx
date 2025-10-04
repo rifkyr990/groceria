@@ -1,9 +1,8 @@
 import Image from "next/image";
+import { CartItemComponentProps } from "../types";
 import QuantityIncrementer from "./QuantityIncrementer";
 import RemoveButton from "./RemoveButton";
 import { formatIDRCurrency } from "@/utils/format";
-import { CartItemComponentProps } from "../types";
-import { Badge } from "@/components/ui/badge";
 
 export default function CartItem({
   id,
@@ -15,8 +14,6 @@ export default function CartItem({
   onIncrement,
   onDecrement,
   onRemove,
-  isFree,
-  originalPrice,
 }: CartItemComponentProps) {
   return (
     <div className="py-3 sm:py-4 border-b border-gray-200 last:border-none">
@@ -34,39 +31,26 @@ export default function CartItem({
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start gap-2 sm:gap-4">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-sm sm:text-base lg:text-lg text-text-dark leading-tight truncate">
-                  {name}
-                </h3>
-                {isFree && (
-                  <Badge className="bg-primary-green-100 text-primary-green-700">
-                    Free
-                  </Badge>
-                )}
-              </div>
+              <h3 className="font-semibold text-sm sm:text-base lg:text-lg text-text-dark leading-tight truncate">
+                {name}
+              </h3>
               <p className="text-xs sm:text-sm text-text-muted mt-0.5 sm:mt-1 truncate">
                 {description}
               </p>
             </div>
-            <p
-              className={`font-bold text-sm sm:text-base lg:text-lg text-text-dark whitespace-nowrap flex-shrink-0 ${
-                isFree ? "line-through text-gray-500" : ""
-              }`}
-            >
-              {formatIDRCurrency(Number(isFree ? originalPrice : price))}
+            <p className="font-bold text-sm sm:text-base lg:text-lg text-text-dark whitespace-nowrap flex-shrink-0">
+              {formatIDRCurrency(Number(price))}
             </p>
           </div>
 
           <div className="flex items-center justify-between mt-2 sm:mt-3 lg:mt-4">
             <QuantityIncrementer
-              id={id as number}
+              id={id}
               quantity={quantity}
               onIncrement={onIncrement}
               onDecrement={onDecrement}
-              isFree={isFree}
             />
-            {!isFree && <RemoveButton id={id as number} onRemove={onRemove} />}
-            {isFree && <div />}
+            <RemoveButton id={id} onRemove={onRemove} />
           </div>
         </div>
       </div>

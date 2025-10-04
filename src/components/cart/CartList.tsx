@@ -13,7 +13,6 @@ export default function CartList({
   onIncrement,
   onRemove,
   storeName,
-  appliedPromo,
 }: CartListProps) {
   return (
     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
@@ -40,25 +39,15 @@ export default function CartList({
           </CardTitle>
         </CardHeader>
         <CardContent className="p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4">
-          {items.flatMap((item) => {
-            const isB1G1Item =
-              appliedPromo?.type === "b1g1" &&
-              appliedPromo.productId === item.productId;
-            const freeItem: CartItemProps | null = isB1G1Item
-              ? {
-                  ...item,
-                  id: `${item.id}-free`,
-                  price: "0",
-                  isFree: true,
-                  originalPrice: item.price,
-                }
-              : null;
-            const results = [<CartItem key={item.id} {...item} onDecrement={onDecrement} onIncrement={onIncrement} onRemove={onRemove} />];
-            if (freeItem) {
-              results.push(<CartItem key={freeItem.id} {...freeItem} onDecrement={onDecrement} onIncrement={onIncrement} onRemove={onRemove} />);
-            }
-            return results;
-          })}
+          {items.map((item: CartItemProps) => (
+            <CartItem
+              key={item.id}
+              {...item}
+              onDecrement={onDecrement}
+              onIncrement={onIncrement}
+              onRemove={onRemove}
+            />
+          ))}
         </CardContent>
       </Card>
     </div>

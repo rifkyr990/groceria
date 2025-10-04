@@ -77,7 +77,6 @@ export default function CheckoutPage() {
                 paymentMethods={MockPaymentMethods}
                 selectedPaymentMethod={selectedPaymentMethod}
                 onSelectMethod={setSelectedPaymentMethod}
-                appliedPromo={appliedPromo}
               />
               <CheckoutSidebar
                 items={items}

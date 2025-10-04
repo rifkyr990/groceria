@@ -43,13 +43,10 @@ export default function OrderDetailPage() {
     quantity: item.quantity,
     price: item.priceAtPurchase,
     imageUrl: item.product.imageUrl,
-    isB1G1Item: item.isB1G1Item,
   }));
 
   const pricingInfo = order
     ? {
-        isB1G1Order: order.isB1G1Order,
-        items: formattedItems || [],
         subtotal: order.subtotal,
         shippingCost: order.shippingCost,
         discountAmount: order.discountAmount,

@@ -45,28 +45,23 @@ export interface PaymentMethod {
 }
 
 export interface CartItemProps {
-  id: number | string; // Can be string for virtual items
-  productId: number;
+  id: number;
   name: string;
   description: string;
   price: string;
   image: string;
   quantity: number;
-  isFree?: boolean;
-  originalPrice?: string;
 }
 
 export interface CartItemComponentProps extends CartItemProps {
   onIncrement: (id: number) => void;
   onDecrement: (id: number) => void;
   onRemove: (id: number) => void;
-  isB1G1Applied?: boolean;
 }
 
 export interface CartListProps {
   items: CartItemProps[];
   storeName?: string | null;
-  appliedPromo: PromoCode | null;
   onDecrement: (id: number) => void;
   onIncrement: (id: number) => void;
   onRemove: (id: number) => void;
@@ -75,9 +70,8 @@ export interface CartListProps {
 export interface PromoCode {
   code: string;
   description: string;
-  type: "percentage" | "fixed" | "free_shipping" | "b1g1";
+  type: "percentage" | "fixed" | "free_shipping";
   value: number;
-  productId?: number;
 }
 
 export interface CheckoutSectionProps {
@@ -103,7 +97,6 @@ export interface OrderItemDetail {
   id: number;
   quantity: number;
   priceAtPurchase: string;
-  isB1G1Item: boolean;
   product: {
     id: number;
     name: string;
@@ -112,7 +105,6 @@ export interface OrderItemDetail {
 }
 
 export interface SharedPricingInfo {
-  items: SharedOrderItem[];
   subtotal: string;
   shippingCost: string;
   discountAmount: string;
@@ -128,7 +120,6 @@ export interface SharedOrderItem {
   quantity: number;
   price: string;
   imageUrl: string;
-  isB1G1Item?: boolean;
 }
 
 export interface OrderDetail {
@@ -153,7 +144,6 @@ export interface OrderDetail {
     status: string;
   } | null;
   items: OrderItemDetail[];
-  isB1G1Order?: boolean;
 }
 
 export interface AdminOrderItem {

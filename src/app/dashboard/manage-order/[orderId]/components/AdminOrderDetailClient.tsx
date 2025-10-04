@@ -37,7 +37,6 @@ export default function AdminOrderDetailClient({
 
   const pricingInfo = order
     ? {
-        items: order.items,
         subtotal: order.pricing.subtotal,
         shippingCost: order.pricing.cost,
         discountAmount: order.pricing.discount,
