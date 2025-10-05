@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,6 @@ import { useAddressStore } from "@/store/address-store";
 import useWilayah, { Wilayah } from "@/hooks/use-wilayah";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import dynamic from "next/dynamic";
 import MapPickerWrapper from "../component/MapPickerWrapper";
 
 interface AddressFormValues {
@@ -36,9 +35,10 @@ interface AddressFormValues {
 
 interface EditAddressModalProps {
   address: AddressFormValues & { id: number };
+  children?: ReactNode; // ✅ Tambahkan children agar bisa pakai ikon
 }
 
-export default function EditAddressModal({ address }: EditAddressModalProps) {
+export default function EditAddressModal({ address, children }: EditAddressModalProps) {
   const { updateAddress } = useAddressStore();
   const { register, handleSubmit, watch, reset, setValue } =
     useForm<AddressFormValues>({ defaultValues: address });
@@ -55,33 +55,34 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
   const selectedSub = subdistricts.find(
     (s) => s.subdistrict_id === watch("subdistrict")
   );
+
   useEffect(() => {
     setValue("postal_code", selectedSub?.zip_code || "");
   }, [selectedSub, setValue]);
 
-  // reset form saat modal dibuka
+  // Reset saat modal dibuka
   useEffect(() => {
-  if (!open) return;
+    if (!open) return;
 
-  const provinceId = provinces.find((p) => p.province === address.province)?.province_id || "";
-  const cityId = cities.find((c) => c.city_name === address.city)?.city_id || "";
-  const districtId = districts.find((d) => d.district_name === address.district)?.district_id || "";
-  const subdistrictId = subdistricts.find((s) => s.subdistrict_name === address.subdistrict)?.subdistrict_id || "";
+    const provinceId = provinces.find((p) => p.province === address.province)?.province_id || "";
+    const cityId = cities.find((c) => c.city_name === address.city)?.city_id || "";
+    const districtId = districts.find((d) => d.district_name === address.district)?.district_id || "";
+    const subdistrictId = subdistricts.find((s) => s.subdistrict_name === address.subdistrict)?.subdistrict_id || "";
 
-  reset({
-    ...address,
-    province: provinceId,
-    city: cityId,
-    district: districtId,
-    subdistrict: subdistrictId,
-    latitude: address.latitude ?? 0,
-    longitude: address.longitude ?? 0,
-  });
+    reset({
+      ...address,
+      province: provinceId,
+      city: cityId,
+      district: districtId,
+      subdistrict: subdistrictId,
+      latitude: address.latitude ?? 0,
+      longitude: address.longitude ?? 0,
+    });
 
-  if (address.latitude && address.longitude) {
-    setCoords([address.latitude, address.longitude]);
-  }
-}, [open]); // ✅ hanya jalankan saat modal dibuka
+    if (address.latitude && address.longitude) {
+      setCoords([address.latitude, address.longitude]);
+    }
+  }, [open]);
 
   const onSubmit = async (data: AddressFormValues) => {
     const payload = {
@@ -120,8 +121,9 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-blue-600 text-white">Edit</Button>
+        {children ? (children) : (<Button className="bg-blue-600 text-white">Edit</Button>)}
       </DialogTrigger>
+
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">Edit Alamat</DialogTitle>
@@ -168,7 +170,7 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
             <textarea {...register("detail")} className="w-full border rounded p-2" />
           </div>
 
-         <div>
+          <div>
             <Label className="mb-2 block">Pin Lokasi</Label>
             <MapPickerWrapper
               lat={watch("latitude") ?? coords?.[0] ?? 0}
@@ -182,7 +184,6 @@ export default function EditAddressModal({ address }: EditAddressModalProps) {
               }}
             />
           </div>
-
 
           <div>
             <Label>Label</Label>

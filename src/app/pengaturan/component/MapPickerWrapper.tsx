@@ -1,4 +1,3 @@
-// components/MapPickerWrapper.tsx
 import dynamic from "next/dynamic";
 
 const MapPicker = dynamic(() => import("@/components/MapPickerInner"), { ssr: false });
@@ -21,7 +20,7 @@ export default function MapPickerWrapper({
   onLocationSelect,
 }: MapPickerWrapperProps) {
   return (
-    <div className="w-full max-w-md h-40 mx-auto my-4">
+    <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl h-40 sm:h-60 lg:h-80 mx-auto my-4 rounded-lg overflow-hidden shadow-md">
       <MapPicker
         disabled={false}
         defaultLocation={{ lat, long, road: street, city, province }}
