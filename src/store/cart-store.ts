@@ -24,6 +24,7 @@ interface ApiCartItem {
     description: string;
     price: string;
     imageUrl: string;
+    stock: number;
   };
 }
 
@@ -43,6 +44,7 @@ interface CartState {
   storeId: number | null;
   storeName: string | null;
   items: CartItem[];
+  stockLevels: Record<number, number>; // productId -> stock
   version: number;
   appliedPromo: PromoCode | null;
   tryApplyPromoCode: (
@@ -100,6 +102,7 @@ export const useCartStore = create<CartState>((set, get) => {
     storeId: null,
     storeName: null,
     items: [],
+    stockLevels: {},
     version: 0,
     appliedPromo: null,
     loading: false,
@@ -109,11 +112,11 @@ addItem: (
     product: Omit<CartItem, "quantity" | "id"> & { id: number },
     storeId: number,
     storeName: string,
-    availableStock: number,
+    availableStock: number, // This is used for the initial add
     quantity = 1
   ) => {
     const { user } = useAuthStore.getState();
-    const { appliedPromo } = get();
+    const { appliedPromo, stockLevels } = get();
 
     if (!user) {
       toast.error("Please log in to add items to your cart.");
@@ -135,6 +138,7 @@ addItem: (
         (item) => item.productId === product.id
       );
       const currentQuantityInCart = existing ? existing.quantity : 0;
+      const liveStock = stockLevels[product.id] ?? availableStock;
 
       // --- CRITICAL STOCK VALIDATION ---
       const isB1G1 =
@@ -144,9 +148,9 @@ addItem: (
         ? (currentQuantityInCart + quantity) * 2
         : currentQuantityInCart + quantity;
 
-      if (requiredStock > availableStock) {
+      if (requiredStock > liveStock) {
         toast.warn(
-          `Not enough stock for promotion. Only ${availableStock} total units available.`
+          `Not enough stock available. Only ${liveStock} units left.`
         );
         return state; // Abort update
       }
@@ -190,20 +194,13 @@ addItem: (
       });
     },
 
-    incrementItem: (cartItemId) => {
-      const { productsByLoc } = useProduct.getState();
-      const { items, storeId, appliedPromo } = get();
+incrementItem: (cartItemId) => {
+      const { items, stockLevels, appliedPromo } = get();
       const itemToIncrement = items.find((item) => item.id === cartItemId);
 
-      if (!itemToIncrement || !storeId) return;
+      if (!itemToIncrement) return;
 
-      const productInfo = productsByLoc.find(
-        (p) => p.id === itemToIncrement.productId
-      );
-      const stockInfo = productInfo?.stocks.find(
-        (s: any) => s.store.id === storeId
-      );
-      const availableStock = stockInfo?.stock_quantity ?? 0;
+      const liveStock = stockLevels[itemToIncrement.productId] ?? 0;
 
       // --- CRITICAL STOCK VALIDATION ---
       const isB1G1 =
@@ -213,9 +210,9 @@ addItem: (
         ? (itemToIncrement.quantity + 1) * 2
         : itemToIncrement.quantity + 1;
 
-      if (requiredStock > availableStock) {
+      if (requiredStock > liveStock) {
         toast.warn(
-          `Not enough stock for promotion. Only ${availableStock} total units available.`
+          `Not enough stock available. Only ${liveStock} total units left.`
         );
         return; // Abort update
       }
@@ -317,6 +314,7 @@ tryApplyPromoCode: async (code, itemsOverride) => {
         appliedPromo: null,
         loading: false,
         error: null,
+        stockLevels: {},
         version: 0,
       });
     },
@@ -351,6 +349,7 @@ tryApplyPromoCode: async (code, itemsOverride) => {
           storeId: null,
           storeName: null,
           loading: false,
+          stockLevels: {},
           version: state.version + 1,
         }));
         return;
@@ -364,10 +363,10 @@ tryApplyPromoCode: async (code, itemsOverride) => {
 
         const data: ApiCartResponse = response.data.data;
 
-        set((state) => ({
-          storeId: data.store?.id || null,
-          storeName: data.store?.name || null,
-          items: (data.cartItems || []).map((item) => ({
+        const newStockLevels: Record<number, number> = {};
+        const newItems = (data.cartItems || []).map((item) => {
+          newStockLevels[item.product.id] = item.product.stock;
+          return {
             id: item.id,
             productId: item.product.id,
             name: item.product.name,
@@ -375,7 +374,14 @@ tryApplyPromoCode: async (code, itemsOverride) => {
             price: item.product.price,
             quantity: item.quantity,
             image: item.product.imageUrl,
-          })),
+          };
+        });
+
+        set((state) => ({
+          storeId: data.store?.id || null,
+          storeName: data.store?.name || null,
+          items: newItems,
+          stockLevels: newStockLevels,
           loading: false,
           version: state.version + 1,
         }));
