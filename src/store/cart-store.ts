@@ -364,23 +364,57 @@ tryApplyPromoCode: async (code, itemsOverride) => {
         const data: ApiCartResponse = response.data.data;
 
         const newStockLevels: Record<number, number> = {};
-        const newItems = (data.cartItems || []).map((item) => {
-          newStockLevels[item.product.id] = item.product.stock;
-          return {
-            id: item.id,
-            productId: item.product.id,
-            name: item.product.name,
-            description: item.product.description,
-            price: item.product.price,
-            quantity: item.quantity,
-            image: item.product.imageUrl,
-          };
-        });
+        let cartWasAdjusted = false;
+
+        const validatedItems = (data.cartItems || [])
+          .map((item) => {
+            const liveStock = item.product.stock;
+            newStockLevels[item.product.id] = liveStock;
+            let finalQuantity = item.quantity;
+            const appliedPromo = get().appliedPromo;
+
+            const isB1G1Item =
+              appliedPromo?.type === "b1g1" &&
+              appliedPromo.productId === item.product.id;
+
+            if (isB1G1Item && item.quantity * 2 > liveStock) {
+              cartWasAdjusted = true;
+              finalQuantity = Math.floor(liveStock / 2);
+              toast.warn(
+                `B1G1 promo adjusted: Quantity for ${item.product.name} was reduced to ${finalQuantity} due to low stock.`
+              );
+            } else if (!isB1G1Item && item.quantity > liveStock) {
+              cartWasAdjusted = true;
+              finalQuantity = liveStock;
+            }
+
+            return {
+              id: item.id,
+              productId: item.product.id,
+              name: item.product.name,
+              description: item.product.description,
+              price: item.product.price,
+              quantity: finalQuantity,
+              image: item.product.imageUrl,
+            };
+          })
+          .filter((item) => item.quantity > 0); // Remove items that are now out of stock
+
+        if (cartWasAdjusted && !get().appliedPromo) {
+          toast.warn(
+            "Some item quantities in your cart were adjusted due to low stock."
+          );
+        }
+        
+        if (cartWasAdjusted) {
+          // Immediately save the corrected cart back to the DB
+          get().saveCart(token, validatedItems);
+        }
 
         set((state) => ({
           storeId: data.store?.id || null,
           storeName: data.store?.name || null,
-          items: newItems,
+          items: validatedItems,
           stockLevels: newStockLevels,
           loading: false,
           version: state.version + 1,
