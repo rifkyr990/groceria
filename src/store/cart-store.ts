@@ -108,55 +108,53 @@ export const useCartStore = create<CartState>((set, get) => {
     loading: false,
     error: null,
 
-addItem: (
-    product: Omit<CartItem, "quantity" | "id"> & { id: number },
-    storeId: number,
-    storeName: string,
-    availableStock: number, // This is used for the initial add
-    quantity = 1
-  ) => {
-    const { user } = useAuthStore.getState();
-    const { appliedPromo, stockLevels } = get();
+    addItem: (
+      product: Omit<CartItem, "quantity" | "id"> & { id: number },
+      storeId: number,
+      storeName: string,
+      availableStock: number, // This is used for the initial add
+      quantity = 1
+    ) => {
+      const { user } = useAuthStore.getState();
+      const { appliedPromo, stockLevels } = get();
 
-    if (!user) {
-      toast.error("Please log in to add items to your cart.");
-      return;
-    }
-
-    if (!user.is_verified) {
-      toast.warn("Please verify your email to start shopping.");
-      return;
-    }
-
-    set((state) => {
-      const isNewStore = state.storeId !== null && state.storeId !== storeId;
-      if (isNewStore) {
-        toast.info(`Cart cleared. Now shopping at ${storeName}.`);
+      if (!user) {
+        toast.error("Please log in to add items to your cart.");
+        return;
       }
-      const initialItems = isNewStore ? [] : state.items;
-      const existing = initialItems.find(
-        (item) => item.productId === product.id
-      );
-      const currentQuantityInCart = existing ? existing.quantity : 0;
-      const liveStock = stockLevels[product.id] ?? availableStock;
 
-      // --- CRITICAL STOCK VALIDATION ---
-      const isB1G1 =
-        appliedPromo?.type === "b1g1" &&
-        appliedPromo.productId === product.id;
-      const requiredStock = isB1G1
-        ? (currentQuantityInCart + quantity) * 2
-        : currentQuantityInCart + quantity;
+      if (!user.is_verified) {
+        toast.warn("Please verify your email to start shopping.");
+        return;
+      }
 
-      if (requiredStock > liveStock) {
-        toast.warn(
-          `Not enough stock available. Only ${liveStock} units left.`
+      set((state) => {
+        const isNewStore = state.storeId !== null && state.storeId !== storeId;
+        if (isNewStore) {
+          toast.info(`Cart cleared. Now shopping at ${storeName}.`);
+        }
+        const initialItems = isNewStore ? [] : state.items;
+        const existing = initialItems.find(
+          (item) => item.productId === product.id
         );
-        return state; // Abort update
-      }
-      // --- END VALIDATION ---
+        const currentQuantityInCart = existing ? existing.quantity : 0;
+        const liveStock = stockLevels[product.id] ?? availableStock;
 
-      let updatedItems;
+        const isB1G1 =
+          appliedPromo?.type === "b1g1" &&
+          appliedPromo.productId === product.id;
+        const requiredStock = isB1G1
+          ? (currentQuantityInCart + quantity) * 2
+          : currentQuantityInCart + quantity;
+
+        if (requiredStock > liveStock) {
+          toast.warn(
+            `Not enough stock available. Only ${liveStock} units left.`
+          );
+          return state;
+        }
+
+        let updatedItems;
         if (existing) {
           updatedItems = initialItems.map((item) =>
             item.productId === product.id
@@ -175,10 +173,16 @@ addItem: (
 
         toast.success(`${product.name} added to cart`);
 
+        const newStockLevels = {
+          ...state.stockLevels,
+          [product.id]: availableStock,
+        };
+
         const newState = {
           storeId,
           storeName,
           items: updatedItems,
+          stockLevels: newStockLevels,
           appliedPromo: isNewStore ? null : state.appliedPromo,
           version: state.version + 1,
         };
@@ -194,7 +198,7 @@ addItem: (
       });
     },
 
-incrementItem: (cartItemId) => {
+    incrementItem: (cartItemId) => {
       const { items, stockLevels, appliedPromo } = get();
       const itemToIncrement = items.find((item) => item.id === cartItemId);
 
@@ -202,7 +206,6 @@ incrementItem: (cartItemId) => {
 
       const liveStock = stockLevels[itemToIncrement.productId] ?? 0;
 
-      // --- CRITICAL STOCK VALIDATION ---
       const isB1G1 =
         appliedPromo?.type === "b1g1" &&
         appliedPromo.productId === itemToIncrement.productId;
@@ -214,9 +217,8 @@ incrementItem: (cartItemId) => {
         toast.warn(
           `Not enough stock available. Only ${liveStock} total units left.`
         );
-        return; // Abort update
+        return;
       }
-      // --- END VALIDATION ---
 
       const updatedItems = get().items.map((item) =>
         item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item
@@ -244,35 +246,35 @@ incrementItem: (cartItemId) => {
       debouncedSaveAndRevalidate(updatedItems);
     },
 
-tryApplyPromoCode: async (code, itemsOverride) => {
-    const { storeId } = get();
-    const itemsToValidate = itemsOverride || get().items;
-    const subtotal = itemsToValidate.reduce(
-      (sum, item) => sum + Number(item.price) * item.quantity,
-      0
-    );
+    tryApplyPromoCode: async (code, itemsOverride) => {
+      const { storeId } = get();
+      const itemsToValidate = itemsOverride || get().items;
+      const subtotal = itemsToValidate.reduce(
+        (sum, item) => sum + Number(item.price) * item.quantity,
+        0
+      );
 
-    if (!storeId) {
-      toast.error("Cannot apply promo: store not selected.");
-      return false;
-    }
+      if (!storeId) {
+        toast.error("Cannot apply promo: store not selected.");
+        return false;
+      }
 
-    if (!itemsOverride) {
-      set({ loading: false, error: null });
-    }
+      if (!itemsOverride) {
+        set({ loading: false, error: null });
+      }
 
-    try {
-      const response = await apiCall.post("/api/discount/verify", {
-        code,
-        subtotal,
-        storeId,
-        items: itemsToValidate.map((item) => ({
-          productId: item.productId,
-          price: item.price,
-          quantity: item.quantity,
-        })),
-      });
-      const promoData: PromoCode = response.data.data;
+      try {
+        const response = await apiCall.post("/api/discount/verify", {
+          code,
+          subtotal,
+          storeId,
+          items: itemsToValidate.map((item) => ({
+            productId: item.productId,
+            price: item.price,
+            quantity: item.quantity,
+          })),
+        });
+        const promoData: PromoCode = response.data.data;
 
         localStorage.setItem("applied_promo", JSON.stringify(promoData));
         set((state) => ({
@@ -398,16 +400,15 @@ tryApplyPromoCode: async (code, itemsOverride) => {
               image: item.product.imageUrl,
             };
           })
-          .filter((item) => item.quantity > 0); // Remove items that are now out of stock
+          .filter((item) => item.quantity > 0);
 
         if (cartWasAdjusted && !get().appliedPromo) {
           toast.warn(
             "Some item quantities in your cart were adjusted due to low stock."
           );
         }
-        
+
         if (cartWasAdjusted) {
-          // Immediately save the corrected cart back to the DB
           get().saveCart(token, validatedItems);
         }
 
