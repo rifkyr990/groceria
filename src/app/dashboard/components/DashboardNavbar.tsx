@@ -23,11 +23,11 @@ export default function DashboardNavbar() {
         <div className="flex items-center">
           {/* Logo */}
           <Image
-            src="/assets/logo-long.svg"
+            src="/assets/logo-long.png"
             alt="company-logo"
-            width={100}
-            height={100}
-            className="w-30  md:w-50 md:h-50 cursor-pointer "
+            width={200}
+            height={200}
+            className=" cursor-pointer "
             onClick={() => router.replace("/")}
           />
         </div>
