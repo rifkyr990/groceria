@@ -14,6 +14,7 @@ interface OrderDetailState {
   repayOrder: (
     orderId: number
   ) => Promise<{ success: boolean; token?: string }>;
+  get: () => OrderDetailState;
 }
 
 export const useOrderDetailStore = create<OrderDetailState>((set, get) => ({
@@ -111,4 +112,5 @@ export const useOrderDetailStore = create<OrderDetailState>((set, get) => ({
       return { success: false };
     }
   },
+  get: () => get(),
 }));

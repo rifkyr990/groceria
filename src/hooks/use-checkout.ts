@@ -149,17 +149,27 @@ export function useCheckout() {
       await new Promise((resolve) => setTimeout(resolve, 1200)); // Delay for UX
       if (result.paymentMethod === "payment_gateway" && result.token) {
         window.snap.pay(result.token, {
-          onSuccess: () => router.push(`/orders/${result.orderId}?from=checkout`),
-          onPending: () => router.push(`/orders/${result.orderId}?from=checkout`),
+          onSuccess: () =>
+            router.push(
+              `/orders/${result.orderId}?from=checkout&status=pending`
+            ),
+          onPending: () =>
+            router.push(
+              `/orders/${result.orderId}?from=checkout&status=pending`
+            ),
           onError: () => {
             toast.error("Payment failed. Please try again.");
-            setIsProcessing(false); // Snap back on payment failure
+            router.push(
+              `/orders/${result.orderId}?from=checkout&status=failed`
+            );
           },
           onClose: () => {
             toast.warn(
               "Payment was not completed. You can find and pay for this order in your order history."
             );
-            router.push(`/orders/${result.orderId}?from=checkout`);
+            router.push(
+              `/orders/${result.orderId}?from=checkout&status=failed`
+            );
           },
         });
       } else {
