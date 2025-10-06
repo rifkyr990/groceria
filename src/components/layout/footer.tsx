@@ -27,18 +27,13 @@ export default function Footer({ className }: IFooterProps) {
               </a>
             </li>
             <li>
-              <a href="/products" className="hover:text-green-600">
+              <a href="/#products" className="hover:text-green-600">
                 Produk
               </a>
             </li>
             <li>
-              <a href="/about" className="hover:text-green-600">
+              <a href="/#aboutus" className="hover:text-green-600">
                 Tentang Kami
-              </a>
-            </li>
-            <li>
-              <a href="/contact" className="hover:text-green-600">
-                Kontak
               </a>
             </li>
           </ul>
@@ -106,7 +101,6 @@ export default function Footer({ className }: IFooterProps) {
         </div>
       </div>
 
-      {/* Bottom */}
       <div className="border-t py-4 text-center text-gray-500 text-sm dark:text-gray-100">
         © {new Date().getFullYear()} Groceria. Semua Hak Dilindungi.
       </div>

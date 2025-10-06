@@ -10,30 +10,30 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
 interface PasswordFormValues {
-  oldPassword: string;
-  newPassword: string;
-  confirmPassword: string;
+    oldPassword: string;
+    newPassword: string;
+    confirmPassword: string;
 }
 
 export default function PasswordForm() {
-  const { changePassword } = useUserStore();
-  const { register, handleSubmit, reset, setValue, watch } = useForm<PasswordFormValues>();
-  const { logout } = useAuthStore();
-  const router = useRouter();
+    const { changePassword } = useUserStore();
+    const { register, handleSubmit, reset, setValue, watch } = useForm<PasswordFormValues>();
+    const { logout } = useAuthStore();
+    const router = useRouter();
 
-  const newPassword = watch("newPassword");
-  const confirmPassword = watch("confirmPassword");
-  const [showOldPassword, setShowOldPassword] = useState(false);
+    const newPassword = watch("newPassword");
+    const confirmPassword = watch("confirmPassword");
+    const [showOldPassword, setShowOldPassword] = useState(false);
 
   const onSubmit = async (data: PasswordFormValues) => {
     if (data.newPassword !== data.confirmPassword) {
-      toast.error("Password baru dan konfirmasi tidak cocok.");
-      return;
+        toast.error("Password baru dan konfirmasi tidak cocok.");
+        return;
     }
     const success = await changePassword(data.oldPassword, data.newPassword);
     if (!success) {
-      toast.error("Password lama salah. Silakan coba lagi.");
-      return;
+        toast.error("Password lama salah. Silakan coba lagi.");
+        return;
     }
 
     toast.success("Password berhasil diubah, silakan login kembali.");

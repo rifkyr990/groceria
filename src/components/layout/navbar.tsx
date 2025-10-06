@@ -21,7 +21,7 @@ import Image from "next/image";
 
 const NavLinks = () => (
   <>
-    {["Home", "Products", "About Us", "Contact"].map((label, idx) => (
+    {["Home", "Products", "About Us"].map((label, idx) => (
       <li key={idx}>
         <Link
           href={
@@ -63,7 +63,7 @@ const CartButton = ({ totalItems }: { totalItems: number }) => (
 );
 
 /* ===========================
-   Menu Items utk Desktop (headlessui Menu)
+    Menu Items utk Desktop (headlessui Menu)
 =========================== */
 const UserMenuItems = ({ user, logout }: any) => {
   const menuLinks = [];
@@ -120,7 +120,7 @@ const UserMenuItems = ({ user, logout }: any) => {
 };
 
 /* ===========================
-   Menu Items utk Mobile (plain <li>)
+    Menu Items utk Mobile (plain <li>)
 =========================== */
 const UserMenuItemsMobile = ({ user, logout, close }: any) => {
   const menuLinks = [];
@@ -223,9 +223,7 @@ export default function Navbar() {
 
   return (
     <nav className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between bg-white dark:bg-gray-900">
-      {/* Logo */}
       <div className="flex items-center gap-2">
-        {/* <img src="/assets/logo-long.png" alt="logo" className="w-40" /> */}
         <Link href={"/"}>
           <Image
             src={"/assets/logo-long.png"}
@@ -289,8 +287,6 @@ export default function Navbar() {
             </Transition>
           </Menu>
         )}
-
-        {/* Hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
