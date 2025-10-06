@@ -35,7 +35,7 @@ interface AddressFormValues {
 
 interface EditAddressModalProps {
   address: AddressFormValues & { id: number };
-  children?: ReactNode; // ✅ Tambahkan children agar bisa pakai ikon
+  children?: ReactNode;
 }
 
 export default function EditAddressModal({ address, children }: EditAddressModalProps) {
@@ -60,10 +60,8 @@ export default function EditAddressModal({ address, children }: EditAddressModal
     setValue("postal_code", selectedSub?.zip_code || "");
   }, [selectedSub, setValue]);
 
-  // Reset saat modal dibuka
   useEffect(() => {
     if (!open) return;
-
     const provinceId = provinces.find((p) => p.province === address.province)?.province_id || "";
     const cityId = cities.find((c) => c.city_name === address.city)?.city_id || "";
     const districtId = districts.find((d) => d.district_name === address.district)?.district_id || "";
@@ -79,9 +77,7 @@ export default function EditAddressModal({ address, children }: EditAddressModal
       longitude: address.longitude ?? 0,
     });
 
-    if (address.latitude && address.longitude) {
-      setCoords([address.latitude, address.longitude]);
-    }
+    if (address.latitude && address.longitude) {setCoords([address.latitude, address.longitude]);}
   }, [open]);
 
   const onSubmit = async (data: AddressFormValues) => {
@@ -102,12 +98,7 @@ export default function EditAddressModal({ address, children }: EditAddressModal
     }
   };
 
-  const renderOptions = (
-    items: Wilayah[],
-    valueKey: keyof Wilayah,
-    labelKey: keyof Wilayah,
-    placeholder: string
-  ) => (
+  const renderOptions = ( items: Wilayah[], valueKey: keyof Wilayah, labelKey: keyof Wilayah, placeholder: string) => (
     <>
       <option value="">{placeholder}</option>
       {items.map((i) => (
@@ -165,20 +156,10 @@ export default function EditAddressModal({ address, children }: EditAddressModal
 
           <div><Label>Kode Pos</Label><Input {...register("postal_code")} readOnly /></div>
           <div><Label>Nama Jalan</Label><Input {...register("street")} /></div>
-          <div>
-            <Label>Detail Alamat</Label>
-            <textarea {...register("detail")} className="w-full border rounded p-2" />
-          </div>
-
+          <div><Label>Detail Alamat</Label><textarea {...register("detail")} className="w-full border rounded p-2" /></div>
           <div>
             <Label className="mb-2 block">Pin Lokasi</Label>
-            <MapPickerWrapper
-              lat={watch("latitude") ?? coords?.[0] ?? 0}
-              long={watch("longitude") ?? coords?.[1] ?? 0}
-              street={watch("street")}
-              city={watch("city")}
-              province={watch("province")}
-              onLocationSelect={(data) => {
+            <MapPickerWrapper lat={watch("latitude") ?? coords?.[0] ?? 0} long={watch("longitude") ?? coords?.[1] ?? 0} street={watch("street")} city={watch("city")} province={watch("province")} onLocationSelect={(data) => {
                 setValue("latitude", data.lat);
                 setValue("longitude", data.long);
               }}

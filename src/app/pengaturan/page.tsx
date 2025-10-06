@@ -9,6 +9,7 @@ import PasswordForm from "./password-form";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { useAuthStore } from "@/store/auth-store"; // pastikan ini mengandung { user, hydrate }
+import { toast } from "react-toastify";
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"profile" | "address" | "password">("profile");
@@ -23,6 +24,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user === null) {
       router.replace("/");
+      toast.error("User belum terdaftar/terverifikasi");
     } else {
       setCheckingAuth(false);
     }

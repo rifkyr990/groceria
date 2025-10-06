@@ -8,6 +8,7 @@ import { UserAddress } from "../types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { toast } from "react-toastify";
 
 interface AddressSelectorProps {
   addresses: UserAddress[];
@@ -22,16 +23,16 @@ export default function AddressSelector({
   selectedAddressId,
   setSelectedAddressId,
 }: AddressSelectorProps) {
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-
   useEffect(() => {
     if (!selectedAddressId && addresses.length > 0) {
       const primaryAddress = addresses.find((addr) => addr.is_primary);
-      setSelectedAddressId(
-        primaryAddress ? primaryAddress.id : addresses[0].id
-      );
+      setSelectedAddressId(primaryAddress ? primaryAddress.id : addresses[0].id);
     }
-  }, [addresses, selectedAddressId, setSelectedAddressId]);
+
+    if (!loading && addresses.length === 0) {
+      toast.error("Kamu belum menambahkan alamat pengiriman.");
+    }
+  }, [addresses, selectedAddressId, loading, setSelectedAddressId]);
 
   return (
     <>
@@ -55,11 +56,13 @@ export default function AddressSelector({
               <p className="ml-2 text-gray-500">Loading addresses...</p>
             </div>
           )}
+
           {!loading && addresses.length === 0 && (
             <p className="text-center text-gray-500 p-8">
               No addresses found. Please add a new one.
             </p>
           )}
+
           {!loading && addresses.length > 0 && (
             <RadioGroup
               value={selectedAddressId?.toString()}
